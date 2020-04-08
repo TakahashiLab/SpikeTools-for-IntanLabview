@@ -2,7 +2,7 @@
 % preprocessing for dividing ilvrc to electrode, LFP and event data
 %
 %sleep: 0=all process
-%       1=cutting process only 
+%       1=cutting process only
 %       2=event process only
 %       3=event process and event cutting
 %       4=
@@ -14,15 +14,15 @@
 %LEDp: a elecrode number which has a optical fiber
 function preProcessIlvrc(basename,sleep,forceRef,LEDp,rf)
 if nargin==1
-  sleep=0;
-  forceRef=[];
+    sleep=0;
+    forceRef=[];
 elseif nargin==2
-  forceRef=[];
-  LEDp=[];
+    forceRef=[];
+    LEDp=[];
 elseif nargin==3
-  LEDp=[];
+    LEDp=[];
 elseif nargin==4
-  rf=0;
+    rf=0;
 end
 
 
@@ -45,116 +45,116 @@ loop=size(d,1);
 
 
 if sleep==0 | sleep==1 | sleep==3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-savenames=cell(1,numOfElectrodes+2);
-for i=1:numOfElectrodes
-  savenames{i}=fullfile(dataFolder,[name 'e' num2str(i) '.mat']);
-end
-savenames{numOfElectrodes+1}=fullfile(dataFolder,[name 'LFP.mat']);
-xLFP=[];
-savenames{numOfElectrodes+2}=fullfile(dataFolder,[name 'Event.mat']);
-xEvent=[];
-savenames{numOfElectrodes+3}=fullfile(dataFolder,[name 'LFPpower.mat']);
-
-savenames{numOfElectrodes+4}=fullfile(dataFolder,[name '.bin']);
-
-fprintf('loading and filtering ilvrc file\n');
-
-for i=1:loop
-    if length(d(i).name)>4
-        stI=i;
-        break;
-    end
-end
-
-for i=stI:loop
-
-    if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
-        if sleep==0 | sleep==1 
-      [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1,numOfElectrodes,'tetrode',0,1);
-      if ~isempty(forceRef)
-	ref=forceRef;
-      end
-
-      e=filterAmp(x,0,sampl);
-      e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
-      
-      if iscell(ref);
-	loop=size(ref,1);
-	
-	if ref{1,1}==0
-	  gmr=median(e,1);%global median referencing 
-	  e=e-gmr;
-	else% split median referencing
-	  for k=1:loop1
-	    channels=ref{k,2};
-	    refNum=ref{k,1};
-	    %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing 
-	    pe=e(channels,:);
-	    gmr=median(pe,1);
-	    e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing 
-	  end
-	end
-      else
-	e=e-repmat(e(ref,:),size(e,1),1);%referencing 
-      end
-
-      e=int16(e);
-      
-      lfp=filterAmp(double(x),2,sampl);
-      lfp=int16(lfp);
     
-      fprintf('convert LFPs\n');
-      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
-      %      dlfp=lfpClean(dlfp);%cleaning using FastICA
-
-      if ~exist(savenames{numOfElectrodes+2})
-	event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
-	event=double(event)./Factor16bit4Event;%convert to V
-      end
-    elseif sleep==3
-      if ~exist(savenames{numOfElectrodes+2})
-	event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
-	event=double(event)./Factor16bit4Event;%convert to V
-      end
+    savenames=cell(1,numOfElectrodes+2);
+    for i=1:numOfElectrodes
+        savenames{i}=fullfile(dataFolder,[name 'e' num2str(i) '.mat']);
     end
-  end
-end
-
-if sleep==0 | sleep==1 | sleep==3
-    if sleep==0 | sleep==1
-        saveKilosort(savenames{numOfElectrodes+4},x);
-        for j=1:(numOfElectrodes)
-            fprintf('Saving electrode # %d...\n',j);
-            x=e(numOfMicrowires*(j-1)+1:numOfMicrowires*j,:);
-            parsave(savenames{j},'x',x); 
-        end	
-        fprintf('Saving LFPs...\n');
-        parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp); 
+    savenames{numOfElectrodes+1}=fullfile(dataFolder,[name 'LFP.mat']);
+    xLFP=[];
+    savenames{numOfElectrodes+2}=fullfile(dataFolder,[name 'Event.mat']);
+    xEvent=[];
+    savenames{numOfElectrodes+3}=fullfile(dataFolder,[name 'LFPpower.mat']);
+    
+    savenames{numOfElectrodes+4}=fullfile(dataFolder,[name '.bin']);
+    
+    fprintf('loading and filtering ilvrc file\n');
+    
+    for i=1:loop
+        if length(d(i).name)>4
+            stI=i;
+            break;
+        end
     end
-  
-    %x=event;
-    if ~exist(savenames{numOfElectrodes+2})
-        fprintf('Saving Events...\n');
-        parsave(savenames{numOfElectrodes+2},'event',event); 
+    
+    for i=stI:loop
+    
+        if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
+            if sleep==0 | sleep==1
+                [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1,numOfElectrodes,'tetrode',0,1);
+                if ~isempty(forceRef)
+                    ref=forceRef;
+                end
+                
+                e=filterAmp(x,0,sampl);
+                e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
+                
+                if iscell(ref);
+                    loop=size(ref,1);
+                    
+                    if ref{1,1}==0
+                        gmr=median(e,1);%global median referencing
+                        e=e-gmr;
+                    else% split median referencing
+                        for k=1:loop1
+                            channels=ref{k,2};
+                            refNum=ref{k,1};
+                            %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing
+                            pe=e(channels,:);
+                            gmr=median(pe,1);
+                            e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing
+                        end
+                    end
+                else
+                    e=e-repmat(e(ref,:),size(e,1),1);%referencing
+                end
+                
+                e=int16(e);
+                
+                lfp=filterAmp(double(x),2,sampl);
+                lfp=int16(lfp);
+                
+                fprintf('convert LFPs\n');
+                dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+                %      dlfp=lfpClean(dlfp);%cleaning using FastICA
+                
+                if ~exist(savenames{numOfElectrodes+2})
+                    event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
+                    event=double(event)./Factor16bit4Event;%convert to V
+                end
+            elseif sleep==3
+                if ~exist(savenames{numOfElectrodes+2})
+                    event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
+                    event=double(event)./Factor16bit4Event;%convert to V
+                end
+            end
+        end
     end
-end
-%matlabpool close;
-%return;
+    
+    if sleep==0 | sleep==1 | sleep==3
+        if sleep==0 | sleep==1
+            saveKilosort(savenames{numOfElectrodes+4},x);
+            for j=1:(numOfElectrodes)
+                fprintf('Saving electrode # %d...\n',j);
+                x=e(numOfMicrowires*(j-1)+1:numOfMicrowires*j,:);
+                parsave(savenames{j},'x',x);
+            end
+            fprintf('Saving LFPs...\n');
+            parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp);
+        end
+        
+        %x=event;
+        if ~exist(savenames{numOfElectrodes+2})
+            fprintf('Saving Events...\n');
+            parsave(savenames{numOfElectrodes+2},'event',event);
+        end
+    end
+    %matlabpool close;
+    %return;
 end
 
 fprintf('Saving Position and Task...\n');
 
 if 0
-if rf==1
-    [~,TrialT]=extractTaskIntanlv(basename,rf);%produce timing.mat
-    load(fullfile(dataFolder,['positions.mat']),'Pos','PosT');
-    segPara=extractRFevent(TrialT,Pos,PosT);
-    sfn=fullfile(dataFolder,'timing.mat');
-    save(sfn,'segPara','TrialT');
-else
-    extractTaskIntanlv(basename);%produce timing.mat
-end
+    if rf==1
+        [~,TrialT]=extractTaskIntanlv(basename,rf);%produce timing.mat
+        load(fullfile(dataFolder,['positions.mat']),'Pos','PosT');
+        segPara=extractRFevent(TrialT,Pos,PosT);
+        sfn=fullfile(dataFolder,'timing.mat');
+        save(sfn,'segPara','TrialT');
+    else
+        extractTaskIntanlv(basename);%produce timing.mat
+    end
 end
 
 
