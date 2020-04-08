@@ -10,6 +10,8 @@ KSfn=fullfile(homefn,'KiloSort');
 addpath(genpath(KSfn)); % path to kilosort folder
 NPYfn=fullfile(homefn,'npy-matlab');
 addpath(genpath(NPYfn)); % path to npy-matlab scripts
+Spikesfn=fullfile(homefn,'spikes');
+addpath(genpath(Spikesfn)); % path to spikes scripts
 
 %pathToYourConfigFile = '/home/tsusumu/KiloSort/configFiles'; % take from Github folder and put it somewhere else (together with the master_file)
 pathToYourConfigFile = fullfile(homefn,'SpikeTools-for-IntanLabview/configFiles');
