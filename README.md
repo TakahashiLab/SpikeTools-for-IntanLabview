@@ -1,9 +1,8 @@
 # SpikeTools
-Tool sets for analyzing neural activity recorded using our custom-made software.
+Tools for analyzing neural activity recorded using our custom-made software.
 The software was developed using intan-tech libraries for LabVIEW programming language.
 
-
-Tool boxes and libraries should be installed from external repositories: 
+Toolboxes and libraries should be installed from external repositories: 
 
 From cortexlab at UCL
 * KiloSort (https://github.com/cortex-lab/KiloSort)
