@@ -6,20 +6,20 @@ end
 
 % default options are in parenthesis after the comment
 homefn='c:/users/stakahas/Documents/Matlab/';% change this directory first
-KSfn=fullfile(homefn,'externalPackages/KiloSort');
+KSfn=fullfile(homefn,'KiloSort');
 addpath(genpath(KSfn)); % path to kilosort folder
-NPYfn=fullfile(homefn,'externalPackages/npy-matlab');
+NPYfn=fullfile(homefn,'npy-matlab');
 addpath(genpath(NPYfn)); % path to npy-matlab scripts
 
 %pathToYourConfigFile = '/home/tsusumu/KiloSort/configFiles'; % take from Github folder and put it somewhere else (together with the master_file)
-pathToYourConfigFile = fullfile(homefn,'externalPackages/KiloSort/configFiles');
+pathToYourConfigFile = fullfile(homefn,'SpikeTools-for-IntanLabview/configFiles');
 
 %from StandardConfig_MOVEME.m
 cwfn=pwd;
 ops.fbinary             = fullfile(cwfn,filename); % will be created for 'openEphys'		
 ops.fproc               = fullfile(cwfn,'temp_wh.dat'); % residual from RAM of preprocessed data		
 ops.root                = cwfn;
-ops.chanMap             = fullfile(KSfn,'configFiles/tetrode64.mat'); % make this file using createChannelMapFile.m	
+ops.chanMap             = fullfile(pathToYourConfigFile,'tetrode64.mat'); % make this file using createChannelMapFile.m	
 
 run(fullfile(pathToYourConfigFile, 'StandardConfig_MOVEME.m'))
 
