@@ -7,6 +7,7 @@ The software was developed using intan-tech libraries for LabVIEW programming la
 * phy (https://github.com/cortex-lab/phy)
 * spikes (https://github.com/cortex-lab/spikes)
 * npy-matlab (https://github.com/kwikteam/npy-matlab)
+* chronux (https://github.com/jsiegle/chronux)
 
 2. Copy compiled files in the KiloSortCUDAfolder at TakahashiLabB HDD into the respective directory of your cloned KiloSort directory.  
 
