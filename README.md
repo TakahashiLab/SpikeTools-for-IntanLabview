@@ -23,3 +23,16 @@ Spike sorting using KiloSort.
 Curation with phy
 on Anaconda-prompt
 > phy template-gui ~/hogehoge/hoge/params.py
+
+Convert KiloSort timestamps into sampling counts
+> fn=pwd;ks=convertKS(fn);
+
+Extract the timing of video frames from event  
+> PosT = extractPos(fn,Traj);
+
+Construct place map of unit #3
+> PlaceMap = pmap(ks.st(ks.clu==3),Traj,PosT,0,'animal','rat');
+
+Construct head direction polar map of unit #3
+> HeadDirectionPlot = plot_polar_rate_map(ks.st(ks.clu==3),Traj,PosT,0,'rat');
+
