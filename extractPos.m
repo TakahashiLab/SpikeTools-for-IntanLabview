@@ -1,4 +1,4 @@
-function [PosT]=extractPos(filename,Traj)
+function [PosT,Traj]=extractPos(filename,Traj)
 PosId=8;
 
 [path,name,ext]=fileparts(filename);
