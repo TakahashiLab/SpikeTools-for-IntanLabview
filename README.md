@@ -31,7 +31,8 @@ Extract the timing of video frames from event
 > fn=pwd; PosT = extractPos(fn,Traj);
 
 Construct place map of unit #3
-> PlaceMap = pmap(ks.st(ks.clu==3),Traj,PosT,0,'animal','rat');
+> [rate_map, ~, ~, oc_map] = pmap(ks.st(ks.clu==3),Traj,PosT,0,'animal','rat');
+> imagePmap(rate_map,oc_map);
 
 Construct head direction polar map of unit #3
 > HeadDirectionPlot = plot_polar_rate_map(ks.st(ks.clu==3),Traj,PosT,0,'rat');
