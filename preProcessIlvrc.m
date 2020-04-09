@@ -29,6 +29,7 @@ end
 Factor16bit=6553600;
 Factor16bit4Event=9930;
 uV01=10^7;
+uV1=10^6;
 
 numOfMicrowires=4;%tetrode
 numOfElectrodes=16;%64 channels
@@ -71,6 +72,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
             if sleep==4
                 [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1,numOfElectrodes,'tetrode',0,1);
+                x=double(x)./Factor16bit.*uV1;%convert to 1 uV
                 if ~exist(savenames{numOfElectrodes+2})
                     event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
                     event=double(event)./Factor16bit4Event;%convert to V
@@ -81,9 +83,9 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if ~isempty(forceRef)
                     ref=forceRef;
                 end
-                
-                
+                           
                 e=filterAmp(x,0,sampl);
+                x=double(x)./Factor16bit.*uV1;%convert to 1 uV
                 e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
                 
                 if iscell(ref);
@@ -173,7 +175,7 @@ return;
 %%%%%%%%%
 function saveKilosort(fn,x)
 fid=fopen(fn,'w');
-x=int16(double(x)/10);
+x=int16(x);
 fwrite(fid,x,'int16');
 fclose(fid);
 return;
