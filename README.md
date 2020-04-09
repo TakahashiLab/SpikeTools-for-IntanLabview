@@ -28,7 +28,7 @@ Convert KiloSort timestamps into sampling counts
 > fn=pwd;ks=convertKS(fn);
 
 Extract the timing of video frames from event  
-> PosT = extractPos(fn,Traj);
+> fn=pwd; PosT = extractPos(fn,Traj);
 
 Construct place map of unit #3
 > PlaceMap = pmap(ks.st(ks.clu==3),Traj,PosT,0,'animal','rat');
