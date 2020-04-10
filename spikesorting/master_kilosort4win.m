@@ -5,7 +5,7 @@ if nargin==0
 end
 
 % default options are in parenthesis after the comment
-homefn='c:/users/stakahas/Documents/Matlab/';% change this directory first
+homefn='c:/users/takahashilab/Documents/Matlab/';% change this directory first
 KSfn=fullfile(homefn,'KiloSort');
 addpath(genpath(KSfn)); % path to kilosort folder
 NPYfn=fullfile(homefn,'npy-matlab');
