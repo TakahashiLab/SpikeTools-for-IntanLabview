@@ -4,9 +4,9 @@
 ***The software was developed using intan-tech libraries for LabVIEW programming language.***
 
 - Please clone the following tools from cortexlab at UCL to your home directory (c:/users/[your user account here]/Documents/Matlab) using git. 
-* [KiloSort](https://github.com/cortex-lab/KiloSort)
-* [phy](https://github.com/cortex-lab/phy)
-* [spikes](https://github.com/cortex-lab/spikes)
+  * [KiloSort](https://github.com/cortex-lab/KiloSort)
+  * [phy](https://github.com/cortex-lab/phy)
+  * [spikes](https://github.com/cortex-lab/spikes)
 * [npy-matlab](https://github.com/kwikteam/npy-matlab)
 * [chronux](https://github.com/jsiegle/chronux)
 
@@ -22,35 +22,35 @@ n=pwd;
 preProcessIlvrc(fn,4);
 ```
 
-1. Spike sorting using KiloSort.
+2. Spike sorting using KiloSort.
 ```matlab
 master_kilosort4win('hogehoge.bin');
 ```
 
-1.  Curation with phy on Anaconda-prompt
-```
+3. Curation with phy on Anaconda-prompt
+```matlab
 phy template-gui ~/hogehoge/hoge/params.py
 ```
 
-1.  Convert KiloSort timestamps into sampling counts
-```
+4. Convert KiloSort timestamps into sampling counts
+```matlab
 fn=pwd;
 ks=convertKS(fn);
 ```
 
-Extract the timing of video frames from event  
-```
+5. Extract the timing of video frames from event  
+```matlab
 fn=pwd;
 PosT = extractPos(fn,Traj);
 ```
 
-Construct place map of unit #3
-```
+6. Construct place map of unit #3
+```matlab
 [rate_map, ~, ~, oc_map] = pmap(ks.st(ks.clu==3),Traj,PosT,0,'animal','rat');
 imagePmap(rate_map,oc_map);
 ```
 
-Construct head direction polar map of unit #3
-```
+7. Construct head direction polar map of unit #3
+```matlab
 HeadDirectionPlot = plot_polar_rate_map(ks.st(ks.clu==3),Traj,PosT,0,'rat');
 ```
