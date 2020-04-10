@@ -8,8 +8,6 @@ load(Efilename,'event');
 Th=2.5;
 
 [PosT]=getTimes(event(PosId,:),Th)';
-
-
 if size(Traj,1)<size(PosT,1)
     PosT=PosT(1:size(Traj,1),:);
 elseif size(Traj,1)>size(PosT,1)
