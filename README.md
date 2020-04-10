@@ -7,8 +7,8 @@
   * [KiloSort](https://github.com/cortex-lab/KiloSort)
   * [phy](https://github.com/cortex-lab/phy)
   * [spikes](https://github.com/cortex-lab/spikes)
-* [npy-matlab](https://github.com/kwikteam/npy-matlab)
-* [chronux](https://github.com/jsiegle/chronux)
+  * [npy-matlab](https://github.com/kwikteam/npy-matlab)
+  * [chronux](https://github.com/jsiegle/chronux)
 
 - Copy compiled files in the KiloSortCUDAfolder at TakahashiLabB HDD into the respective directory of your cloned KiloSort directory.  
 
