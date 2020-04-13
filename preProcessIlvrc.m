@@ -72,7 +72,12 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
             if sleep==4
                 [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1,numOfElectrodes,'tetrode',0,1);
-                x=double(x)./Factor16bit.*uV01;%convert to 1 uV
+                
+                x = bsxfun(@minus, x, median(x,2)); % subtract median of each channel
+                tm = median(x,1);
+                x = bsxfun(@minus, x, tm); % subtract median of each time point
+                
+                x=double(x)./Factor16bit.*uV1;%convert to 1 uV
                 if ~exist(savenames{numOfElectrodes+2})
                     event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
                     event=double(event)./Factor16bit4Event;%convert to V
@@ -85,7 +90,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 end
                            
                 e=filterAmp(x,0,sampl);
-                x=double(x)./Factor16bit.*uV01;%convert to 1 uV
+                x=double(x)./Factor16bit.*uV1;%convert to 1 uV
                 e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
                 
                 if iscell(ref);
