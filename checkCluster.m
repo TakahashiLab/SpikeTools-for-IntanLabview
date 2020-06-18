@@ -1,4 +1,4 @@
-function checkCluster(ensemble,an,en)
+function checkCluster(ensemble,an,en,tetNum)
 tm=tetrodeMap(an,en);
 demoFeatureCore(ensemble,tm,tetNum);
 return;
