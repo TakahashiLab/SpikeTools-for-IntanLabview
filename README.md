@@ -1,4 +1,5 @@
-# SpikeTools
+# SpikeTools for Takahashi Lab
+@ Graduate School of Brain Science, Doshisha University
 
 ***Tools for analyzing neural activity recorded using our custom-made software.***
 ***The software was developed using intan-tech libraries for LabVIEW programming language.***
@@ -15,8 +16,40 @@
 
 - Curation 
   * [phy](https://github.com/cortex-lab/phy)
-  
-# How to use
+---  
+
+# How to use with KlustaKwik or ICSort and tTools  
+
+1. Convert your ilvrc file into MAT files.
+```matlab
+fn=pwd;
+preProcessIlvrc(fn,0);
+```
+2. Spike sorting using KlustaKwik.
+```matlab
+fn=pwd;
+batchSpikesIntan(fn);
+```
+
+3. Extract the timing of video frames from event  
+```matlab
+fn=pwd;
+PosT = extractPos(fn,Traj);
+```
+
+4. Construct place map of unit #3
+```matlab
+[rate_map, ~, ~, oc_map] = pmap(kkOut{3,3},Traj,PosT,0,'animal','rat');
+imagePmap(rate_map,oc_map);
+```
+
+5. Construct head direction polar map of unit #3
+```matlab
+HeadDirectionPlot = plot_polar_rate_map(kkOut{3,3},Traj,PosT,0,'rat');
+```
+
+---
+# How to use with KiloSort and Phy
 
 1. Convert your ilvrc file into .bin file.
 ```matlab
