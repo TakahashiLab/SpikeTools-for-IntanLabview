@@ -4,7 +4,7 @@
 % tetrodes: 1-8
 % Event:        9
 %
-function [out,ref,Hz]=loadilvrcN(filename,elecNum,numeOfElec,elecType,realConv,atOnce)
+function [out,ref,Hz]=loadilvrcN(filename,elecNum,numOfElec,elecType,realConv,atOnce)
 
 byte=2;
 step=1000000;
