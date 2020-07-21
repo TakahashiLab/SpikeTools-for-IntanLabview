@@ -12,5 +12,5 @@ for i=1:MaxTetrode
 end    
 fprintf('processing event\n');
 %process event signals
-preProcessIlvrc2(basename,3);    
+preProcessIlvrc2(basename,2);    
 return;
