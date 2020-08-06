@@ -8,20 +8,30 @@ shuffleN=100;
 shuffleLag=20000;%20sec
 SpksShuffle=[];
 BinWidthCm=2.5;%2.5cm
+Linear=0;
 
 xl=3;
 yl=4;
 
 kHz=31.25;
 ThS=2;%100cm/s
-yLen=max(Traj(:,2))-min(Traj(:,2));
-xLen=max(Traj(:,1))-min(Traj(:,1));
 
-Len=yLen;
-if yLen < xLen
-    Len=xLen;
+if size(Traj,1)==1 | size(Traj,2)==1
+    Len=max(Traj);
+    Linear=1;
+    xl=1;
+    yl=1;
+else
+    yLen=max(Traj(:,2))-min(Traj(:,2));
+    xLen=max(Traj(:,1))-min(Traj(:,1));
+    Len=yLen;
+    if yLen < xLen
+        Len=xLen;
+    end
+    Len=min([xLen yLen]);
 end
-Len=min([xLen yLen]);
+
+
 
 
 for i=1:2:(length(varargin)-1)
@@ -71,7 +81,11 @@ for i=1:2:(length(varargin)-1)
           ThS=2.5;
 
       elseif strcmp(varargin{i+1},'rat')
-          cmPerPixel=160/Len;%
+          if Linear
+              cmPerPixel=400/Len;%
+          else
+              cmPerPixel=160/Len;%
+          end
           Bin=BinWidthCm/cmPerPixel;
           kHz=25;
           spON=1;
@@ -111,7 +125,12 @@ msFPS=floor(1/FPS*1000);
 
 Spks=ceil(Spks/kHz)+fstart;%msec
 
-movement=sqrt(sum(diff(Traj(:,1:2)).^2,2))*cmPerPixel;% 
+if Linear
+    movement=sqrt(sum(diff(Traj).^2,2))*cmPerPixel;% 
+else
+    movement=sqrt(sum(diff(Traj(:,1:2)).^2,2))*cmPerPixel;% 
+end
+
 speed=movement./diff(msT);
 speed=smooth(speed,FPS,'moving')*1000;
 
@@ -123,9 +142,15 @@ if spON
   speed=speed(Good);
 end
 
-x=ceil(Traj(:,xl));
-y=ceil(Traj(:,yl));
-if length(Spks)<100 & corrFlag==0
+if Linear
+    x=Traj;
+    y=ones(size(Traj));
+else
+    x=ceil(Traj(:,xl));
+    y=ceil(Traj(:,yl));
+end
+%if length(Spks)<100 & corrFlag==0
+if 0
     rate_map=[];
     rate_mapB=[];
     binside=2.5;
@@ -273,7 +298,13 @@ else
         maxY=max(spk_y);
     end
     
-    [rate_map,~,~,oc_map] = ratemap(spk_x,spk_y,x,y,spatial_scale,fs_video,1);
-    rate_mapB=[];
+
+    if Linear
+        [rate_map,~,~,oc_map] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);
+    else
+        [rate_map,~,~,oc_map] = ratemap(spk_x,spk_y,x,y, ...
+                                        spatial_scale,fs_video,1);
+    end
+        rate_mapB=[];
 end
 
