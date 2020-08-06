@@ -98,6 +98,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     if ref{1,1}==0
                         gmr=median(e,1);%global median referencing
                         e=e-gmr;
+                        
                     else% split median referencing
                         loop1=size(ref,1);
                         for k=1:loop1

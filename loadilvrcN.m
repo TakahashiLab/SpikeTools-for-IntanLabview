@@ -38,7 +38,6 @@ if atOnce
 end
 
 
-
 headerPos=ftell(fp);
 fseek(fp,0,1);
 pos=ftell(fp);
@@ -47,6 +46,7 @@ size=pos-headerPos;
 
 loop=floor(size/(numOfCh*byte*step));
 lastStep=(size-loop*numOfCh*byte*step)/(numOfCh*byte);
+
 
 if elecNum<=numOfElec
   initialPos=(elecNum-1)*numOfMicrowires*byte;%initial # of bytes for skip
