@@ -9,9 +9,8 @@ for i=1:tetNum
         step=size(tmp{1,1},2)/size(tmp{1,3},2);
     end
     
-
     if ~isempty(en{i})
-        
+        en{i}
         rInd=[];
         for j=1:size(en{i},1)
             sameCell=en{i}{j};

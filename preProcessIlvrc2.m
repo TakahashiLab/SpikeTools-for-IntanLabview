@@ -76,7 +76,7 @@ if sleep==0 | sleep==1 | sleep==2
                 e=int16(e);
             elseif sleep==2
                 if ~exist(savenames{numOfElectrodes+2})
-                    event=loadilvrcN(fullfile(dataFolder,d(i).name),tetrodeNum,numOfElectrodes,'tetrode',0,0);
+                    event=loadilvrcN(fullfile(dataFolder,d(i).name),tetrodeNum,numOfElectrodes,0,0);
                     event=double(event)./Factor16bit4Event;%convert to V
                 end
             end
