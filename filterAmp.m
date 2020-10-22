@@ -50,7 +50,7 @@ for i=1:size(x,1)
     if gpuOn
         sdat(i,:)=gpuFiltFilt(b,a,x(i,:));
     else
-        sdat(i,:)=filtfilt(bpFilt,x(i,:));
+        sdat(i,:)=filtfilt(bpFilt,double(x(i,:)));
     end
 end
 
