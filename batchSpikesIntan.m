@@ -10,7 +10,12 @@
 %                3: load sorting(kk)->sorting(ic)
 %                4: load extracted data->sorting(kk)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function batchSpikesIntan(basename,mode,elecNums)
+function batchSpikesIntan(basename,mode,elecNums,Th)
+
+if nargin==3
+  Th=50;
+end
+
 suffix='ilvrc';
 
 numOfMicrowires=4;%tetrode
@@ -60,7 +65,7 @@ for i=elecNums
 
       if ~exist(savenameX,'file')
 
-	[tmp,tmps]=extractSpikes(loadnameE,activeNums,step,Stimuli,suffix);  
+	[tmp,tmps]=extractSpikes(loadnameE,activeNums,step,Stimuli,suffix,Th);  
 	save(savenameX,'tmp','tmps');
      else
 	load(savenameX,'tmp','tmps');

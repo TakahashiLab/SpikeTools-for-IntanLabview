@@ -18,7 +18,7 @@ sm = p.Results.smooth;
 spks=double(spks);
 orgSpks=spks;
 MAX=0;
-Th=2.5;%event threshold
+Th=3;%event threshold
 
 delInd=[];
 loop=length(nums);

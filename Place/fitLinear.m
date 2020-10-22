@@ -24,8 +24,7 @@ GI(2,:)=[y1 y2 y3 y4];
 hold on;
 plot(GI(1,:),GI(2,:),'r');
 
-
-LTraj=dsearchn(GI,Traj(:,3:4)');
+LTraj=dsearchn(GI',Traj(:,3:4));
 
 close(h);
 return;
