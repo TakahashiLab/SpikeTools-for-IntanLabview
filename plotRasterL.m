@@ -2,14 +2,13 @@
 %load event.mat
 %plotRaster(kkOut{4,3},event,[1 2],'binWidth',100);
 %%%
-function [histR,Up,Do,I,M]=plotRaster(spks,event,nums,varargin)
+function histR=plotRasterL(spks,event,num,varargin)
 p = inputParser;
 p.addParamValue('binwidth', 100, @isnumeric);
 p.addParamValue('samplingrate', 25, @isnumeric);
 p.addParamValue('jitter', 0, @isnumeric);
 p.addParamValue('smooth', 0, @isnumeric);
 p.addParamValue('verbose', 1, @isnumeric);
-p.addParamValue('splitNum', 0, @isnumeric);
 
 p.parse(varargin{:});
 binWidth = p.Results.binwidth;
@@ -17,23 +16,22 @@ kHz=p.Results.samplingrate;
 jitter=p.Results.jitter;
 sm = p.Results.smooth;
 verbose = p.Results.verbose;
-splitNum = p.Results.splitNum;
 
 spks=double(spks);
 
-
 MAX=0;
-Th=3;%event threshold
-ThS=5;%split threshold (sec)
-loop=length(nums);
+Th=2.5;%event threshold
+
+nums=[num num];
+loop=2;%left,right direction
+
 for m=1:loop
     if verbose
-        subplot(1,loop,m);
+       subplot(1,loop,m);
     end
     
     [Up,Do]=getTimes(event(nums(m),:),Th);
     
- 
     if event(nums(m),1)>Th
         buf=Do;
         Do=Up;
@@ -43,46 +41,43 @@ for m=1:loop
     if Up(1)> Do(1)
        Up=Up(1:end-1);
        Do=Do(2:end);
-       l=length(Up);       
+       l=length(Up);
     elseif length(Up)~=length(Do)
        l=min([length(Up) length(Do)]);
        Up=Up(1:l);
        Do=Do(1:l);
-    else
-      l=length(Up);
     end
-    
-    
-    if splitNum>0
-       [Up,Do,l]=splitUpDo(Up,Do,splitNum,ThS,kHz);
-    end
-    
-   
-      
+    l=ceil(l/2);
     eventNum=l;
+    
+    if m==1
+      range=1:2:l;
+    else
+      range=2:2:l;
+    end
+    
     duration=max(Do-Up)+jitter*1000*kHz*2;
     eventLength=floor(duration/(kHz*binWidth));
     raster=zeros(l,eventLength);
-    if verbose
-        hold on;
-    end
-    for i=1:l
+    c=1;
+    for i=range
         SpkInTrial=spks-(Up(i)-jitter*1000*kHz);
         SpkInTrial=SpkInTrial(SpkInTrial>=0 & SpkInTrial<=duration);
         SpkSeq=floor(SpkInTrial/(kHz*binWidth));
-        SpkSeq(SpkSeq==0)=[];
-        SpkSeq(SpkSeq==eventLength+1)=[];
-        raster(i,:)=full(sparse(1,SpkSeq,1,1,eventLength));
+        SpkSeq(SpkSeq==0)=1;
+        raster(c,:)=full(sparse(1,SpkSeq,1,1,eventLength));
         
-        spkPoint=find(raster(i,:));
+        spkPoint=find(raster(c,:));
         if ~isempty(spkPoint)
             if verbose
-                plot(spkPoint,i,'k.');
+               hold on;
+                plot(spkPoint,c,'k.');
             end
         end
+        c=c+1;
     end
 
-    histR{m}=sum(raster)/l;
+    histR{m}=sum(raster);
     MAX=max([MAX max(histR{m})]);
     
     if verbose
@@ -92,14 +87,8 @@ for m=1:loop
     
     if jitter
         xlabels=xlabels-jitter;
-        if jitter<0
-          pjitter=0;
-        else
-          pjitter=jitter;
-        end
-          plot([pjitter*jump pjitter*jump],[0 l+1],'g')
-          plot([duration/(kHz*binWidth)-pjitter*jump duration/(kHz*binWidth)-pjitter*jump],[0 l+1],'g')
-        
+        plot([jitter*jump jitter*jump],[0 l+1],'g')
+        plot([duration/(kHz*binWidth)-jitter*jump duration/(kHz*binWidth)-jitter*jump],[0 l+1],'g')
     end
 
     set(gca,'xtick',xticks,'xticklabels',xlabels);
@@ -109,42 +98,19 @@ for m=1:loop
 end
 
 if verbose
+ 
     for m=1:loop
         subplot(1,loop,m);
         hold on;
         histRaster=histR{m};
-       
         fr=(max(histRaster)/(binWidth/1000))/l;
         histRaster=histRaster/MAX*l;
         if sm
-           smhistRaster=smooth(histRaster,10);
+            plot(smooth(histRaster,10),'r');
         else
-            smhistRaster=histRaster;
+            plot(histRaster,'r');
         end
-        [~,Index]=max(smhistRaster);%mieno
-        index=Index/jump-jitter;
-        Mean=mean(histRaster);%mieno
-        plot(smhistRaster,'r');
-        title(sprintf('Peak:%2.1fHz Index:%2.1f Mean:%2.1f',fr,index,Mean));%mieno
-        I(1,m)=index;
-        M(1,m)=Mean;
+        title(sprintf('Peak:%2.1fHz',fr));
     end
 end
-return;
-%%%%%%%%%%%%%%%%%%%%%%%%%
-function [Up,Do,l]=splitUpDo(Up,Do,splitNum,ThS,kHz)
-duration=(Do-Up)/(kHz*1000);
-splitP=find(abs(diff(duration))>ThS )+1;
-splitP=[1 splitP];
-%duration
-if length(splitP)==splitNum
-  r=splitP(splitNum):length(Do);
-else
-  r=splitP(splitNum):(splitP(splitNum+1)-1);
-end
-
-Up=Up(r);
-Do=Do(r);
-l=length(Up);
-
 return;
