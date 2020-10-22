@@ -300,7 +300,7 @@ else
     
 
     if Linear
-        [rate_map,~,~,oc_map] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);
+        [rate_map,~,oc_map] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);
     else
         [rate_map,~,~,oc_map] = ratemap(spk_x,spk_y,x,y, ...
                                         spatial_scale,fs_video,1);
