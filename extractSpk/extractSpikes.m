@@ -1,14 +1,16 @@
-function [tmp,tmps]=extractSpikes(filename,activeNums,step,Stimuli,filetype)
+function [tmp,tmps]=extractSpikes(filename,activeNums,step,Stimuli,filetype,Th)
 
-Th=50*(2^15-1)*5000*10^-6;%50uV 
+%Th=50*(2^15-1)*5000*10^-6;%50uV 
 
 if nargin<=3
   Stimuli=[];
   filetype='alvrc';
+  Th=50;
 elseif nargin<=4
   filetype='ilvrc';
-else
-  
+  Th=50;
+elseif nargin<=5
+  Th=50;
 end
 
 switch lower(filetype)
@@ -16,7 +18,8 @@ switch lower(filetype)
     Th=50*(2^15-1)*5000*10^-6;%50uV 
   case 'ilvrc',
     %    Th=300;%30uV 0.1uV
-    Th=500;%50uV 0.1uV 500??? 200=20uV?
+    %Th=500;%50uV 0.1uV 500??? 200=20uV?
+    Th=Th*10;
 end
 
 load(filename,'x');
