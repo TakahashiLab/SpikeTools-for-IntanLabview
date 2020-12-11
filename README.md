@@ -24,8 +24,9 @@
 ```matlab
 fn=pwd;
 preProcessIlvrc(fn,0);
+```
 
-PD mouse
+1'. PD mouse
 ```matlab
 fn=pwd;
 load DLCAnalyzedTrajectory.mat
@@ -33,6 +34,7 @@ Traj=Pos;
 save DLC.mat;
 forceRef{1,1}=1;forceRef{1,2}=1:4;forceRef{2,2}=[5:8];%split median referencing
 preProcessIlvrc4Mouse(fn,0,forceRef,0,LEDp,0);% 0:entire process, 0:old version/ 1:new version, LEDp:LED position (tetrode #), realtime feedback? No/Yes (0/1) 
+```
 
 2. Spike sorting using KlustaKwik.
 ```matlab
