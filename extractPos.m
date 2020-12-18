@@ -38,17 +38,21 @@ tmp=unique([tmp tmp+1]);
 tmp(1)=[];
 
 PosT=P(tmp);
-size(PosT)
+
 
 %remove oversampled data(interval <5msec)
 ro=find(diff(PosT)<125);%125
 ro=unique([ro ro+1]);
 
+
+
 if size(ro,2)>1
   fprintf('removing oversampled data:%d...\n',size(ro,2));
 end
-size(PosT)
+
 PosT(ro)=[];
+
+
 
 if ver
     size(PosT)
@@ -57,10 +61,10 @@ if ver
     else
         PosT=PosT(1:2:end);
     end
-    size(PosT)
 else
     dp=diff(PosT);
-    PosT(find(dp<=463)+1)=[];
+    %    PosT(find(dp<=463)+1)=[];
+
 end
 
 return;
