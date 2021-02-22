@@ -9,7 +9,7 @@ shuffleLag=20000;%20sec
 SpksShuffle=[];
 BinWidthCm=2.5;%2.5cm
 Linear=0;
-
+clockWise=1;
 xl=3;
 yl=4;
 
@@ -28,7 +28,7 @@ else
     if yLen < xLen
         Len=xLen;
     end
-    Len=min([xLen yLen]);
+%     Len=min([xLen yLen])
 end
 
 
@@ -83,8 +83,9 @@ for i=1:2:(length(varargin)-1)
       elseif strcmp(varargin{i+1},'rat')
           if Linear
               cmPerPixel=400/Len;%
+              Len
           else
-              cmPerPixel=160/Len;%
+              cmPerPixel=160/Len;%50
           end
           Bin=BinWidthCm/cmPerPixel;
           kHz=25;
@@ -95,6 +96,7 @@ for i=1:2:(length(varargin)-1)
       shuffle=0;
     case 'shuffle',
       shuffle=1;
+   
     case 'corr',
       corrFlag=varargin{i+1};
     case 'shufflen',
@@ -140,6 +142,16 @@ if spON
   Traj=Traj(Good,:);
   msT=msT(Good);
   speed=speed(Good);
+  
+ % if Linear
+ if 0
+      directionT=smooth(diff(Traj),FPS,'moving')*1000;
+      directionT=clockWise*directionT;
+      Bad=find(directionT >= 500 & directionT<2000);
+      Traj(Bad)=[];
+      msT(Bad)=[];
+      speed(Bad)=[];
+  end
 end
 
 if Linear
@@ -272,6 +284,7 @@ else
     spk_x_disp=[];
     spk_y_disp=[];
     jitter=[-5:1:5];
+    
     for j=1:(size(Traj,1)-1)
         spkcnt=sum(Spks >= msT(j) & Spks < msT(j)+msFPS);
 
@@ -297,10 +310,10 @@ else
         maxX=max(spk_x);
         maxY=max(spk_y);
     end
-    
-
+  
     if Linear
         [rate_map,~,oc_map] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);
+     
     else
         [rate_map,~,~,oc_map] = ratemap(spk_x,spk_y,x,y, ...
                                         spatial_scale,fs_video,1);
