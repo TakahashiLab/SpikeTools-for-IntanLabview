@@ -83,7 +83,6 @@ for i=1:2:(length(varargin)-1)
       elseif strcmp(varargin{i+1},'rat')
           if Linear
               cmPerPixel=400/Len;%
-              Len
           else
               cmPerPixel=160/Len;%50
           end
