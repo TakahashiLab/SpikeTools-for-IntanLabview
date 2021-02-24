@@ -8,8 +8,6 @@ std_smooth_kernel=5;
 %spatial_scale,binside,fs_video);
 dim=binside;;
 
-min(x)
-max(x)
 xdim = min(x):spatial_scale^-1*dim:max(x); %edges of x and y
                                            %dimensions
 occupancy = histcounts(x, xdim)/fs_video;
