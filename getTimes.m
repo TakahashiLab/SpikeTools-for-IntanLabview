@@ -11,7 +11,7 @@ P=find(x>Th);
 %if event width==1
 P(x(P+1)<Th)=[];
 
-P=[0 P];
+P=[0 P length(x)];
 
 
 tmp=find((diff(P)~=1));
@@ -29,13 +29,11 @@ if size(ro,2)>1
   fprintf('removing oversampled data:%d...\n',size(ro,2));
 end
 
-
-
 if x(1) > Th
-    riseT=PosT(2:2:end);
+    riseT=PosT(2:2:end-1);
     fallT=PosT(3:2:end);
 else
-    riseT=PosT(1:2:end);
+    riseT=PosT(1:2:end-1);
     fallT=PosT(2:2:end);
 end
 
