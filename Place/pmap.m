@@ -127,7 +127,11 @@ msFPS=floor(1/FPS*1000);
 Spks=ceil(Spks/kHz)+fstart;%msec
 
 if Linear
-    movement=sqrt(sum(diff(Traj).^2,2))*cmPerPixel;% 
+    dTraj=diff(Traj);
+    ind=find(abs(dTraj)>max(Traj)/2);
+    dTraj(ind)=dTraj(ind)-sign(dTraj(ind))*max(Traj);
+    movement=sqrt(sum(dTraj.^2,2))*cmPerPixel;% 
+                                              %movement=sqrt(sum(diff(Traj).^2,2))*cmPerPixel;% 
 else
     movement=sqrt(sum(diff(Traj(:,1:2)).^2,2))*cmPerPixel;% 
 end
