@@ -118,7 +118,7 @@ for i=1:2:(length(varargin)-1)
   end
 end
 
-ThS
+
 FPS=floor(1/(median(diff(msT))/1000));
 fs_video=FPS;
 msFPS=floor(1/FPS*1000);
