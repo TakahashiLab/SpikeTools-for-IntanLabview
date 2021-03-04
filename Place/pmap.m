@@ -32,10 +32,8 @@ else
 end
 
 
-
-
 for i=1:2:(length(varargin)-1)
-  % change the value of parameter
+    % change the value of parameter
   switch lower(varargin{i})
     case 'animal',
       if strcmp(varargin{i+1},'bird')
@@ -95,7 +93,8 @@ for i=1:2:(length(varargin)-1)
       shuffle=0;
     case 'shuffle',
       shuffle=1;
-   
+    case 'speed',
+      ThS=varargin{i+1};
     case 'corr',
       corrFlag=varargin{i+1};
     case 'shufflen',
@@ -119,7 +118,7 @@ for i=1:2:(length(varargin)-1)
   end
 end
 
-
+ThS
 FPS=floor(1/(median(diff(msT))/1000));
 fs_video=FPS;
 msFPS=floor(1/FPS*1000);
