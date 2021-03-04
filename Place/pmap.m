@@ -133,7 +133,7 @@ if Linear
     movement=sqrt(sum(dTraj.^2,2))*cmPerPixel;% 
                                               %movement=sqrt(sum(diff(Traj).^2,2))*cmPerPixel;% 
 else
-    movement=sqrt(sum(diff(Traj(:,1:2)).^2,2))*cmPerPixel;% 
+    movement=sqrt(sum(diff(Traj(:,5:6)).^2,2))*cmPerPixel;% 1:2 -> 5:6
 end
 
 speed=movement./diff(msT);

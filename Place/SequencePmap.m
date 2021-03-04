@@ -1,6 +1,6 @@
-function [seq,order,oc_map]=SequencePmap(ensemble,event,nums,Traj,PosT,LTraj)
+function [seq,order,oc_map,LTraj,LTrajS]=SequencePmap(ensemble,event,nums,Traj,PosT,LTraj)
 if nargin==5
-    [LTraj]=fitLinear(Traj);
+    [LTraj,LTrajS]=fitLinear(Traj);
 end
 
 loop=size(ensemble,1);

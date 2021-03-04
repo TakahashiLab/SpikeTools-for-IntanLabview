@@ -1,4 +1,4 @@
-function [LTraj,GI]=fitLinear2(Traj)
+function [LTraj,LTrajS,GI]=fitLinear(Traj)
 h=figure;
 plot(Traj(:,3),Traj(:,4));
 fprintf(['Check the four corners of the rectangule with the mouse\n' ...
@@ -41,7 +41,8 @@ GI(2,:)=[y1 y2 y3 y4 y5 y6 y7 y8];
 hold on;
 plot(GI(1,:),GI(2,:),'r');
 
-LTraj=dsearchn(GI',Traj(:,3:4));
+LTraj=dsearchn(GI',Traj(:,3:4));%
+LTrajS=dsearchn(GI',Traj(:,5:6));%
 
 pause(2);
 close(h);
