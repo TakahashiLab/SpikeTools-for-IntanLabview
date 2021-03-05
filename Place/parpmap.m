@@ -1,9 +1,9 @@
-function [rate_map,rawRate_map,spatial_scale,SpksShuffle,oc_map,sinfo]=parpmap(Spks,Traj, msT,fstart,varargin)
+function [rate_map,spatial_scale,SpksShuffle,oc_map,sinfo]=parpmap(Spks,Traj, msT,fstart,varargin)
 
 p = inputParser;
 p.addParamValue('animal','rat', @ischar);
 p.addParamValue('shuffle', 0, @isnumeric);
-p.addParamValue('shuffleType', 1, @isnumeric);
+p.addParamValue('shuffletype', 1, @isnumeric);
 p.addParamValue('shufflen', 1000, @isnumeric);
 p.addParamValue('verbose', 0, @isnumeric);
 p.addParamValue('binside', 2.5, @isnumeric);
@@ -11,7 +11,7 @@ p.addParamValue('binside', 2.5, @isnumeric);
 p.parse(varargin{:});
 animal = p.Results.animal;
 shuffle = p.Results.shuffle;
-shuffleType = p.Results.shuffleType;
+shuffleType = p.Results.shuffletype;
 shuffleN=p.Results.shufflen;
 verbose=p.Results.verbose;
 binside=p.Results.binside;
@@ -150,14 +150,32 @@ if shuffle
             SpksShuffle(i,:)=Spks(sort(bootsamp));
             BS(i,:)=bootsamp;
         end
+    elseif shuffleType==4%spike-time random shuffle
+        beginSpks=fstart;%%
+        endSpks=Spks(end);        
+        entireLength=ceil(endSpks-beginSpks);
+        lenSpks=length(Spks);
+        SpksShuffle=zeros(shuffleN,lenSpks);
+
+        for i=1:shuffleN
+            rp=randperm(entireLength);
+            spkss=Spks+rp(1:lenSpks);
+            spkss=sort(spkss);
+            topSpks=find(spkss>=endSpks);
+            spkss(topSpks)=spkss(topSpks)-endSpks+beginSpks;
+            SpksShuffle(i,:)=sort(spkss);
+        end        
+        
     end
     
-    if shuffleType==1 | shuffleType==3%spike timing shuffle or bootstrap
+    
+    if shuffleType==1 | shuffleType==3 | shuffleType==4%spike timing shuffle or bootstrap
         for i=1:shuffleN
 
             Spks=SpksShuffle(i,:);
             spk_x=[];
             spk_y=[];
+            
             for j=1:(length(msT)-1)
                 SpkCnt=sum(Spks >= msT(j) & Spks < msT(j)+msFPS);
                 for k=1:SpkCnt

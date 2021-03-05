@@ -1,5 +1,5 @@
 %Linearlized version
-function [pcList,sinfoO,sinfoS,sRateMap]=identifyPC(ensemble,LTraj,PosT,fstart,varargin)
+function [pcList,sinfoO,sinfoS]=identifyPC(ensemble,LTraj,PosT,fstart,varargin)
 p = inputParser;
 p.addParamValue('percentile', 95, @isnumeric);
 p.addParamValue('shufflen', 1000, @isnumeric);
@@ -19,13 +19,14 @@ for i=1:size(ensemble,1)
     if isempty(event)
         spk=ensemble{i,3};
     else
-        spk=extractDelay(ensemble{i,3},event,eventNum);
+        [spk,~,~,LTraj,PosT]=extractDelay(ensemble{i,3},event,eventNum,'LTraj',LTraj,'msT',PosT);
     end
     
+
     [oRateMap]=pmap(spk,LTraj,PosT,fstart,'animal','rat');
     
     %%%parpmap
-    [sRateMap]=parpmap(spk,LTraj, PosT,fstart,'animal','rat','shuffle',1,'shuffleN',shuffleN);
+    [sRateMap,~,z]=parpmap(spk,LTraj, PosT,fstart,'animal','rat','shuffle',1,'shuffleN',shuffleN,'shuffleType',4);
     %[seq]=pmap(extractDelay(ensemble{i,3},event,nums),LTraj,PosT,0,'animal','rat','verbose',0,'shuffle');
 
     sinfoO(i)=calcInfo(oRateMap);
