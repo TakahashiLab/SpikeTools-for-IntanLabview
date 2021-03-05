@@ -1,16 +1,70 @@
 function info=calcInfo(seq,oc_map)
 
 if nargin==1
+    [x,y]=size(seq);
+    if x > y
+        seq=seq';
+    end
+    
   PlaceMap=seq(1,:);
   oc_map=ones(size(PlaceMap));
 end
+
+
 for i=1:size(seq,1)
   PlaceMap=seq(i,:);
-  [InfoPerSec,InfoPerSpk,InfoSparse]=calcInfoC(PlaceMap,oc_map);
+  [InfoPerSec,InfoPerSpk,InfoSparse]=calcInfoNew(PlaceMap,oc_map);
   info(i)=InfoPerSpk;
 end
 return;
 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function  [InfoPerSec,InfoPerSpk,InfoSparse]=calcInfoNew(PlaceMap,OccupancyMap) 
+
+tc=PlaceMap(:);
+occ=OccupancyMap(:);
+ix=tc~=0;
+tc=tc(ix);
+occ=occ(ix);
+
+occ=occ/sum(occ);
+
+
+f=sum(occ.*tc);
+tc1=tc;
+tc=tc/f;
+
+if 0
+SB=(occ(ix).*tc(ix)).*log2(tc(ix));
+SB=sum(SB);
+
+SS=(occ(ix).*tc1(ix)).*log2(tc(ix));
+SS=sum(SS);
+
+tau2=sum(tc1(ix).*occ(ix))^2;
+SP=tau2/sum(occ(ix).*(tc1(ix).^2));
+SP=sum(SP);
+else
+SB=(occ.*tc).*log2(tc);
+SB=sum(SB);
+
+SS=(occ.*tc1).*log2(tc);
+SS=sum(SS);
+
+tau2=sum(tc1.*occ)^2;
+SP=tau2/sum(occ.*(tc1.^2));
+SP=sum(SP);    
+end
+
+
+InfoPerSec=SS;
+InfoPerSpk=SB;
+InfoSparse=SP;
+
+
+
+return;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function  [InfoPerSec,InfoPerSpk,InfoSparse]=calcInfoC(PlaceMap,OccupancyMap) 
 
