@@ -1,18 +1,31 @@
 %Linearlized version
-function [pcList,sinfoO,sinfoS]=identifyPC(ensemble,LTraj,PosT,fstart,varargin)
+function [pcList,sinfoO,sinfoS,sRateMap]=identifyPC(ensemble,LTraj,PosT,fstart,varargin)
 p = inputParser;
-p.addParamValue('percentile', 0.95, @isnumeric);
+p.addParamValue('percentile', 95, @isnumeric);
+p.addParamValue('shufflen', 1000, @isnumeric);
+p.addParamValue('event', [], @ismatrix);
+p.addParamValue('eventnum', [1 2], @isvector);
 
 p.parse(varargin{:});
-Percentile = p.Results.percentile;
+Percentile = p.Results.percentile/100;
+shuffleN=p.Results.shufflen;
+event=p.Results.event;
+eventNum=p.Results.eventnum;
 
 fprintf('cell #');
+
 for i=1:size(ensemble,1)
     fprintf('%3d/%3d',i,size(ensemble,1));
-    [oRateMap]=pmap(ensemble{i,3},LTraj,PosT,fstart,'animal','rat');
+    if isempty(event)
+        spk=ensemble{i,3};
+    else
+        spk=extractDelay(ensemble{i,3},event,eventNum);
+    end
     
-    %%%parpmap???
-    [sRateMap]=parpmap(ensemble{i,3},LTraj, PosT,fstart,'animal','rat','shuffle',1,'shuffleN',100);
+    [oRateMap]=pmap(spk,LTraj,PosT,fstart,'animal','rat');
+    
+    %%%parpmap
+    [sRateMap]=parpmap(spk,LTraj, PosT,fstart,'animal','rat','shuffle',1,'shuffleN',shuffleN);
     %[seq]=pmap(extractDelay(ensemble{i,3},event,nums),LTraj,PosT,0,'animal','rat','verbose',0,'shuffle');
 
     sinfoO(i)=calcInfo(oRateMap);

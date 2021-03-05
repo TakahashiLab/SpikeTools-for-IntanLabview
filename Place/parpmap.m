@@ -1,4 +1,4 @@
-function [rate_map,rawRate_map,spatial_scale,SpksShuffle,oc_map,rate_mapB,sinfo]=parpmap(Spks,Traj, msT,fstart,varargin)
+function [rate_map,rawRate_map,spatial_scale,SpksShuffle,oc_map,sinfo]=parpmap(Spks,Traj, msT,fstart,varargin)
 
 p = inputParser;
 p.addParamValue('animal','rat', @ischar);
@@ -104,10 +104,16 @@ FPS=floor(1/(median(diff(msT))/1000));
 fs_video=FPS;
 msFPS=floor(1/FPS*1000);
 
+
 [Spks,Traj,msT,speed,StartTraj,EndTraj]=SpkTraj(Spks,Traj,msT,fstart,spON,msFPS,kHz,cmPerPixel,ThS);
 
-x=ceil(Traj(:,xl));
-y=ceil(Traj(:,yl));
+if Linear
+    x=Traj;
+    y=ones(size(Traj));
+else
+    x=ceil(Traj(:,xl));
+    y=ceil(Traj(:,yl));
+end
 
 
 spatial_scale=cmPerPixel;
@@ -159,10 +165,11 @@ if shuffle
                     spk_y=[spk_y; Traj(j,yl)];
                 end
             end
-            
+
             if Linear
                 [rate_map(i,:,:)] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);                
             else
+
                 [rate_map(i,:,:)] = ratemap(spk_x,spk_y,x,y, ...
                                             spatial_scale,fs_video);            
             end
@@ -186,7 +193,6 @@ if shuffle
 
         [rm,~,~,oc_map] = ratemap(spk_x,spk_y,x,y, ...
                                             spatial_scale,fs_video);            
-
         
         for i=1:shuffleN
             tmp=fieldShuffleEE(rm,oc_map,binside);
@@ -195,24 +201,7 @@ if shuffle
         sinfo=[];
     end
     
-    %for Border cell
-        parfor i=1:shuffleN
-            Spks=SpksShuffle(i,:);
-            spk_x=[];
-            spk_y=[];
-            for j=1:(size(Traj,1)-1)
-                SpkCnt=sum(Spks >= msT(j) & Spks < msT(j)+msFPS);
-                for k=1:SpkCnt
-                    spk_x=[spk_x; Traj(j,xl)];
-                    spk_y=[spk_y; Traj(j,yl)];
-                end
-            end
-            if length(spk_x)>1
-                
-                [rate_mapB(i,:,:)] = ratemap(spk_x,spk_y,x,y, ...
-                                            spatial_scale,fs_video);            
-            end
-        end
+
 else
     SpkCnt=[];
     spk_x=[];
