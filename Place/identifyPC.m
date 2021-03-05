@@ -36,7 +36,7 @@ for i=1:size(ensemble,1)
     end
     fprintf('\b\b\b\b\b\b\b');
 end
-fprintf('\n');
+fprintf('Done\n');
 sinfoS=sort(sinfoS,2,'MissingPlacement','first');
 
 pcList=sinfoO>sinfoS(:,size(sinfoS,2)*Percentile)';
