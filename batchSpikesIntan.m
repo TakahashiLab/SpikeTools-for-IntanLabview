@@ -9,6 +9,7 @@
 %                2: load extracted data->sorting(ic)
 %                3: load sorting(kk)->sorting(ic)
 %                4: load extracted data->sorting(kk)
+%                5: load raw data->extraction->sorting(kk)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function batchSpikesIntan(basename,mode,elecNums,Th)
 
@@ -27,7 +28,9 @@ if nargin<=1
   mode=0;
   elecNums=1:numOfElectrodes;
 elseif nargin<=2
-  elecNums=1:numOfElectrodes;
+    elecNums=1:numOfElectrodes;
+else
+    numOfElectrodes=elecNums(end);
 end
 
 
@@ -59,7 +62,7 @@ for i=elecNums
     loadnameE=fullfile(dataFolder,[name 'e' num2str(i) '.mat']);
     
     %spike extraction
-    if mode==0 | mode==1
+    if mode==0 | mode==1 | mode==5
       fprintf('Extracting spikes from electrode %d \n',i);
       savenameX=fullfile(dataFolder,[name 'x' num2str(i) '.mat']);
 
@@ -91,9 +94,9 @@ for i=elecNums
 	%spike sorting
 	if mode==3
 	  [OutputData,SampleOut,kkOut,OutputLWV]=ICSort(loadnameE,activeNums,tmp,tmps,'icasso','on','ck',kkOut,'isctest','on','filetype','ilvrc');
-	elseif mode==4
+	elseif mode==4 | mode==5
 	  [OutputData,SampleOut,kkOut]=ICSort(loadnameE,activeNums,tmp,tmps,'kkonly','on','filetype','ilvrc');
-	else
+        else
 	  [OutputData,SampleOut,kkOut,OutputLWV]=ICSort(loadnameE,activeNums,tmp,tmps,'icasso','on','isctest','on','filetype','ilvrc');
 	  %      [OutputData,SampleOut,kkOut,OutputLWV]=ICSort(loadnameE,activeNums,tmp,tmps,'icasso','off','isctest','on');
 	end
