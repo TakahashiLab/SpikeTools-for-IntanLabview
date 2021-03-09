@@ -1,11 +1,14 @@
-function sdat=filterAmp(x,beta,sampl)
+function sdat=filterAmp(x,beta,sampl,gpuFlag)
 if nargin==1
   beta=0;
   sampl=20000;
+  gpuFlag=1;
+elseif nargin==3
+    gpuFlag=1;
 end
 
 gpuOn=0;
-if gpuDeviceCount
+if gpuDeviceCount & gpuFlag
     gpuOn=1;
 end
 
