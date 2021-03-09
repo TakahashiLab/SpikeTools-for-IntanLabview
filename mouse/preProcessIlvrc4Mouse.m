@@ -20,20 +20,31 @@
 %
 %ver: 0:mouse old, 1: mouse new2020, 2:
 %
-function preProcessIlvrc4Mouse(basename,sleep,forceRef,ver,LEDp,rf)
+function preProcessIlvrc4Mouse(basename,sleep,forceRef,ver,LEDp,rf,gpuFlag)
 if nargin==1
   sleep=0;
   forceRef=[];
   rf=0;
+  gpuFlag=1;
 elseif nargin==2
   forceRef=[];
   LEDp=[];
   rf=0;
+  gpuFlag=1;
 elseif nargin==3
+    ver=0;
     LEDp=[];
     rf=0;
+    gpuFlag=1;
 elseif nargin==4
-  rf=0;
+    LEDp=[];
+    rf=0;
+    gpuFlag=1;
+elseif nargin==5
+    rf=0;
+    gpuFlag=1;
+elseif nargin==6
+    gpuFlag=1;
 end
 
 
@@ -116,7 +127,7 @@ for i=possibleId
 	ref=forceRef;
       end
 
-      e=filterAmp(x,0,sampl);
+      e=filterAmp(x,0,sampl,gpuFlag);
       x=double(x)./Factor16bit.*uV1;%convert to 1 uV
       e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
       
@@ -142,7 +153,7 @@ for i=possibleId
 
       e=int16(e);
       
-      lfp=filterAmp(double(x),2,sampl);
+      lfp=filterAmp(double(x),2,sampl,gpuFlag);
       lfp=int16(lfp);
     
       fprintf('convert LFPs\n');
