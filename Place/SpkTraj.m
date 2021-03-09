@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [Spks,Traj,msT,speed,StartTraj,EndTraj]=SpkTraj(Spks,Traj,msT,fstart,spON,msFPS,kHz,cmPerPixel,ThS)
+function [Spks,Traj,msT,speed,StartTraj,EndTraj,speedSpks]=SpkTraj(Spks,Traj,msT,fstart,spON,msFPS,kHz,cmPerPixel,ThS)
 
 verbose=0;
 
@@ -39,7 +39,7 @@ ThR=10;%2cm, 5
 %histogram(retention);
 
 %Th
-ThS=2.5;
+%ThS=2.5;
 
 %analyzed if the speed is more than 5cm/s 
 if spON
@@ -53,9 +53,17 @@ if spON
     speed=speed(Good);
 end
 
+
 StartTraj=msT(1);
 EndTraj=msT(end);
 Spks=Spks(find(Spks > StartTraj & Spks < EndTraj));
+
+speedInd=[];
+for i=1:length(msT)
+    speedInd=[speedInd find(Spks>=msT(i) & Spks<msT(i)+msFPS)];
+end
+
+speedSpks=Spks(sort(speedInd));
 
 return;
 
