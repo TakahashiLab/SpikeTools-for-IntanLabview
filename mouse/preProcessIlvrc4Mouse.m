@@ -94,7 +94,7 @@ else
   end
 end
 
-if sleep==0 | sleep==1 | sleep==3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 savenames=cell(1,numOfElectrodes+2);
 for i=1:numOfElectrodes
@@ -230,7 +230,8 @@ if 1
 end
 
 if sleep~=3
-  %LFP power
+    %LFP power
+    load(savenames{numOfElectrodes+1},'dlfp'); 
   load(fullfile(dataFolder,['positions.mat']));
   if isempty(LEDp)
     mP=LFPpower(dlfp,PosT);
