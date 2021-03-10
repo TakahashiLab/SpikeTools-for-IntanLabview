@@ -1,7 +1,7 @@
-function [LTraj,LTrajS,GI]=fitLinear(Traj)
+function [LTraj,LTrajS,TMpoints,GI]=fitLinear(Traj)
 h=figure;
 plot(Traj(:,3),Traj(:,4));
-fprintf(['Check the four corners of the rectangule with the mouse\n' ...
+fprintf(['Check the 10 corners of the rectangule with the mouse\n' ...
          'in a clockwise direction\n']);
 fprintf('Please start at the left reward zone\n');
 [x,y]=ginput(10);
@@ -48,6 +48,15 @@ LTraj=dsearchn(GI',Traj(:,3:4));%
 LTrajS=dsearchn(GI',Traj(:,5:6));%
 
 LTrajS=[];
+pause(2);
+
+fprintf('Check a middle point of the 2 treadmills with the mouse, respectively\n'n');
+[x,y]=ginput(2);
+
+GI(1,:)=[x(1) x(2)];
+GI(2,:)=[y(1) y(2)];
+plot(GI(1,:),GI(2,:),'go');
+TMpoints=dsearchn(GI',Traj(:,3:4));%
 pause(2);
 close(h);
 return;
