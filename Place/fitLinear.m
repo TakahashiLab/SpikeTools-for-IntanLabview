@@ -47,16 +47,16 @@ plot(GI(1,:),GI(2,:),'r');
 LTraj=dsearchn(GI',Traj(:,3:4));%
 LTrajS=dsearchn(GI',Traj(:,5:6));%
 
-LTrajS=[];
 pause(2);
 
-fprintf('Check a middle point of the 2 treadmills with the mouse, respectively\n'n');
+fprintf('Check a middle point of the 2 treadmills with the mouse, respectively\n');
 [x,y]=ginput(2);
 
-GI(1,:)=[x(1) x(2)];
-GI(2,:)=[y(1) y(2)];
-plot(GI(1,:),GI(2,:),'go');
-TMpoints=dsearchn(GI',Traj(:,3:4));%
+
+GI2(1,:)=[x(1) x(2)];
+GI2(2,:)=[y(1) y(2)];
+plot(GI2(1,:),GI2(2,:),'go');
+TMpoints=dsearchn(GI',GI2');%
 pause(2);
 close(h);
 return;
