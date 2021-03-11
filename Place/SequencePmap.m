@@ -18,8 +18,12 @@ outputMode = p.Results.outputmode;
 loop=size(ensemble,1);
 for i=1:loop
     fprintf('%d/%d\n',i,loop);
-    [seq(i,:),~,~,oc_map]=pmap(extractDelay(ensemble{i,3},event,nums),LTraj,PosT,0,'animal','rat', ...
+    if isempty(nums)
+        [seq(i,:),~,~,oc_map]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0);
+    else
+        [seq(i,:),~,~,oc_map]=pmap(extractDelay(ensemble{i,3},event,nums),LTraj,PosT,0,'animal','rat', ...
                  'speed',ThS,'verbose',0);
+    end
 end
 
 [maxSeq,ind]=max(seq,[],2);
