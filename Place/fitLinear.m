@@ -45,7 +45,11 @@ hold on;
 plot(GI(1,:),GI(2,:),'r');
 
 LTraj=dsearchn(GI',Traj(:,3:4));%
-LTrajS=dsearchn(GI',Traj(:,5:6));%
+if size(Traj,2)>=5
+    LTrajS=dsearchn(GI',Traj(:,5:6));%
+else
+    LTrajS=[];
+end
 
 pause(2);
 
