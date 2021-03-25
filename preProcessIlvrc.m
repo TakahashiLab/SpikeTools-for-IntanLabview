@@ -12,17 +12,25 @@
 % ex.) forceRef{1,1}=1;
 %      forceRef{1,2}=5:8;
 %LEDp: a elecrode number which has a optical fiber
-function preProcessIlvrc(basename,sleep,forceRef,LEDp,rf)
+function preProcessIlvrc(basename,sleep,forceRef,LEDp,rf,gpuFlag)
 if nargin==1
     sleep=0;
     forceRef=[];
+    LEDp=[];
+    rf=0;
+    gpuFlag=1;
 elseif nargin==2
     forceRef=[];
     LEDp=[];
+    rf=0;
+    gpuFlag=1;
 elseif nargin==3
     LEDp=[];
+    rf=0;
+    gpuFlag=1;
 elseif nargin==4
     rf=0;
+    gpuFlag=1;
 end
 
 
@@ -78,6 +86,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 x = bsxfun(@minus, x, tm); % subtract median of each time point
                 
                 x=double(x)./Factor16bit.*uV1;%convert to 1 uV
+                saveKilosort(savenames{numOfElectrodes+4},x);
                 if ~exist(savenames{numOfElectrodes+2})
                     event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
                     event=double(event)./Factor16bit4Event;%convert to V
@@ -88,9 +97,20 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if ~isempty(forceRef)
                     ref=forceRef;
                 end
-                           
-                e=filterAmp(x,0,sampl);
+                e=filterAmp(x,0,sampl,gpuFlag);          
+                
                 x=double(x)./Factor16bit.*uV1;%convert to 1 uV
+
+                lfp=filterAmp(double(x),2,sampl,gpuFlag);
+                lfp=int16(lfp);
+                fprintf('convert LFPs\n');
+                dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+                %      dlfp=lfpClean(dlfp);%cleaning using FastICA
+                fprintf('Saving LFPs...\n');
+                parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
+                        'dlfp',dlfp);
+                clear x lfp dlfp;
+                
                 e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
                 
                 if iscell(ref);
@@ -106,8 +126,14 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                             refNum=ref{k,1};
                             %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing
                             pe=e(channels,:);
-                            gmr=median(pe,1);
-                            e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing
+                            branchPoint=floor(size(pe,2)/2);
+                            %1st half
+                            gmr=median(pe(:,1:branchPoint),1);
+                            e(channels,1:branchPoint)=pe(:,1:branchPoint)-repmat(gmr,size(channels,2),1); 
+                            %2nd half
+                            gmr=median(pe(:,branchPoint+1:end),1);
+                            e(channels,branchPoint+1:end)=pe(:,branchPoint+1:end)-repmat(gmr,size(channels,2),1); 
+
                         end
                     end
                 else
@@ -116,12 +142,6 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 e=int16(e);
                 
-                lfp=filterAmp(double(x),2,sampl);
-                lfp=int16(lfp);
-                
-                fprintf('convert LFPs\n');
-                dlfp=downlfp(lfp,25);%25kHz -> 1kHz
-                %      dlfp=lfpClean(dlfp);%cleaning using FastICA
                 
                 if ~exist(savenames{numOfElectrodes+2})
                     event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
@@ -140,16 +160,13 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         
         if sleep==0 | sleep==1
-            saveKilosort(savenames{numOfElectrodes+4},x);
+
             for j=1:(numOfElectrodes)
                 fprintf('Saving electrode # %d...\n',j);
                 x=e(numOfMicrowires*(j-1)+1:numOfMicrowires*j,:);
                 parsave(savenames{j},'x',x);
             end
-            fprintf('Saving LFPs...\n');
-            parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp);
-        elseif sleep==4
-            saveKilosort(savenames{numOfElectrodes+4},x);
+
         end
         
         %x=event;
