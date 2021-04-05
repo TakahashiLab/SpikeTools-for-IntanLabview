@@ -10,7 +10,7 @@ end
 Efilename = fullfile(path,[name '/' name 'Event.mat']);
 
 load(Efilename,'event');
-Th=2.5;
+Th=2;
 
 [PosT]=getTimes(event(PosId,:),Th,ver)';
 if length(Traj)<length(PosT)
