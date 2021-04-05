@@ -15,10 +15,16 @@ if nargin<=5
     ThS=2.5;
     if isempty(LTraj)
         [LTraj,LTrajS,TMpoints]=fitLinear(Traj);
+    else
+        LTrajS=[];
+        TMpoints=[];
     end
 elseif nargin<=6
     if isempty(LTraj)
         [LTraj,LTrajS,TMpoints]=fitLinear(Traj);
+    else
+        LTrajS=[];
+        TMpoints=[];
     end
 end
 
