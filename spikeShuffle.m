@@ -32,7 +32,9 @@ for z=1:shuffleN
     topSpks=find(spkss>=endSpks);
     spkss(topSpks)=spkss(topSpks)-endSpks+beginSpks;
     SpksShuffle(z,:)=sort(spkss);
+    SpksShuffle(z,:)=(SpksShuffle(z,:)-fstart).*kHz;
 end
+
 
 return;
     
