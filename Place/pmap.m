@@ -130,7 +130,7 @@ if Linear
     ind=find(abs(dTraj)>max(Traj)/2);
     dTraj(ind)=dTraj(ind)-sign(dTraj(ind))*max(Traj);
     movement=sqrt(sum(dTraj.^2,2))*cmPerPixel;% 
-                                              %movement=sqrt(sum(diff(Traj).^2,2))*cmPerPixel;% 
+                                              
 else
     movement=sqrt(sum(diff(Traj(:,5:6)).^2,2))*cmPerPixel;% 1:2 -> 5:6
 end
@@ -144,16 +144,6 @@ if spON
   Traj=Traj(Good,:);
   msT=msT(Good);
   speed=speed(Good);
-  
- % if Linear
- if 0
-      directionT=smooth(diff(Traj),FPS,'moving')*1000;
-      directionT=clockWise*directionT;
-      Bad=find(directionT >= 500 & directionT<2000);
-      Traj(Bad)=[];
-      msT(Bad)=[];
-      speed(Bad)=[];
-  end
 end
 
 if Linear
@@ -163,15 +153,7 @@ else
     x=ceil(Traj(:,xl));
     y=ceil(Traj(:,yl));
 end
-%if length(Spks)<100 & corrFlag==0
-if 0
-    rate_map=[];
-    rate_mapB=[];
-    binside=2.5;
-    spatial_scale=cmPerPixel;
-    [oc_map] = Occupancy(x,y, spatial_scale,binside,fs_video);
-    return;
-end
+
 
 StartTraj=msT(1);
 EndTraj=msT(end);
@@ -204,7 +186,7 @@ spatial_scale=cmPerPixel;
 spk_x=[];
 spk_y=[];
 
-fieldShuffleFlag=1;
+fieldShuffleFlag=0;
 
 if shuffle
     
@@ -237,8 +219,14 @@ if shuffle
                     spk_y=[spk_y; Traj(j,yl)];
                 end
             end
-            [rate_map(i,:,:)] = ratemap(spk_x,spk_y,x,y,spatial_scale,fs_video);
+
             
+            if Linear
+                [rate_map(i,:,:)] = rateLinearMap(spk_x,x,spatial_scale,fs_video,1);
+            else
+                [rate_map(i,:,:)] = ratemap(spk_x,spk_y,x,y, ...
+                                            spatial_scale,fs_video);
+            end
         end
         oc_map=[];
     else%fieldShuffle
