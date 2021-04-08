@@ -29,7 +29,7 @@ if shuffle
         error('Please input PosT value\n');
         return;
     else
-        parfor j=1:loop
+        for j=1:loop
             shuffleEns{j}=spikeShuffle(ensemble{j,3},PosT,fstart, ...
                                   'shuffleN',shuffleN);
         end
@@ -47,16 +47,19 @@ for i=1:loop
                 [~,histR]=plotRasterMM2(shuffleEns{i}(j,:),event,nums, ...
                                         PORK3,Nsta,Nen,'verbose', ...
                                         0,'jitter',jitter);
-
+                
+                ori_seq1(i,j,:)=smooth(histR{1},wSize);
+                ori_seq2(i,j,:)=smooth(histR{2},wSize);                            
             end
         elseif L == 1
             for j=1:shuffleN
                 [~,histR]=plotRasterLMM(shuffleEns{i}(j,:),event, ...
                                         nums,PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
+                ori_seq1(i,j,:)=smooth(histR{1},wSize);
+                ori_seq2(i,j,:)=smooth(histR{2},wSize);            
             end
         end
-        ori_seq1(i,j,:)=smooth(histR{1},wSize);
-        ori_seq2(i,j,:)=smooth(histR{2},wSize);            
+
     else
         if L == 0
             [~,histR]=plotRasterMM2(ensemble{i,3},event,nums,PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
