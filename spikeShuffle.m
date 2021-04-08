@@ -13,7 +13,7 @@ shuffleLag=20000;%20sec
 
 
 Spks=ceil(Spks/kHz)+fstart;%msec
-PosT=PosT/kHz;
+
 
 beginSpks=PosT(1);
 endSpks=PosT(end);
