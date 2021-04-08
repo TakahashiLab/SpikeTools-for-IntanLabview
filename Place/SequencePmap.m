@@ -47,6 +47,10 @@ for i=1:loop
     end
 end
 
+if shuffle
+    outputMode='raw'
+end
+    
 [maxSeq,ind]=max(seq,[],2);
 [~,ind]=sort(ind);
 

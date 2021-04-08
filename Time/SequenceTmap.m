@@ -1,36 +1,75 @@
-function [seq1,seq2,order]=SequenceTmap(ensemble,event,nums,jitter,splitNum)
-if nargin==3
-    order=1;%sequence order 
-    jitter=0;
-    splitNum=0;
-elseif nargin==4
-    splitNum=0;
-end
+% LMM縺ｮ譎ゅ↓縺ｯ譛蠕後↓1繧定ｿｽ蜉
+%Nsta=[11 21 31];,Nen=[20 30 40];縺ｨ縺九↓縺吶ｋ
+
+function [seq1,seq2,order,ori_seq1,ori_seq2]=SequenceTmap(ensemble,event,nums,jitter,PORK3,Nsta,Nen,varargin)
+% p = inputParser;
+% p.addParamValue('L', 0, @isnumeric);
+% 
+% L = p.Results.L;
+
+p = inputParser;
+p.addParamValue('l', 0, @isnumeric);
+p.addParamValue('shuffle', 0, @isnumeric);
+p.addParamValue('shufflen', 100, @isnumeric);
+p.addParamValue('post', [], @ismatrix);
+p.addParamValue('fstart', 0, @isnumeric);
+p.parse(varargin{:});
+L = p.Results.l;
+shuffle=p.Results.shuffle;
+shuffleN=p.Results.shufflen;
+PosT=p.Results.post;
+fstart=p.Results.fstart;
+
+
 loop=size(ensemble,1);
 wSize=10;
 
-for i=1:loop
-    fprintf('%d/%d\n',i,loop);
-    histR=plotRaster(ensemble{i,3},event,nums,'verbose',0,'jitter',jitter,'splitNum',splitNum);
-    seq1(i,:)=smooth(histR{1},wSize);
-%     
-%     if size(histR,1)>1　三重野
-      seq2(i,:)=smooth(histR{2},wSize);
-%     end
+if shuffle
+    if isempty(PosT)
+        error('Please input PosT value\n');
+        return;
+    else
+        ensemble=spikeShuffle(ensemble{1,3},PosT,fstart,'shuffleN',shuffleN);
+    end
 end
 
-[maxSeq1,ind1]=max(seq1,[],2);
-[~,ind1]=sort(ind1);
-seq1=seq1./maxSeq1;
 
-% if size(histR,1)>1 9/3三重野
-[maxSeq2,ind2]=max(seq2,[],2);
-[~,ind2]=sort(ind2);
-seq2=seq2./maxSeq2;
-% else
-%   seq2=[];
-% ind2=[];
-% end
-order=[ind1 ind2];
+for i=1:loop
+    fprintf('%d/%d\n',i,loop);
+    
+    
+    if shuffle
+        if L == 0
+            [~,histR]=plotRasterMM2(ensemble(i,:),event,nums, ...
+                                        PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
+        elseif L == 1
+            [~,histR]=plotRasterLMM(ensemble(i,:),event,nums,PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
+        end
+    else
+        if L == 0
+            [~,histR]=plotRasterMM2(ensemble{i,3},event,nums,PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
+        elseif L == 1
+            [~,histR]=plotRasterLMM(ensemble{i,3},event,nums,PORK3,Nsta,Nen,'verbose',0,'jitter',jitter);
+        end
+    end
+    ori_seq1(i,:)=smooth(histR{1},wSize);
+    ori_seq2(i,:)=smooth(histR{2},wSize);
+end
+
+
+if shuffle
+    order=[];
+    seq1=ori_seq1;
+    seq2=ori_seq2;
+else
+    [maxSeq1,ind1]=max(ori_seq1,[],2);
+    [~,ind1]=sort(ind1);
+    seq1=ori_seq1./maxSeq1;
+    [maxSeq2,ind2]=max(ori_seq2,[],2);
+    [~,ind2]=sort(ind2);
+    seq2=ori_seq2./maxSeq2;
+
+    order=[ind1 ind2];
+end
 
 return;
