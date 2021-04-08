@@ -6,12 +6,14 @@ p.addParamValue('ltraj', [], @ismatrix);
 p.addParamValue('jitterpre', 0, @isnumeric);
 p.addParamValue('jitterpost', 0, @isnumeric);
 p.addParamValue('shuffle', 0, @isnumeric);
+p.addParamValue('shufflen', 100, @isnumeric);
 p.parse(varargin{:});
 outputMode = p.Results.outputmode;
 LTraj = p.Results.ltraj;
 jitterPre=p.Results.jitterpre;
 jitterPost=p.Results.jitterpost;
 shuffle=p.Results.shuffle;
+shuffleN=p.Results.shufflen;
 
 if nargin<=5
     ThS=2.5;
@@ -29,14 +31,14 @@ for i=1:loop
     fprintf('%d/%d\n',i,loop);
     if isempty(nums)
         if shuffle
-            [seq(i,:,:)]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0,'shuffle',shuffle);
+            [seq(i,:,:)]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0,'shuffle',shuffle,'shuffleN',shuffleN);
             oc_map=[];
         else
             [seq(i,:),~,~,oc_map]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0);
         end
     else
         if shuffle
-            [seq(i,:,:)]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0,'shuffle',shuffle);
+            [seq(i,:,:)]=pmap(ensemble{i,3},LTraj,PosT,0,'animal','rat','speed',ThS,'verbose',0,'shuffle',shuffle,'shuffleN',shuffleN);
             oc_map=[];
         else
             [seq(i,:),~,~,oc_map]=pmap(extractDelay(ensemble{i,3},event,nums,'jitterPre',jitterPre,'jitterPost',jitterPost),LTraj,PosT,0,'animal','rat', ...

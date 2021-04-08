@@ -42,7 +42,7 @@ for i=1:cellNum
         ind1=find(~isnan(seqSP1(i,j,:)));
         ind2=find(~isnan(seqSP2(i,j,:)));
         ind=intersect(ind1,ind2);
-        scc=corr(seqSP1(i,j,ind)',seqP2(i,j,ind)','Type','Pearson');
+        scc=corr(seqSP1(i,j,ind)',seqSP2(i,j,ind)','Type','Pearson');
         sCC=[sCC scc];  
     end
     sCC=sort(sCC);
