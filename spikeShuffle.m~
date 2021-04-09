@@ -1,0 +1,18 @@
+function spikeShuffle()
+beginSpks=msT(1);
+    endSpks=msT(end);
+    entireLength=ceil(endSpks-beginSpks);
+    rp=randperm(entireLength-shuffleLag*2+1);
+    rp=rp(1:shuffleN);
+    orgRp=shuffleLag:(entireLength-shuffleLag);
+    rp=orgRp(rp);
+    lenOrgRp=length(orgRp);
+    lenSpks=length(Spks);
+    SpksShuffle=zeros(shuffleN,lenSpks);
+    for z=1:shuffleN
+        spkss=Spks+rp(z);
+        topSpks=find(spkss>=endSpks);
+        spkss(topSpks)=spkss(topSpks)-endSpks+beginSpks;
+        SpksShuffle(z,:)=sort(spkss);
+    end
+    
