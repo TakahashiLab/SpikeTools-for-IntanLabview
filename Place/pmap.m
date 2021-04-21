@@ -159,6 +159,17 @@ StartTraj=msT(1);
 EndTraj=msT(end);
 Spks=Spks(find(Spks > StartTraj & Spks < EndTraj));
 
+
+if isempty(Spks)
+    rate_map=[];
+    spatial_scale=[];
+    SpksShuffle=[];
+    oc_map=[];
+    rate_mapB=[];
+    FrIndex=[];
+    return;
+end
+
 %Firing rate contrast Index
 windowSize=2000;%2s
 Th=nanmedian(speed);
