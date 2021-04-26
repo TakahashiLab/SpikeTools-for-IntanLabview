@@ -161,10 +161,19 @@ Spks=Spks(find(Spks > StartTraj & Spks < EndTraj));
 
 
 if isempty(Spks)
-    rate_map=[];
+    binside=2.5;
+    if Linear
+        dim=binside;
+        xdim = min(x):spatial_scale^-1*dim:max(x); %edges of x and y
+        dummy = histcounts(x, xdim);
+    else
+        dummy = Occupancy(x,y, spatial_scale,binside,fs_video);
+    end
+    
+    rate_map=zeros(size(dummy));
     spatial_scale=[];
     SpksShuffle=[];
-    oc_map=[];
+    oc_map=ones(size(dummy));
     rate_mapB=[];
     FrIndex=[];
     return;
