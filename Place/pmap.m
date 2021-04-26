@@ -118,6 +118,7 @@ for i=1:2:(length(varargin)-1)
   end
 end
 
+spatial_scale=cmPerPixel;
 
 FPS=floor(1/(median(diff(msT))/1000));
 fs_video=FPS;
@@ -202,7 +203,7 @@ FrIndex(1,1)=(FrHigh-FrLow)/(FrHigh+FrLow);
 FrIndex(1,2)=FrHigh;
 FrIndex(1,3)=FrLow;
 
-spatial_scale=cmPerPixel;
+
 spk_x=[];
 spk_y=[];
 
