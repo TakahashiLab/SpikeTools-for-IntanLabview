@@ -32,6 +32,10 @@ loop=size(post,2);
 speed=[];
 maxDist=[];
 
+if post(2)-post(1)> 1000
+    post(1)=[];
+end
+
 for i=1:60:loop
   seg=find(post>post(i)-halfsec & post<post(i)+halfsec);
   if seg(end)>endP
