@@ -15,8 +15,9 @@ theta_phase = mod(lfpphases,2*pi);%covert to 0-2pi
 theta_phase=rad2deg(theta_phase);
 theta_phase=ceil(theta_phase./binWidth)';
 
-
 for i=1:size(ensemble,1)
+    delId=find(ensemble{i,3}<kHz);
+    ensemble{i,3}(delId)=kHz;
     ensemble{i,4}=theta_phase(floor(ensemble{i,3}/kHz));
 end
 
