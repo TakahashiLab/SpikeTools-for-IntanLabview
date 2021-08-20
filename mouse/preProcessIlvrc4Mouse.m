@@ -127,8 +127,20 @@ for i=possibleId
 	ref=forceRef;
       end
 
-      e=filterAmp(x,0,sampl,gpuFlag);
       x=double(x)./Factor16bit.*uV1;%convert to 1 uV
+      lfp=filterAmp(double(x),2,sampl,gpuFlag);
+      save('tmp.mat','-v7.3','x');
+      clear x;
+      lfp=int16(lfp);
+      fprintf('convert LFPs\n');
+      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+      fprintf('Saving LFPs...\n');
+      parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
+              'dlfp',dlfp);
+      clear lfp dlfp;
+      load tmp.mat x;
+      e=filterAmp(x,0,sampl,gpuFlag);
+      clear x;
       e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
       
       if iscell(ref);
@@ -153,11 +165,9 @@ for i=possibleId
 
       e=int16(e);
       
-      lfp=filterAmp(double(x),2,sampl,gpuFlag);
-      lfp=int16(lfp);
     
-      fprintf('convert LFPs\n');
-      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+      %fprintf('convert LFPs\n');
+      %      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
 %      dlfp=lfpClean(dlfp);%cleaning using FastICA
 
       
@@ -186,9 +196,9 @@ if sleep==0 | sleep==1 | sleep==3
       parsave(savenames{j},'x',x); 
     end	
 
-    fprintf('Saving LFPs...\n');
+    %    fprintf('Saving LFPs...\n');
     %x=lfp;
-    parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp); 
+    %parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp); 
   end
   
   %x=event;
