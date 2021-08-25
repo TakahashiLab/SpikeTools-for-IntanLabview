@@ -33,7 +33,7 @@ speed=[];
 maxDist=[];
 
 if post(2)-post(1)> 1000
-    post(1)=[];
+    %    post(1)=[];
 end
 
 for i=1:60:loop
