@@ -14,7 +14,7 @@ for i=1:loop
   seg=find(PosT>segments(i,1) & PosT<segments(i,2));
   pos=Pos(seg,1:2);  
   post=PosT(seg);  
- 
+
   [segPara{i,1},segPara{i,2}]=runSpeedMaxDist(pos,post,kHz);%running speed /sec
 end
 
@@ -27,8 +27,8 @@ halfsec=kHz*1000/2;
 dist=sqrt(sum(diff(pos).^2,2));
 dt=diff(post);
 %endP=size(pos,1);
-endP=size(post,2)-1;
-loop=size(post,2);
+endP=length(post)-1;
+loop=length(post);
 speed=[];
 maxDist=[];
 
@@ -49,6 +49,7 @@ for i=1:60:loop
   p=pos(seg)-pos(i);
   maxDist=[maxDist nanmax(sqrt(sum(diff(p).^2,2)))];
 end
+
 
 return;
 
