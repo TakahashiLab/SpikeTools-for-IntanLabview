@@ -34,7 +34,8 @@ end
 
 c=hist(raster,-dispRangePre-step:step:(stimDuration+dispRangePost)+step);
 c([1 end])=[];
-if sum(c) > 100
+%if sum(c) > 1
+if 1
   c=(c./(cnt-1))./(binWidth/1000);
   mind=mean(c([dispRangePre/kHz+1:dispRangePre/kHz+stimDuration/kHz]))/mean(c([1:dispRangePre/kHz end-dispRangePost/kHz:end]));
 else
