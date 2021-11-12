@@ -1,4 +1,8 @@
-function [vars,labels]=plotRF(segPara)
+function [vars,r]=plotRF(segPara,verbose)
+if nagrin==1
+    verbose=1;
+end
+    
 num=2;%maxDist
 loop=size(segPara,1);
 
@@ -17,25 +21,28 @@ for i=1:loop
   segPara{i,num}(isnan(segPara{i,num}))=[];
 end
 
-
-
-figure;
-%stats
-labels=[];
-vars=[];
-for i=1:loop
-  initC=num2str(i);
-  labels=[labels repmat({initC},1,size(segPara{i,num},2))];
-  vars=[vars segPara{i,num}];
+    %stats
+    labels=[];
+    vars=[];
+    for i=1:loop
+        initC=num2str(i);
+        labels=[labels repmat({initC},1,size(segPara{i,num},2))];
+        vars=[vars segPara{i,num}];
+    end
+    
+if verbose
+    figure;    
+    boxplot(vars,labels,'notch','on');
+    xticklabels={'pre','peak','s','trough','s','rising','s','falling','post'};
+    set(gca,'xticklabel',xticklabels);
+    
+    [p,tbl,stats]=anova1(vars,labels);
+    r=multcompare(stats);
+else
+    %[p,tbl,stats]=kruskalwallis(vars,labels);
+    [p,tbl,stats]=anova1(vars,labels,'off');    
+    r=multcompare(stats,'Display','off');
 end
-
-boxplot(vars,labels,'notch','on');
-xticklabels={'pre','peak','s','trough','s','rising','s','falling','post'};
-set(gca,'xticklabel',xticklabels);
-
-%[p,tbl,stats]=kruskalwallis(vars,labels);
-[p,tbl,stats]=anova1(vars,labels);
-r=multcompare(stats);
 
 %anova1(vars,labels);
 return;
