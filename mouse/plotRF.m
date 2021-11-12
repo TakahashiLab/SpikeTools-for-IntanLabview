@@ -1,5 +1,5 @@
 function [vars,r]=plotRF(segPara,verbose)
-if nagrin==1
+if nargin==1
     verbose=1;
 end
     
