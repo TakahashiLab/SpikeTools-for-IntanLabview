@@ -1,4 +1,4 @@
-function [vars,r]=plotRF(segPara,verbose)
+function [vars,r,m]=plotRF(segPara,verbose)
 if nargin==1
     verbose=1;
 end
@@ -41,7 +41,7 @@ if verbose
 else
     %[p,tbl,stats]=kruskalwallis(vars,labels);
     [p,tbl,stats]=anova1(vars,labels,'off');    
-    r=multcompare(stats,'Display','off');
+    [r,m]=multcompare(stats,'Display','off');
 end
 
 %anova1(vars,labels);
