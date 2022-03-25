@@ -5,13 +5,14 @@
 %       1=cutting process only 
 %       2=event process only
 %       3=event process and event cutting
-%       4=
+%       4=re-median filtering for the preprocessed data (tmp.mat is
+%       required)
 %forceRef: When it is not Cell type, number of channel ( Tetrode ...    4-ch1=13)
 %forceRef: When it is Cell type, {number of ref channel, number of ...
 %    target channels}
 %
 % ex. split median referencing(left:tetrodes 1-4, right:tetrodes 5-8
-%forceRef{1,1}=1;forceRef{1,2}=1:4;forceRef{2,2}=[5:8];
+%forceRef{1,1}=1;forceRef{1,2}=[1:16];forceRef{2,2}=[17:32];
 %
 % ex. global median referencing(left:tetrodes 1-8)
 %forceRef{1,1}=0;
@@ -94,6 +95,7 @@ else
   end
 end
 
+
 if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 savenames=cell(1,numOfElectrodes+2);
@@ -119,77 +121,77 @@ end
     
 fprintf('loading and filtering ilvrc file\n');
 for i=possibleId
-  if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
-    
-    if sleep==0 | sleep==1 
-      [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1);
-      if ~isempty(forceRef)
-	ref=forceRef;
-      end
-
-      x=double(x)./Factor16bit.*uV1;%convert to 1 uV
-      lfp=filterAmp(double(x),2,sampl,gpuFlag);
-      save('tmp.mat','-v7.3','x');
-      clear x;
-      lfp=int16(lfp);
-      fprintf('convert LFPs\n');
-      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
-      fprintf('Saving LFPs...\n');
-      parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
-              'dlfp',dlfp);
-      clear lfp dlfp;
-      load tmp.mat x;
-      e=filterAmp(x,0,sampl,gpuFlag);
-      clear x;
-      e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
+    if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
+        if sleep==0 | sleep==1 | sleep==4
+            
+            if sleep~=4
+                [x,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),1);
+                if ~isempty(forceRef)
+                    ref=forceRef;
+                end
+                x=double(x)./Factor16bit.*uV1;%convert to 1 uV
+                lfp=filterAmp(double(x),2,sampl,gpuFlag);
+                save('tmp.mat','-v7.3','x');
+                clear x;
+                lfp=int16(lfp);
+                fprintf('convert LFPs\n');
+                dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+                fprintf('Saving LFPs...\n');
+                parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
+                        'dlfp',dlfp);
+                clear lfp dlfp;
+            else
+                load tmp.mat x;
+            end
+            e=filterAmp(x,0,sampl,gpuFlag);
+            clear x;
+            e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
       
-      if iscell(ref);
-	loop=size(ref,1);
+            if iscell(ref);
+                loop=size(ref,1);
 	
-	if ref{1,1}==0
-	  gmr=median(e,1);%global median referencing 
-	  e=e-gmr;
-	else% split median referencing
-	  for k=1:loop
-	    channels=ref{k,2};
-	    refNum=ref{k,1};
-	    %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing 
-            pe=e(channels,:);
-	    gmr=median(pe,1);
-	    e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing 
-	  end
-	end
-      else
-	e=e-repmat(e(ref,:),size(e,1),1);%referencing 
-      end
+                if ref{1,1}==0
+                    gmr=median(e,1);%global median referencing 
+                    e=e-gmr;
+                else% split median referencing
+                    for k=1:loop
+                        channels=ref{k,2};
+                        refNum=ref{k,1};
+                        %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing 
+                        pe=e(channels,:);
+                        gmr=median(pe,1);
+                        e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing 
+                    end
+                end
+            else
+                e=e-repmat(e(ref,:),size(e,1),1);%referencing 
+            end
 
-      e=int16(e);
-      
+            e=int16(e);
     
-      %fprintf('convert LFPs\n');
-      %      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
-%      dlfp=lfpClean(dlfp);%cleaning using FastICA
-
+            %fprintf('convert LFPs\n');
+            %      dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+            %      dlfp=lfpClean(dlfp);%cleaning using FastICA
       
-      if ~exist(savenames{numOfElectrodes+2})
-	event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
-	event=double(event)./Factor16bit4Event;%convert to V
-	%    event=int16(event);
-      end
-    elseif sleep==3
-      if ~exist(savenames{numOfElectrodes+2})
-	event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
-	event=double(event)./Factor16bit4Event;%convert to V
-	%    event=int16(event);
-      end
+            if ~exist(savenames{numOfElectrodes+2})
+                event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
+                event=double(event)./Factor16bit4Event;%convert to V
+                                                       %    event=int16(event);
+            end
+        elseif sleep==3
+            if ~exist(savenames{numOfElectrodes+2})
+                event=loadilvrcN(fullfile(dataFolder,d(i).name),2);
+                event=double(event)./Factor16bit4Event;%convert to V
+                                                       %    event=int16(event);
+            end
+        end
     end
-  end
 end
 
-if sleep==0 | sleep==1 | sleep==3
+if sleep==0 | sleep==1 | sleep==3 | sleep==4
   %parfor j=1:(numOfElectrodes+2)
   
-  if sleep==0 | sleep==1
+  if sleep==0 | sleep==1 | sleep==4
     for j=1:(numOfElectrodes)
       fprintf('Saving electrode # %d...\n',j);
       x=e(numOfMicrowires*(j-1)+1:numOfMicrowires*j,:);
