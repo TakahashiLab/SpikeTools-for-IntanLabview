@@ -142,7 +142,10 @@ for i=possibleId
                 clear lfp dlfp;
                 load tmp.mat x;
             else
-                [~,~,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),-1);
+                [~,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),-1);
+                if ~isempty(forceRef)
+                    ref=forceRef;
+                end
                 load tmp.mat x;
             end
             e=filterAmp(x,0,sampl,gpuFlag);
