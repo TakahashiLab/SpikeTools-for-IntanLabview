@@ -140,6 +140,7 @@ for i=possibleId
                 parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
                         'dlfp',dlfp);
                 clear lfp dlfp;
+                load tmp.mat x;
             else
                 load tmp.mat x;
             end
