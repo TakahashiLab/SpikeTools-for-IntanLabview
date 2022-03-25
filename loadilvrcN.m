@@ -31,6 +31,11 @@ numOfCh=fread(fp,1,'uchar');
 Hz=fread(fp,1,'float32');
 ref=fread(fp,1,'float32');
 
+if elecNum==-1
+    out=[];
+    return;
+end
+
 if atOnce
   numOfMicrowires=numOfCh-numOfEvent;
   numOfElec=1;
@@ -69,6 +74,7 @@ fseek(fp,headerPos+initialPos,-1);
 Precision=sprintf('%d*int16=>int16',numOfMLE);
 
 for i=1:loop
+    %for i=1:2
     tmp=fread(fp,blocksize,Precision,Skip);
     out=[out tmp];
 end
