@@ -1,0 +1,8 @@
+%set working directory
+fn=pwd;
+%
+%set reference
+%split hemisphere
+
+forceRef{1,1}=1;forceRef{1,2}=1:4;forceRef{2,2}=[5:8];
+preProcessIlvrc4Mouse(fn,0,forceRef,0,3,1,0);
