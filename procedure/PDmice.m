@@ -20,3 +20,27 @@ save DLC.mat Traj;
 preProcessIlvrc4Mouse(fn,0,forceRef,0,3,0,0);
 %example for realtime feedback
 preProcessIlvrc4Mouse(fn,0,forceRef,0,3,1,0);
+
+%%%%%%%%%%%%%%%
+%%make ensemble file
+%load results from klustakwik
+fn=pwd;
+kkOuts=batchLoadKK(fn);
+%make ensemble file
+%for example, choose clusters #1-4 and the merge #1,2 and #3,4
+an{8}=[];
+en{8}=[];
+an{1}=[1 2 3 4];
+en{1}={[1 2];[3 4]};
+ensemble=makeEnsemble64(kkOuts,an,en);
+%Please save ensemble information for later analyses
+save ensemble.mat ensemble an en kkOuts;
+%
+%find neurons from ensemble
+%for example,you can find neurons in the tetrode #1 
+tet1=ensemble(find(tetrodeMap(an,en)==1),:);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%check cluster in the feature space
+%ex. check cluster of tetrode #1 in the feature space 
+checkClusterM(ensemble,an,en,1)

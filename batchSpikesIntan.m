@@ -11,13 +11,18 @@
 %                4: load extracted data->sorting(kk)
 %                5: load raw data->extraction->sorting(kk)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function batchSpikesIntan(basename,mode,elecNums,Th)
+function batchSpikesIntan(basename,mode,elecNums,Th,suffix)
 
-if nargin==3
-  Th=50;
+if nargin<3
+    fprintf('input error\n');
+    return;
+elseif nargin==3
+    Th=50;
+    suffix='ilvrc';
+elseif nargin==4
+    suffix='ilvrc';
 end
 
-suffix='ilvrc';
 
 numOfMicrowires=4;%tetrode
 numOfElectrodes=16;
