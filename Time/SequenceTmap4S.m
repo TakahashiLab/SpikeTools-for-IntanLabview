@@ -5,16 +5,16 @@ p.addParamValue('l', 0, @isnumeric);
 p.addParamValue('shuffle', 0, @isnumeric);
 p.addParamValue('shufflen', 100, @isnumeric);
 p.addParamValue('fstart', 0, @isnumeric);
-p.addParamValue('pre', 0, @isnumeric);
-p.addParamValue('post', 0, @isnumeric);
+p.addParamValue('jitterpre', 0, @isnumeric);
+p.addParamValue('jitterpost', 0, @isnumeric);
 
 p.parse(varargin{:});
 L = p.Results.l;
 shuffle=p.Results.shuffle;
 shuffleN=p.Results.shufflen;
 fstart=p.Results.fstart;
-pre=p.Results.pre;
-post=p.Results.post;
+pre=p.Results.jitterpre;
+post=p.Results.jitterpost;
 
 loop=size(ensemble,1);
 wSize=10;
@@ -37,11 +37,11 @@ for i=1:loop
     
     if shuffle
         for j=1:shuffleN
-            histR=plotTime(shuffleEns{i}(j,:),event,'verbose',0,'pre',pre,'post',post,'smooth',1);
+            histR=plotTime(shuffleEns{i}(j,:),event,'verbose',0,'jitterpre',pre,'jitterpost',post,'smooth',1);
             org_seq(i,j,:)=histR;
         end
     else
-        histR=plotTime(ensemble{i,3},event,'verbose',0,'pre',pre,'post',post,'smooth',1);
+        histR=plotTime(ensemble{i,3},event,'verbose',0,'jitterpre',pre,'jitterpost',post,'smooth',1);
         org_seq(i,:)=histR;
     end
 end

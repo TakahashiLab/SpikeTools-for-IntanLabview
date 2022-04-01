@@ -6,8 +6,8 @@ function [histR]=plotTime(spks,Event,varargin)
 p = inputParser;
 p.addParamValue('binwidth', 100, @isnumeric);
 p.addParamValue('samplingrate', 25, @isnumeric);
-p.addParamValue('pre', 0, @isnumeric);
-p.addParamValue('post', 0, @isnumeric);
+p.addParamValue('jitterpre', 0, @isnumeric);
+p.addParamValue('jitterpost', 0, @isnumeric);
 p.addParamValue('smooth', 0, @isnumeric);
 p.addParamValue('verbose', 1, @isnumeric);
 p.addParamValue('splitNum', 0, @isnumeric);
@@ -15,8 +15,8 @@ p.addParamValue('splitNum', 0, @isnumeric);
 p.parse(varargin{:});
 binWidth = p.Results.binwidth;
 kHz=p.Results.samplingrate;
-pre=p.Results.pre;
-post=p.Results.post;
+pre=p.Results.jitterpre;
+post=p.Results.jitterpost;
 sm = p.Results.smooth;
 verbose = p.Results.verbose;
 splitNum = p.Results.splitNum;
@@ -30,7 +30,10 @@ eventLength=floor(duration/(kHz*binWidth));
 l=length(Event);
 raster=zeros(l,eventLength);
 
-hold on;
+if verbose
+    hold on;
+end
+
 for i=1:l
     SpkInTrial=spks-(Event(i)-pre);
     SpkInTrial=SpkInTrial(SpkInTrial>=0 & SpkInTrial<=duration);
