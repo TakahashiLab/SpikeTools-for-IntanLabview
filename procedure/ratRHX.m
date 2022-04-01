@@ -53,6 +53,12 @@ for i=1:size(ensemble,1)
     % reference point: nose-porking #2 
     % pre- and post duration: 8 sec
     % smoothing on
-    plotTime(ensemble{i,3},beNP{2},'verbose',1,'jitter',8,'smooth', ...
+    plotTime(ensemble{i,3},beNP{2},'verbose',1,'pre',3,'post',7,'smooth', ...
              1);
 end
+%%%%%%%%%%%%%%
+[beNP,tmr,tmSpeed]=sawataniR1(NosePork,Treadmill);
+%%%%%%%%
+[seq,order]=SequenceTmap4S(ensemble,beNP{3},'jitterpre',10, ...
+                           'jitterpost',7);
+imagesc(seq(order,:));
