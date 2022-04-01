@@ -4,7 +4,13 @@
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [riseT,fallT]=getTimes(x,Th)
+function [riseT,fallT]=getTimes(x,Th,varargin)
+p = inputParser;
+p.addParamValue('oversample', 125, @isnumeric);
+
+p.parse(varargin{:});
+os = p.Results.oversample;
+
 
 P=find(x>Th);
 
@@ -21,7 +27,7 @@ tmp(1)=[];
 PosT=P(tmp);
 
 %remove oversampled data(interval <5msec)
-ro=find(diff(PosT)<125);%125:5msec 25000:1sec
+ro=find(diff(PosT)<os);%125:5msec,250:10msec, 25000:1sec
 ro=unique([ro ro+1]);
 
  

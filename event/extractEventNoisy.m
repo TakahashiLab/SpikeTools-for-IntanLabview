@@ -11,15 +11,18 @@
 function [r,f]=extractEventNoisy(event,varargin)
 p = inputParser;
 p.addParamValue('threshold', 3, @isnumeric);
-p.addParamValue('pulsewidth', 10000, @isnumeric);
+p.addParamValue('pulsewidth', 100, @isnumeric);
+p.addParamValue('oversample', 125, @isnumeric);
+p.addParamValue('swindow', 100, @isnumeric);
 
 p.parse(varargin{:});
 Th = p.Results.threshold;
 pw = p.Results.pulsewidth;
+os = p.Results.oversample;
+swin = p.Results.swindow;
 
-
-se=smoothdata(event,'movmedian',100);
-[r,f]=getTimes(se,Th);
+se=smoothdata(event,'movmedian',swin);
+[r,f]=getTimes(se,Th,'oversample',os);
 id=find((f-r)>pw);
 r=r(id);
 f=f(id);

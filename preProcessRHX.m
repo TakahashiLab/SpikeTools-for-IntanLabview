@@ -75,7 +75,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     fprintf('loading RHX file:%s\n',filename);
     
     if sleep==0 | sleep==1
-        [x,event]=loadRHD(filename);
+        [x,event,t]=loadRHD(filename);
         if ~isempty(forceRef)
             ref=forceRef;
         end
@@ -143,11 +143,25 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %x=event;
         if ~exist(savenames{numOfElectrodes+2})
             fprintf('Saving Events...\n');
-            parsave(savenames{numOfElectrodes+2},'event',event);
+            parsave(savenames{numOfElectrodes+2},'event',event,'t',t);
         end
     end
     %matlabpool close;
     %return;
+end
+
+
+if exist(fullfile(dataFolder,['DLC.mat']))
+    if sleep==3
+        load(savenames{numOfElectrodes+2},'event','t');
+    end
+    load DLC.mat Pos;
+    Pos=Pos';
+    [NosePork,Treadmill,Pos,PosT]=extractRHX(event,t,Pos);   
+    PosT=PosT';
+    save event.mat NosePork Treadmill Pos PosT;
+    sfn=fullfile(dataFolder,'positions.mat');
+    save(sfn,'Pos','PosT');
 end
 
 if 0
