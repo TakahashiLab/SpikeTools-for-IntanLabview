@@ -1,4 +1,4 @@
-function [amplifier_data,board_adc_data]=loadRHD(filename)
+function [amplifier_data,board_adc_data,t_amplifier]=loadRHD(filename)
 
 % read_Intan_RHD2000_file
 %
