@@ -51,7 +51,6 @@ switch lower(filetype)
 end
 
 stdV=stdV(activeNums);
-stdV
 
 [tmp,tmps]=extractSpDodeca4Bird(abs(x),stdV,step,x);
 %[tmp,tmps]=extractSpDodeca(x,stdV,step);
