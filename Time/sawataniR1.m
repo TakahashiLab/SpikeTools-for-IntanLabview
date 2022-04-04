@@ -41,10 +41,17 @@ while 1
 end
 
 %%%%%%%%%Treadmill speed rank
-trialLen=length(beNP{2});
+trialLen=[];
+for i=1:3
+    trialLen=[trialLen length(beNP{i})];
+end
+trialLen=min(trialLen);
+
 stateNum=3;
 tmSpeed=[];
 for trial=1:trialLen
+
+
     tmSpeed=[tmSpeed median(diff(Treadmill(Treadmill > beNP{2}(trial) & Treadmill < beNP{3}(trial))))];
 end
 
