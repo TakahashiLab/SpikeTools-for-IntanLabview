@@ -15,6 +15,9 @@ os = p.Results.oversample;
 P=find(x>Th);
 
 %if event width==1
+if P(end)>=length(x)
+    P(end)=[];
+end
 P(x(P+1)<Th)=[];
 
 P=[0 P length(x)];
