@@ -53,7 +53,7 @@ for i=1:size(ensemble,1)
     % reference point: nose-porking #2 
     % pre- and post duration: 8 sec
     % smoothing on
-    plotTime(ensemble{i,3},beNP{2},'verbose',1,'pre',3,'post',7,'smooth', ...
+    plotTime(ensemble{i,3},beNP{2},'verbose',1,'jitterpre',3,'jitterpost',7,'smooth', ...
              1);
 end
 %%%%%%%%%%%%%%
