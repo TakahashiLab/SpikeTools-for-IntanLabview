@@ -20,6 +20,8 @@ switch lower(filetype)
     %    Th=300;%30uV 0.1uV
     %Th=500;%50uV 0.1uV 500??? 200=20uV?
     Th=Th*10;
+  case 'rhd',
+    Th=Th;
 end
 
 load(filename,'x');
@@ -43,10 +45,13 @@ switch lower(filetype)
   case 'ilvrc',
     x=x(activeNums,:);
     stdV=-stdV;
+  case 'rhd',
+    x=x(activeNums,:);
+    stdV=-stdV;    
 end
 
 stdV=stdV(activeNums);
-
+stdV
 
 [tmp,tmps]=extractSpDodeca4Bird(abs(x),stdV,step,x);
 %[tmp,tmps]=extractSpDodeca(x,stdV,step);
