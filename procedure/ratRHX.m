@@ -17,13 +17,9 @@ en{1}={[1 2];[3 4]};
 fn=pwd;
 kkOuts=batchLoadKK(fn);
 %
-%tetrode #1
+%check tetrode #16 with respect to spike waveform.
 %
-j=1;
-for i=1:size(kkOuts{j},1)
-    figure;
-    dispDodeca(kkOuts{j},i,'limitlen',100);
-end
+wfCheck(kkOuts,16);
 
 ensemble=makeEnsemble64(kkOuts,an,en);
 %Please save ensemble information for later analyses
