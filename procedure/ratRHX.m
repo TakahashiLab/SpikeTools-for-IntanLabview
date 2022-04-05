@@ -58,7 +58,20 @@ for i=1:size(ensemble,1)
 end
 %%%%%%%%%%%%%%
 [beNP,tmr,tmSpeed]=sawataniR1(NosePork,Treadmill);
-%%%%%%%%
+%%%%%%%%sequential activity pattern on time dimension
 [seq,order]=SequenceTmap4S(ensemble,beNP{3},'jitterpre',10, ...
                            'jitterpost',7);
+imagesc(seq(order,:));
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%
+%%%%%% linearlized route
+[LTraj,TMpoints,GI]=fitLinearModel(Pos,'posture',[5 6],'mazetype', ...
+                                   'linear');
+%%%%%%%%%
+%%%%%% exclude treadmill (delay) period
+[ensemble2,LTraj2,PosT2]=excludeDelay(ensemble,beNP{2},beNP{3}, ...
+                                      LTraj,PosT);
+%%%%%%%%%%
+%%%%%%% sequential activity pattern on space dimension
+[seq,order,oc_map]=SequencePmap4S(ensemble2,LTraj2,PosT2);
 imagesc(seq(order,:));
