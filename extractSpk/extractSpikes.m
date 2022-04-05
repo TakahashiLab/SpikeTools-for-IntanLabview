@@ -19,7 +19,8 @@ switch lower(filetype)
   case 'ilvrc',
     %    Th=300;%30uV 0.1uV
     %Th=500;%50uV 0.1uV 500??? 200=20uV?
-    Th=Th*10;
+    %Th=Th*10;
+    
   case 'rhd',
     Th=Th;
 end
