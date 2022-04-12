@@ -9,7 +9,11 @@ end
 
 gpuOn=0;
 if gpuDeviceCount & gpuFlag
-    gpuOn=1;
+    if gpuFlag==2
+        gpuOn=2;
+    else
+        gpuOn=1;
+    end
 end
 
 switch(beta)
@@ -48,12 +52,12 @@ case 7%notch filter 50Hz
 end
 [b,a]=tf(bpFilt);
 
-sdat=x;
+%sdat=x;
 for i=1:size(x,1)
-    if gpuOn
-        sdat(i,:)=gpuFiltFilt(b,a,x(i,:));
+    if gpuOn==1
+        x(i,:)=gpuFiltFilt(b,a,x(i,:));
     else
-        sdat(i,:)=filtfilt(bpFilt,double(x(i,:)));
+        x(i,:)=filtfilt(bpFilt,double(x(i,:)));
     end
 end
 
