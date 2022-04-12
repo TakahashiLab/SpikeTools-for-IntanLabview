@@ -151,7 +151,7 @@ for i=possibleId
             e=filterAmp(x,0,sampl,gpuFlag);
             clear x;
             e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
-      
+            
             if iscell(ref);
                 loop=size(ref,1);
 	
@@ -202,7 +202,8 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4
       x=e(numOfMicrowires*(j-1)+1:numOfMicrowires*j,:);
       parsave(savenames{j},'x',x); 
     end	
-
+    
+    clear e x;
     %    fprintf('Saving LFPs...\n');
     %x=lfp;
     %parsave(savenames{numOfElectrodes+1},'lfp',lfp,'dlfp',dlfp); 
@@ -212,6 +213,7 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4
   if ~exist(savenames{numOfElectrodes+2})
     fprintf('Saving Events...\n');
     parsave(savenames{numOfElectrodes+2},'event',event); 
+    clear event;
   end
 end
 %matlabpool close;
