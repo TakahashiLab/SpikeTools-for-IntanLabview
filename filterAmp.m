@@ -1,4 +1,4 @@
-function sdat=filterAmp(x,beta,sampl,gpuFlag)
+function x=filterAmp(x,beta,sampl,gpuFlag)
 if nargin==1
   beta=0;
   sampl=20000;
