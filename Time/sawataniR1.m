@@ -18,26 +18,44 @@ for i=1:3
     end
 end
 
-
 checkPoint=find(NosePork{fpNum}==bp);
 checkTime=NosePork{fpNum}(checkPoint);
 d=NosePork{fpNum}-checkTime;
 NosePork{fpNum}(d<0)=[];
 beNP{fpNum}=[beNP{fpNum} checkTime];
 
+
 while 1
     %current porking number
     fpNum=mod(fpNum,3)+1;%because circular (1-3)
     d=(NosePork{fpNum}-checkTime);%
     NosePork{fpNum}(d<0)=[];    
-    
-    if length(d)<=1
+
+    if length(d)<=1 | isempty(NosePork{fpNum})
         break;
     end
+
     [~,checkPoint]=min(d);
-    
+
     checkTime=NosePork{fpNum}(checkPoint);
     beNP{fpNum}=[beNP{fpNum} checkTime];
+end
+
+%%%%% start from fpNum==1 in any cases
+%all porking points
+allNp=cell2mat(beNP);
+bp=min(allNp);
+for i=1:3
+    if any(beNP{i}==bp)
+        fpNum=i;%first porking number
+        break;
+    end
+end
+if fpNum==2
+    beNP{2}(1)=[];
+    beNP{3}(1)=[];
+elseif fpNum==3
+    beNP{3}(1)=[];
 end
 
 %%%%%%%%%Treadmill speed rank
