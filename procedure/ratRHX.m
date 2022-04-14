@@ -35,11 +35,12 @@ tet1=ensemble(find(tetrodeMap(an,en)==1),:);
 checkClusterM(ensemble,an,en,1)
 
 load ???Event.mat
-[NosePork,Treadmill,Pos,PosT]=extractRHX(event,t,Pos);   
 
-save event.mat NosePork Treadmill PosT;
-load DLC.mat
-Pos=Traj;
+    load DLC.mat Pos;
+    Pos=Pos';
+    [NosePork,Treadmill,Pos,PosT]=extractRHX(event,t,Pos);   
+    PosT=PosT';
+
 save positions.mat Pos PosT;
 %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%

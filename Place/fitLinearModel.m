@@ -72,18 +72,40 @@ switch (lower(mazetype))
       
   case 'linear',
     TMpoints=[];
-    fprintf('Check the 2 end of the linear with the mouse\n');
+    fprintf('Check the 2 end points of the linear with the mouse\n');
     [x,y]=ginput(2);
     
-    if diff(x) > diff(y) %horizontal
-        x1=[x(1):x(2)];        
-        y1=ones(size(x1)).*mean(y);
-    else%vertical 
-        y1=[y(1):y(2)];            
-        x1=ones(size(y1)).*mean(x);
-    end
+    [x1,y1]=calcVector(x,y,[1 2]);    
+
     GI(1,:)=x1;
     GI(2,:)=y1;
+    
+  case 'l-shape',
+    TMpoints=[];
+    fprintf(['Check the 2 end points and 1 joint of the L-shape with ' ...
+             'the mouse\n''in a sequence: one end, joint, another ' ...
+             'end points\n']);
+    [x,y]=ginput(3);
+    [x1,y1]=calcVector(x,y,[1 2]);
+    [x2,y2]=calcVector(x,y,[2 3]) ;   
+
+    
+    GI(1,:)=[x1 x2];
+    GI(2,:)=[y1 y2];    
+    
+  case 't-shape',
+    TMpoints=[];
+    fprintf(['Check the 3 end points and 1 joint of the L-shape with ' ...
+             'the mouse\n''in a sequence: one end, joint, 2 other ' ...
+             'end points\n']);    
+    [x,y]=ginput(4);
+    
+    [x1,y1]=calcVector(x,y,[1 2]);
+    [x2,y2]=calcVector(x,y,[2 3]);
+    [x3,y3]=calcVector(x,y,[2 4]);
+    
+    GI(1,:)=[x1 x2 x3];
+    GI(2,:)=[y1 y2 y3];        
 end
 
 
@@ -93,4 +115,17 @@ plot(GI(1,:),GI(2,:),'r');
 LTraj=dsearchn(GI',Traj(:,posture(1):posture(2)));%
 
 close(h);
+return;
+%%%%%%%%%%%%%%%%%
+function  [x1,y1]=calcVector(x,y,nums)
+if abs(diff(x(nums))) > abs(diff(y(nums))) %horizontal
+    vx=sort(x(nums));
+    x1=[vx(1):vx(2)];        
+    y1=ones(size(x1)).*mean(y(nums));
+else%vertical 
+    vy=sort(y(nums));
+    y1=[vy(1):vy(2)];            
+    x1=ones(size(y1)).*mean(x(nums));
+end
+        
 return;
