@@ -72,3 +72,10 @@ imagesc(seq(order,:));
 %%%%%%% sequential activity pattern on space dimension
 [seq,order,oc_map]=SequencePmap4S(ensemble2,LTraj2,PosT2);
 imagesc(seq(order,:));
+
+%%%%%%%%%%%%%%%%%%%%%timepoints of forward/backward laps
+[fTP,bTP]=extractLap(PosT,beNP{1},beNP{3});
+%plot(LTraj);
+%hold on;
+%plot(fTP,LTraj(fTP),'r.');
+%plot(bTP,LTraj(bTP),'g.');
