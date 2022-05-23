@@ -130,9 +130,30 @@ for i=possibleId
                     ref=forceRef;
                 end
                 x=double(x)./Factor16bit.*uV1;%convert to 1 uV
-                lfp=filterAmp(double(x),2,sampl,gpuFlag);
+
                 save('tmp.mat','-v7.3','x');
-                clear x;
+                fprintf('dividing data\n');
+                if unixMem() < 50 %if below 50GB
+                    xx=x(1:size(x,1)/2,:);
+                    clear x;
+                    lfp0=filterAmp(xx,2,sampl,gpuFlag);
+                    fprintf('first half\n');
+		    save('tmp.mat','-append','lfp0');
+                    clear lfp0;
+                    load tmp.mat x;
+                    xx=x(size(x,1)/2+1:end,:);
+                    clear x;
+                    fprintf('second half\n');
+                    lfp1=filterAmp(xx,2,sampl,gpuFlag);	
+                    load tmp.mat lfp0;
+                    fprintf('Concatenate halves\n');
+                    lfp=[lfp0;lfp1];
+                    clear lfp0 lfp1;
+                else
+                    fprintf('process entire data at once\n');
+                    lfp=filterAmp(x,2,sampl,gpuFlag);
+                    clear x;
+                end
                 lfp=int16(lfp);
                 fprintf('convert LFPs\n');
                 dlfp=downlfp(lfp,25);%25kHz -> 1kHz
