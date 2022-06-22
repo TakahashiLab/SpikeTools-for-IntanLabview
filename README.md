@@ -100,3 +100,30 @@ imagePmap(rate_map,oc_map);
 ```matlab
 HeadDirectionPlot = plot_polar_rate_map(ks.st(ks.clu==3),Traj,PosT,0,'rat');
 ```
+
+---
+# How to use with mountainlab (mountainsort and mountainview) 
+
+1. Convert your e.mat file into .mda file.
+```matlab
+fn=pwd;
+mountainWrite(fn,16);%for 16 tetrodes
+```
+
+2. Spike sorting using mountainsort.
+```python
+conda activate mountain
+cd 'data diretory'
+python ~/SpikeTools-for-Intanlabview/spikesorting/master_ms4.py
+```
+
+3. Curation using qt-mountainview
+```python
+python ~/SpikeTools-for-Intanlabview/spikesorting/master_mv.py
+```
+
+4. Convert mountainsort timestamps into sampling counts
+```python
+fn=pwd;
+ensemble=convertMS(fn);
+```
