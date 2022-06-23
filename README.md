@@ -114,12 +114,12 @@ mountainWrite(fn,16);%for 16 tetrodes
 ```python
 conda activate mountain
 cd 'data diretory'
-python ~/SpikeTools-for-Intanlabview/spikesorting/master_ms4.py
+python /nfs/home/tsusumu/SpikeTools-for-Intanlabview/spikesorting/master_ms4.py
 ```
 
 3. Curation using qt-mountainview
 ```python
-python ~/SpikeTools-for-Intanlabview/spikesorting/master_mv.py
+python /nfs/home/tsusumu/SpikeTools-for-Intanlabview/spikesorting/master_mv.py
 ```
 
 4. Convert mountainsort timestamps into sampling counts
