@@ -53,6 +53,9 @@ for i=1:l
     histR=sum(raster)/l;
     MAX=max(histR);
     
+    if sm
+        histR=smooth(histR,10);
+    end
 
     if verbose
         jump=1000/binWidth;
@@ -82,11 +85,10 @@ if verbose
         fr=(max(histRaster)/(binWidth/1000));
 
         histRaster=histRaster/MAX*l;
-        if sm
-           smhistRaster=smooth(histRaster,10);
-        else
-            smhistRaster=histRaster;
-        end
+
+        
+        smhistRaster=histRaster;
+
         [~,Index]=max(smhistRaster);%mieno
         index=Index/jump-pre;
         %        [Mean]=mean(histRaster);%mieno

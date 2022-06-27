@@ -7,6 +7,7 @@ p.addParamValue('shufflen', 100, @isnumeric);
 p.addParamValue('fstart', 0, @isnumeric);
 p.addParamValue('jitterpre', 0, @isnumeric);
 p.addParamValue('jitterpost', 0, @isnumeric);
+p.addParamValue('post', 0, @isnumeric);
 
 p.parse(varargin{:});
 L = p.Results.l;
@@ -15,6 +16,7 @@ shuffleN=p.Results.shufflen;
 fstart=p.Results.fstart;
 pre=p.Results.jitterpre;
 post=p.Results.jitterpost;
+PosT=p.Results.post;
 
 loop=size(ensemble,1);
 wSize=10;
@@ -49,7 +51,7 @@ end
 
 if shuffle
     order=[];
-    seq=org_seq1;
+    seq=org_seq;
 else
     [maxSeq,ind]=max(org_seq,[],2);
     [~,ind]=sort(ind);
