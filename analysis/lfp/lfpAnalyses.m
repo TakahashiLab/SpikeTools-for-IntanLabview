@@ -1,12 +1,15 @@
-function lfpAnalyses(TrialT,dlfp,varargin)
+function output=lfpAnalyses(TrialT,dlfp,varargin)
 
+output=[];
 p = inputParser;
 p.addParamValue('dispmode', 'spect', @ischar);
 p.addParamValue('channels', [1 1], @isvector);
+p.addParamValue('verbose', 1, @isnumeric);
 
 p.parse(varargin{:});
 dmode = p.Results.dispmode;
 ch = p.Results.channels;
+verbose = p.Results.verbose;
 
 
 kHz=25;
@@ -38,8 +41,9 @@ plvSeq=[1 3 4 5 6 7 8 9 2];
 
 for i=1:size(segments,1)
 %for i=1
-
-  fprintf('seg #%d\n',i);
+    if verbose
+        fprintf('seg #%d\n',i);
+    end
 
   seg=[segments(i,1):segments(i,2)];
   lfpTarget=dlfpTarget(seg);
@@ -89,21 +93,25 @@ for i=1:size(segments,1)
       out=getCFC(xphaseT(1:maxFq,:)',xampT');
       subplot(9,4,c)
       imagesc(out.MI);
+      title([states{i} ' phaseT vs ampT']);
       c=c+1;
 
       subplot(9,4,c)
       out=getCFC(xphaseS(1:maxFq,:)',xampS');
       imagesc(out.MI);
+      title([states{i} ' phaseS vs ampS']);
       c=c+1;
 
       subplot(9,4,c)
       out=getCFC(xphaseT(1:maxFq,:)',xampS');
       imagesc(out.MI);
+      title([states{i} ' phaseT vs ampS']);
       c=c+1;
 
       subplot(9,4,c)
       out=getCFC(xphaseS(1:maxFq,:)',xampT');
       imagesc(out.MI);
+      title([states{i} ' phaseS vs ampT']);
       c=c+1;
 
     case 'plvmod',
@@ -111,17 +119,40 @@ for i=1:size(segments,1)
       plv_modindex_manager(lfpTarget',lfpSource',lfpTarget');
       title(states{i});
       c=c+1;
-  end
 
+    case 'plvmodm',
+      plvmc=plv_modindex_manager(lfpTarget',lfpSource',lfpTarget',0);
+      output(c,:)=mean(plvmc,1);
+
+      if verbose
+          subplot(5,2,plvSeq(c));
+          if c==1
+              for k=1:9
+                  subplot(5,2,k);
+                  plot(mean(plvmc,1),'r');
+              end
+          else
+              hold on;
+              plot(mean(plvmc,1),'k');
+          end
+      
+          title(states{i});
+      end
+      c=c+1;
+  end
+  
 
 end
 
-colormap jet;
-
+if verbose
+    colormap jet;
+end
 
 
 return;
 %%%%%%%%%%%%%%%%%%%%%%
+
+
 function [Cxy_T,T,F]=cohereCore(lfpTarget,lfpSource,srate_lfp)
 %coherence
 windowlength = 4*srate_lfp;
@@ -138,5 +169,3 @@ for nwin = 1:Nwindow
 end
 
 return;
-
-

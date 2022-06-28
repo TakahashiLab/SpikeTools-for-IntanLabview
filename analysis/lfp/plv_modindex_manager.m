@@ -37,11 +37,14 @@
 
 
 %% Load data
-function plv_modindex_manager(lfp1,lfp2,lfp_sw)
+function plv_modindex_comodulogram=plv_modindex_manager(lfp1,lfp2,lfp_sw,verbose)
 %clc, clear, clf
 %clc,clf
 %load('Example_plv_modindex.mat')
 
+if nargin==3
+    verbose=1;
+end
 
 
 %% Setting Parameters
@@ -88,21 +91,19 @@ for i = 1:size(SlowPhase,1) % loop through slow frequencies
     end  
 end 
 
+
 %% Plotting the comodulogram
-
-%figure;
-contourf(slow_vector+slow_BandWidth/2,fast_vector+fast_BandWidth/2,plv_modindex_comodulogram,50,'edgecolor','none')
-set(gca,'Fontsize',12)
-ylabel('PLV Frequency (Hz)','Fontsize',20)
-xlabel('Phase Frequency (Hz)','Fontsize',20)
-grid on
-set(gca,'gridcolor',[1 1 1],'gridalpha',0.5,'gridlinestyle','--')
-h = colorbar;
-ylabel(h, 'Mod Index','Fontsize',15)
-
-
-
-    
+if verbose
+    %figure;
+    contourf(slow_vector+slow_BandWidth/2,fast_vector+fast_BandWidth/2,plv_modindex_comodulogram,50,'edgecolor','none')
+    set(gca,'Fontsize',12)
+    ylabel('PLV Frequency (Hz)','Fontsize',20)
+    xlabel('Phase Frequency (Hz)','Fontsize',20)
+    grid on
+    set(gca,'gridcolor',[1 1 1],'gridalpha',0.5,'gridlinestyle','--')
+    h = colorbar;
+    ylabel(h, 'Mod Index','Fontsize',15)
+end
 
 end
 
