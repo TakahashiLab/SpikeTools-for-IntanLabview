@@ -1,14 +1,16 @@
 %dn: 2018,2019,2020
-function [LEDout,LFPoutL,LFPoutR,params]=proPD(dn,an)
+function [LEDout,LFPoutL,LFPoutR,params,details]=proPD(dn,an)
 
     elecNum=4;%tetrode
     alpha=0.05;
     [homePath,dataPath]=PDdata(dn,an);
     TimingData='timing.mat';
     paraname={'Peak','P-S','Trough','T-S','Rising','R-S','Falling','F-S'};
+    details=dataPath;
 
-loop=size(dataPath,1);
-params=cell(loop,2);
+    loop=size(dataPath,1);
+    params=cell(loop,2);
+
 for i=1:loop
     %for i=1:2
     fprintf('analyzing %s\n',dataPath{i,1});
