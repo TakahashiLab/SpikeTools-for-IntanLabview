@@ -239,7 +239,14 @@ switch (dn)
                  };
 
     end
+    
+    case '2019f',
+        homePath='f:/2019/';
 
+        switch (an)
+            case 'TK19081901',
+                dataPath={
+                    'TK19081901/20190927
 
 
 end
