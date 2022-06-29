@@ -1,4 +1,6 @@
-function ensemble=convertMS(basename,numOfElectrodes)
+function [ensemble,an,en]=convertMS(basename,numOfElectrodes)
+
+en{numOfElectrodes}=[];%this cell is always empty.
 
 %load all data
 [path,name,ext]=fileparts(basename);
@@ -6,6 +8,7 @@ function ensemble=convertMS(basename,numOfElectrodes)
 dataFolder=fullfile(path,name);
 dataFolder=fullfile(dataFolder,'ms');
 
+an=[];
 ensemble=[];
 c=1;
 for i=1:numOfElectrodes
@@ -14,12 +17,14 @@ for i=1:numOfElectrodes
     fprintf('loading %s\n',fn);
     if exist(fn,'file')
         out=readmda(fn);
+        an{i}=ones(1,length(unique(out(3,:))));
         for j=unique(out(3,:))
             ensemble{c,3}=out(2,find(out(3,:)==j));
             c=c+1;
         end
     end
 end
+
 
 
 end
