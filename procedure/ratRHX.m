@@ -24,6 +24,7 @@ wfCheck(kkOuts,16);
 ensemble=makeEnsemble64(kkOuts,an,en);
 %Please save ensemble information for later analyses
 save ensemble.mat ensemble an en kkOuts;
+
 %
 %find neurons from ensemble
 %for example,you can find neurons in the tetrode #1 
@@ -43,7 +44,7 @@ load ???Event.mat
 
 save positions.mat Pos PosT;
 %%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% plot Time field
 load ensemble.mat ensemble
 for i=1:size(ensemble,1)
     figure;
@@ -53,6 +54,15 @@ for i=1:size(ensemble,1)
     plotTime(ensemble{i,3},beNP{2},'verbose',1,'jitterpre',3,'jitterpost',7,'smooth', ...
              1);
 end
+%%%%%%%%%%%%%% plot theta phase precession
+tetrodePoint=tetrodeMap(an,en);
+samplrate=1000;
+for i=1:size(ensemble,1)
+    figure;
+    ts=thetaPhase(dlfp(1+(tetrodePoint(i)-1)*4,:),samplrate);    
+    plotTimePhase(ensemble{i,3},beNP{2},ts,'verbose',1','jitterpre',2,'jitterpost',10,'smooth',0);
+end
+
 %%%%%%%%%%%%%%
 [beNP,tmr,tmSpeed]=sawataniR1(NosePork,Treadmill);
 %%%%%%%%sequential activity pattern on time dimension
