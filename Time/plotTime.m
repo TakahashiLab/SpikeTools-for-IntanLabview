@@ -48,16 +48,10 @@ for i=1:l
             plot(spkPoint,i,'k.');
         end
     end
-    
 
-    histR=sum(raster)/l;
-    MAX=max(histR);
-    
-    if sm
-        histR=smooth(histR,10);
-    end
+end
 
-    if verbose
+if verbose
         jump=1000/binWidth;
         xticks=[0:jump:duration/(kHz*binWidth)];
         xlabels=floor(xticks/(jump));
@@ -71,15 +65,21 @@ for i=1:l
         end
 
         set(gca,'xtick',xticks,'xticklabels',xlabels);
+        ylim([0 l+1]);
         xlabel('Delay time (s)');
         ylabel('Lap #');
     
-    end
 end
 
 
-
 if verbose
+
+    histR=sum(raster)/l;    
+    if sm
+        histR=smooth(histR,10);
+    end
+
+    MAX=max(histR);
 
         histRaster=histR;
         fr=(max(histRaster)/(binWidth/1000));
