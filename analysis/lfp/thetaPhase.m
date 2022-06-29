@@ -3,7 +3,7 @@ if nargin==2
     method='wavelet';
 end
 
-binWidth=60;%60;
+binWidth=1;%60;
 
 fprintf('converting it to the theta band LFP\n');
 sig_theta = BandpassFilter(signal, fs, [4 11]);
