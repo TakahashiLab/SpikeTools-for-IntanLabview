@@ -125,5 +125,5 @@ python /nfs/home/tsusumu/SpikeTools-for-IntanLabview/spikesorting/master_mv.py
 4. Convert mountainsort timestamps into sampling counts
 ```python
 fn=pwd;
-[ensemble,an,en]=convertMS(fn);
+[ensemble,an,en]=convertMS(fn,16);%for 16 tetrodes
 ```
