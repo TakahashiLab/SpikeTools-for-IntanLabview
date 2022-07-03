@@ -40,7 +40,7 @@ rSeq=[6 9 12 15];%reference plot
 plvSeq=[1 3 4 5 6 7 8 9 2];
 
 for i=1:size(segments,1)
-%for i=1
+    %for i=1:2
     if verbose
         fprintf('seg #%d\n',i);
     end
@@ -90,29 +90,39 @@ for i=1:size(segments,1)
       maxFq=150;
       [xphaseT,xampT]=PAC(lfpTarget);
       [xphaseS,xampS]=PAC(lfpSource);
+
+      mi=[];
       out=getCFC(xphaseT(1:maxFq,:)',xampT');
-      subplot(9,4,c)
-      imagesc(out.MI);
-      title([states{i} ' phaseT vs ampT']);
-      c=c+1;
-
-      subplot(9,4,c)
+      mi=[mi out.MI(:)']; 
       out=getCFC(xphaseS(1:maxFq,:)',xampS');
-      imagesc(out.MI);
-      title([states{i} ' phaseS vs ampS']);
-      c=c+1;
-
-      subplot(9,4,c)
+      mi=[mi out.MI(:)']; 
       out=getCFC(xphaseT(1:maxFq,:)',xampS');
-      imagesc(out.MI);
-      title([states{i} ' phaseT vs ampS']);
-      c=c+1;
-
-      subplot(9,4,c)
+      mi=[mi out.MI(:)']; 
       out=getCFC(xphaseS(1:maxFq,:)',xampT');
-      imagesc(out.MI);
-      title([states{i} ' phaseS vs ampT']);
-      c=c+1;
+      mi=[mi out.MI(:)']; 
+
+      output(i,:)=mi;
+      if verbose
+          subplot(9,4,c)
+          imagesc(output{i,1}.MI);
+          title([states{i} ' phaseT vs ampT']);
+          c=c+1;
+
+          subplot(9,4,c)
+          imagesc(output{i,2}.MI);
+          title([states{i} ' phaseS vs ampS']);
+          c=c+1;
+
+          subplot(9,4,c)
+          imagesc(output{i,3}.MI);
+          title([states{i} ' phaseT vs ampS']);
+          c=c+1;
+
+          subplot(9,4,c)
+          imagesc(output{i,4}.MI);
+          title([states{i} ' phaseS vs ampT']);
+          c=c+1;
+      end
 
     case 'plvmod',
       subplot(5,2,plvSeq(c));

@@ -1,5 +1,9 @@
 %dn: 2018,2019,2020
-function [LEDout,LFPoutL,LFPoutR,params,details]=proPD(dn,an)
+function [LEDout,LFPoutL,LFPoutR,params,details]=proPD(dn,an,method)
+
+if nargin==2
+    method='plvmodm';
+end
 
     elecNum=4;%tetrode
     alpha=0.05;
@@ -44,7 +48,7 @@ for i=1:loop
         ch=[1+(LFPp-1)*elecNum 1+(dataPath{i,3}-1)*elecNum];%LED as source
     end
 
-    LEDout(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode','plvmodm','verbose',0); 
+    LEDout(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode',method,'verbose',0); 
 
     fprintf('LFP right\n');
     %%%%LED excluded, right=low frequency source
@@ -56,7 +60,7 @@ for i=1:loop
     ch=[1+(cand1-1)*elecNum 1+(cand2-1)*elecNum];%
     ch=sort(ch);
 
-    LFPoutR(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode','plvmodm','verbose',0); 
+    LFPoutR(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode',method,'verbose',0); 
 
     fprintf('LFP left\n');
     %%%%LED excluded, left=low frequency source
@@ -67,7 +71,7 @@ for i=1:loop
     
     ch=[1+(cand1-1)*elecNum 1+(cand2-1)*elecNum];%LED as source
     ch=sort(ch,'descend');
-    LFPoutL(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode','plvmodm','verbose',0); 
+    LFPoutL(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode',method,'verbose',0); 
     
 end
 
