@@ -1,9 +1,14 @@
 %dn: 2018,2019,2020
-function [LEDout,LFPoutL,LFPoutR,params,details]=proPD(dn,an,method)
+function [LEDout,LFPoutL,LFPoutR,params,details]=proPD(dn,an,varargin)
 
-if nargin==2
-    method='plvmodm';
-end
+p = inputParser;
+p.addParamValue('method', 'plvmodm', @ischar);
+p.addParamValue('region', 'all', @ischar);
+
+p.parse(varargin{:});
+method = p.Results.method;
+region=p.Results.region;
+
 
     elecNum=4;%tetrode
     alpha=0.05;
@@ -30,11 +35,24 @@ for i=1:loop
     params{i,2}=badPara;
     params{i,3}=dataPath{i,2};
 
+    switch(lower(region))
+      case  'all',
+        candElec=1:8;
+      case 'ctx',
+        candElec=dataPah{i,5};
+      case 'str',
+        candElec=dataPah{i,6};
+    end
+    fprintf('LFP right\n');
+    cand=setdiff(candElec,dataPath{i,3});
+    cand1=min(cand(cand<=4));
+    cand2=min(cand(cand>4));
+
     fprintf('LED stim\n');
     %%%LED simulus as a source channel
     if dataPath{i,3}<=4%Optical fiber was implanted in the left hemisphere
         if dataPath{i,4}<=4%LFP reference was on the left hemisphere
-            LFPp=5;%We forced the LFP position to the right hemisphere
+            LFPp=cand2;%We forced the LFP position to the right hemisphere
         else
             LFPp=dataPath{i,4};
         end
@@ -43,20 +61,16 @@ for i=1:loop
         if dataPath{i,4}<=4%LFP reference was on the left hemisphere
             LFPp=dataPath{i,4};
         else
-            LFPp=1;%We forced the LFP position to the left hemisphere
+            LFPp=cand1;%We forced the LFP position to the left hemisphere
         end
         ch=[1+(LFPp-1)*elecNum 1+(dataPath{i,3}-1)*elecNum];%LED as source
     end
 
     LEDout(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode',method,'verbose',0); 
 
-    fprintf('LFP right\n');
+
     %%%%LED excluded, right=low frequency source
-    cand=setdiff(1:8,dataPath{i,3});
-    cand=intersect(randperm(8),cand,'stable');
-    cand1=min(cand(cand<=4));
-    cand2=min(cand(cand>4));
-    
+    fprintf('LFP right\n');
     ch=[1+(cand1-1)*elecNum 1+(cand2-1)*elecNum];%
     ch=sort(ch);
 
@@ -64,11 +78,6 @@ for i=1:loop
 
     fprintf('LFP left\n');
     %%%%LED excluded, left=low frequency source
-    cand=setdiff(1:8,dataPath{i,3});
-    cand=intersect(randperm(8),cand,'stable');
-    cand1=min(cand(cand<=4));
-    cand2=min(cand(cand>4));
-    
     ch=[1+(cand1-1)*elecNum 1+(cand2-1)*elecNum];%LED as source
     ch=sort(ch,'descend');
     LFPoutL(i,:,:)=lfpAnalyses(TrialT,dlfp,'channels',ch,'dispmode',method,'verbose',0); 
