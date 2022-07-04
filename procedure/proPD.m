@@ -39,9 +39,9 @@ for i=1:loop
       case  'all',
         candElec=1:8;
       case 'ctx',
-        candElec=dataPah{i,5};
+        candElec=dataPath{i,5};
       case 'str',
-        candElec=dataPah{i,6};
+        candElec=dataPath{i,6};
     end
     fprintf('LFP right\n');
     cand=setdiff(candElec,dataPath{i,3});
