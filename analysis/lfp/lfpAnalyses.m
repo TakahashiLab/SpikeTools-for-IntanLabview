@@ -14,7 +14,7 @@ verbose = p.Results.verbose;
 
 kHz=25;
 states={'pre','peak','s','trough','s','rising','s','falling','post'};
-maxFq=30;
+maxFq=150;
 
 srate_lfp=1000;
 
@@ -52,37 +52,46 @@ for i=1:size(segments,1)
 
   switch (lower(dmode))
     case 'spect',
-      [SA, FA, TA, PA] = spectrogram(lfpTarget,...
+      [SA, FA, TA, PA] = spectrogram(lfpSource,...
                                      WindowLength,Overlap,NFFT, srate_lfp);
 
       FqPoint=max(find(FA<maxFq));
-      subplot(5,3,pSeq(c));
-      imagesc(TA,FA(1:FqPoint),PA(1:FqPoint,:));
-      title(states{i});
-      xlabel('time')
-      ylabel('Frequency(Hz)');
-      set(gca,'ydir','reverse');
+      fa=FA(1:FqPoint);
+      pa=mean(PA(1:FqPoint,:),2);
+      output(i,:)=[fa' pa'];
 
-      subplot(5,3,mSeq(c));
-      hold on;
-      plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2));
+      if verbose
+          subplot(5,3,pSeq(c));
+          imagesc(TA,FA(1:FqPoint),PA(1:FqPoint,:));
+          title(states{i});
+          xlabel('time')
+          ylabel('Frequency(Hz)');
+          set(gca,'ydir','reverse');
 
-      [maxV,maxId]=max(mean(PA(1:FqPoint,:),2));
-      maxId=FA(maxId);
-      plot([maxId maxId],[0 maxV],'k');
-      fprintf('%s:%f\n',states{i},maxV);
-      for j=1:length(rSeq)
-          if c==1 
-              subplot(5,3,rSeq(j));
-              hold on;
-              plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2),'bo');
-          elseif c==9
-              subplot(5,3,rSeq(j));
-              hold on;
-              plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2),'go');
+          subplot(5,3,mSeq(c));
+          hold on;
+          plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2));
+
+          [maxV,maxId]=max(mean(PA(1:FqPoint,:),2));
+          maxId=FA(maxId);
+          plot([maxId maxId],[0 maxV],'k');
+          fprintf('%s:%f\n',states{i},maxV);
+          for j=1:length(rSeq)
+              if c==1 
+                  subplot(5,3,rSeq(j));
+                  hold on;
+                  plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2),'bo');
+              elseif c==9
+                  subplot(5,3,rSeq(j));
+                  hold on;
+                  plot(FA(1:FqPoint),mean(PA(1:FqPoint,:),2),'go');
+              end
           end
+          c=c+1;
       end
-      c=c+1;
+
+
+
     case 'cohere',
       %  [Cxy_T,T,F]=cohereCore(lfpTarget,lfpSource,srate_lfp);
 
