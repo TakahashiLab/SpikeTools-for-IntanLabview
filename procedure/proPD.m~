@@ -1,0 +1,24 @@
+function proPD()
+
+alpha=0.05;
+pd=PDlist(PDdata);
+loadData='timing.mat'
+
+paraname={'Peak','P-S','Trough','T-S','Rising','R-S','Falling','F-S'};
+
+
+loop=size(pd,1);
+params=cell(loop,2);
+for i=1:loop
+    num=sprintf('%02d',pd{i,4});
+    loadname=fullfile(pd{i,1},pd{i,2},[pd{i,3} num],loadData);
+    load(loadname,'segPara');
+    [~,mc,m]=plotRF(segPara,0);
+    goodPara=find(mc(1:8,6)<alpha &  m(2:9)>m(1));
+    badPara=find(mc(1:8,6)<alpha &  m(2:9)<m(1));
+    
+    params{i,1}=goodPara;
+    params{i,2}=badPara;
+end
+end
+
