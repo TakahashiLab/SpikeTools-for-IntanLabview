@@ -17,8 +17,8 @@ if opt=='win'
 
 
     for i=1:size(dn,1)
-        bhv=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv');
+        [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'bhv','details');
     end
 
 
@@ -31,8 +31,8 @@ if opt=='win'
        };
 
     for i=1:size(dn,1)
-        bhv=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv');
+        [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'bhv','details');
     end
 else
     
@@ -48,8 +48,8 @@ dn={
 };
 
     for i=1:size(dn,1)
-        bhv=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv');
+        [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'bhv','details');
     end
     
 yn='2020h';
@@ -61,8 +61,9 @@ dn={
     };
 
     for i=1:size(dn,1)
-        bhv=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv');
+        [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'bhv','details');
+
     end
 
 
@@ -74,10 +75,13 @@ dn={'AZ20121501',%PD
 };
 
     for i=1:size(dn,1)
-        bhv=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv');
+        [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'bhv','details');
     end
 end
 return;
+
+
+
 
 
