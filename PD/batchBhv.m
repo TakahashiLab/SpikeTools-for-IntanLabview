@@ -8,8 +8,6 @@ if opt=='win'
     dn={
         'TK18052901',
         'TK18052902',%%PD    
-        'TK18110801',%%PD control no stim
-        'TK18121301',%%normal control
         'TK18121401',%%PD
         'TK19011801',%%PD
         'TK19012501',%%PD
@@ -21,7 +19,20 @@ if opt=='win'
         save([dn{i} '.mat'],'bhv','details');
     end
 
+    yn='2018';
+    dn={
+        'TK18110801',%%PD control no stim
+        };
+    [bhv,~,~,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['pdWOstim/' dn{1} '.mat'],'bhv','details');
 
+
+    yn='2018';
+    dn={
+        'TK18121301',%%normal control
+        };
+    [bhv,~,~,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['normal/' dn{1} '.mat'],'bhv','details');
 
     yn='2019';
     dn={'TK19040101',%%PD 
@@ -37,11 +48,8 @@ if opt=='win'
 else
     
 yn='2019f';
-
 dn={
-    'TK19081901',%PD, no ChRs on Str
     'TK19100801',%PD,Str-Str(1 8), Ctx-LED
-    'AZ19091201',%normal
     'AZ19120501',%PD
     'AZ20013101',%PD
     'AZ20031201',%PD
@@ -49,15 +57,30 @@ dn={
 
     for i=1:size(dn,1)
         [bhv,~,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','details');
+        save([dn{i} '.mat'],'bhv','details');    'TK19081901',%PD, no ChRs on Str
+
     end
-    
+
+yn='2019f';
+dn={
+    'AZ19091201',%normal
+};
+    [bhv,~,~,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['normal/' dn{1} '.mat'],'bhv','details');
+
+
+yn='2019f';
+dn={
+    'TK19081901',%PD, no ChRs on Str    
+};
+    [bhv,~,~,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['LEDquestion/' dn{1} '.mat'],'bhv','details');
+
 yn='2020h';
 
 dn={
     'AZ20030601',%PD
     'AZ20031901',%PD
-     'AZ20070101'%PD
     };
 
     for i=1:size(dn,1)
@@ -66,6 +89,13 @@ dn={
 
     end
 
+yn='2020h';
+
+dn={
+     'AZ20070101'%PD
+};
+    [bhv,~,~,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['ctx-str/' dn{1} '.mat'],'bhv','details');
 
 yn='2020e';
 dn={'AZ20121501',%PD
