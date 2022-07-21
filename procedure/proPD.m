@@ -29,8 +29,8 @@ for i=1:loop
     if method=='behavior'
         loadname=fullfile(homePath,dataPath{i,1},TimingData);
         load(loadname,'segPara','TrialT');
-        LEDout(i,:)=cellfun(@sum,segPara(:,1))';%1:speed
-        LFPoutL=[];
+        LEDout(i,:)=cellfun(@mean,segPara(:,1))';%1:speed, 2:maxdist
+        LFPoutL(i,:)=cellfun(@mean,segPara(:,2))';%1:speed, 2:maxdist
         LFPoutR=[];
     else
         loadname=fullfile(homePath,dataPath{i,1},[name 'LFP.mat']);
