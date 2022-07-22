@@ -20,6 +20,9 @@ region=p.Results.region;
     loop=size(dataPath,1);
     params=cell(loop,2);
 
+    LEDout=[];
+    LFPoutL=[];
+    LFPoutR=[];
 for i=1:loop
     %for i=1:2
 
@@ -29,9 +32,19 @@ for i=1:loop
     if method=='behavior'
         loadname=fullfile(homePath,dataPath{i,1},TimingData);
         load(loadname,'segPara','TrialT');
-        LEDout(i,:)=cellfun(@median,segPara(:,1))';%1:speed, 2:maxdist
-        LFPoutL(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist
-        LFPoutR=[];
+        if dataPath{i,4}<=4%LFP reference was on the left hemisphere
+            if dataPath{i,4}==dataPath{i,3}
+                LEDout(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist     
+            else
+                LFPoutL(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist
+            end
+        else%Optical fiber was implanted in the right hemisphere
+            if dataPath{i,4}==dataPath{i,3}
+                LEDout(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist  
+            else
+                LFPoutR(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist     
+            end
+        end
     else
         loadname=fullfile(homePath,dataPath{i,1},[name 'LFP.mat']);
         load(loadname,'dlfp');
