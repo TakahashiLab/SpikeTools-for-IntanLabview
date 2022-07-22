@@ -34,15 +34,15 @@ for i=1:loop
         load(loadname,'segPara','TrialT');
         if dataPath{i,4}<=4%LFP reference was on the left hemisphere
             if dataPath{i,4}==dataPath{i,3}
-                LEDout(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist     
+                LEDout=[LEDout;cellfun(@median,segPara(:,2))'];%1:speed, 2:maxdist     
             else
-                LFPoutL(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist
+                LFPoutL=[LFPoutL;cellfun(@median,segPara(:,2))'];%1:speed, 2:maxdist
             end
         else%Optical fiber was implanted in the right hemisphere
             if dataPath{i,4}==dataPath{i,3}
-                LEDout(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist  
+                LEDout=[LEDout;cellfun(@median,segPara(:,2))'];%1:speed, 2:maxdist  
             else
-                LFPoutR(i,:)=cellfun(@median,segPara(:,2))';%1:speed, 2:maxdist     
+                LFPoutR=[LFPoutR;cellfun(@median,segPara(:,2))'];%1:speed, 2:maxdist     
             end
         end
     else
