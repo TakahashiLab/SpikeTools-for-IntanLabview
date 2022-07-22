@@ -15,24 +15,24 @@ if opt=='win'
 
 
     for i=1:size(dn,1)
-        [bhv,mdist,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','mdist','details');
+        [LED,L,R,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'LED','L','R','details');
     end
 
     yn='2018';
     dn={
         'TK18110801',%%PD control no stim
         };
-    [bhv,mdist,~,~,details]=proPD(yn,dn{1},'method','behavior');
-    save(['pdWOstim/' dn{1} '.mat'],'bhv','mdist','details');
+    [LED,L,R,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['pdWOstim/' dn{1} '.mat'],'LED','L','R','details');
 
 
     yn='2018';
     dn={
         'TK18121301',%%normal control
         };
-    [bhv,mdist,~,~,details]=proPD(yn,dn{1},'method','behavior');
-    save(['normal/' dn{1} '.mat'],'bhv','mdist','details');
+    [LED,L,R,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['normal/' dn{1} '.mat'],'LED','L','R','details');
 
     yn='2019';
     dn={'TK19040101',%%PD 
@@ -42,8 +42,8 @@ if opt=='win'
        };
 
     for i=1:size(dn,1)
-        [bhv,mdist,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','mdist','mdist','details');
+        [LED,L,R,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'LED','L','R','details');
     end
 else
     
@@ -56,8 +56,8 @@ dn={
 };
 
     for i=1:size(dn,1)
-        [bhv,mdist,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','mdist','details');    'TK19081901',%PD, no ChRs on Str
+        [LED,L,R,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'LED','L','R','details');    'TK19081901',%PD, no ChRs on Str
 
     end
 
@@ -65,15 +65,15 @@ yn='2019f';
 dn={
     'AZ19091201',%normal
 };
-    [bhv,mdist,~,~,details]=proPD(yn,dn{1},'method','behavior');
-    save(['normal/' dn{1} '.mat'],'bhv','mdist','details');
+    [LED,L,R,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['normal/' dn{1} '.mat'],'LED','L','R','details');
 
 yn='2019f';
 dn={
     'TK19081901',%PD, no ChRs on Str    
 };
-    [bhv,mdist,~,~,details]=proPD(yn,dn{1},'method','behavior');
-    save(['LEDquestion/' dn{1} '.mat'],'bhv','mdist','details');
+    [LED,L,R,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['LEDquestion/' dn{1} '.mat'],'LED','L','R','details');
 
 yn='2020h';
 
@@ -83,8 +83,8 @@ dn={
     };
 
     for i=1:size(dn,1)
-        [bhv,mdist,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','mdist','details');
+        [LED,L,R,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'LED','L','R','details');
 
     end
 
@@ -93,8 +93,8 @@ yn='2020h';
 dn={
      'AZ20070101'%PD
 };
-    [bhv,mdist,~,~,details]=proPD(yn,dn{1},'method','behavior');
-    save(['ctx-str/' dn{1} '.mat'],'bhv','mdist','details');
+    [LED,L,R,~,details]=proPD(yn,dn{1},'method','behavior');
+    save(['ctx-str/' dn{1} '.mat'],'LED','L','R','details');
 
 yn='2020e';
 dn={'AZ20121501',%PD
@@ -104,8 +104,8 @@ dn={'AZ20121501',%PD
 };
 
     for i=1:size(dn,1)
-        [bhv,mdist,~,~,details]=proPD(yn,dn{i},'method','behavior');
-        save([dn{i} '.mat'],'bhv','mdist','details');
+        [LED,L,R,~,details]=proPD(yn,dn{i},'method','behavior');
+        save([dn{i} '.mat'],'LED','L','R','details');
     end
 end
 return;
