@@ -29,7 +29,7 @@ for i=1:loop
     fprintf('analyzing %s\n',dataPath{i,1});
     [~,name]=fileparts(dataPath{i,1});
 
-    if method=='behavior'
+    if strcmp(method,'behavior')
         loadname=fullfile(homePath,dataPath{i,1},TimingData);
         load(loadname,'segPara','TrialT');
         if dataPath{i,4}<=4%LFP reference was on the left hemisphere
