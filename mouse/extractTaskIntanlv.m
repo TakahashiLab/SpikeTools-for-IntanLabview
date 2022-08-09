@@ -39,6 +39,8 @@ Th=max(Pulse(:))/2;
 
 
 [TrialT]=getTimes(Trial,Th);
+%%%%bug fix when the ending pulse was missing
+TrialT=[TrialT size(event,2)];
 
 
 if rf~=1
