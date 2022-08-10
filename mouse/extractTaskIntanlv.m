@@ -39,9 +39,6 @@ Th=max(Pulse(:))/2;
 
 
 [TrialT]=getTimes(Trial,Th);
-%%%%bug fix when the ending pulse was missing
-TrialT=[TrialT size(event,2)];
-
 
 if rf~=1
   
@@ -74,12 +71,7 @@ noiseStopTime=TrialT(noiseSeq(end)+1)+noiseDuration;
 noiseTime=[noiseStartTime noiseStopTime];
 
 
-%tagging
-tagSeq=find(dTr>tagDuration-jitter & dTr<tagDuration+jitter);
-tagSeq=tagSeq(end);
-tagStartTime=TrialT(tagSeq);
-tagStopTime=TrialT(tagSeq+1);
-tagTime=[tagStartTime tagStopTime];
+
 
 %pre Silent 
 preSilentStopTime=TrialT(pulseSeq(1));
@@ -92,6 +84,19 @@ preSilentTime=[preSilentStartTime preSilentStopTime];
 postSilentStopTime=noiseStopTime+silentDuration;
 postSilentStartTime=noiseStopTime+1;
 postSilentTime=[postSilentStartTime postSilentStopTime];
+
+
+%tagging
+%tagSeq=find(dTr>tagDuration-jitter & dTr<tagDuration+jitter);
+%tagSeq=tagSeq(end);
+
+%tagStartTime=TrialT(tagSeq);
+%tagStopTime=TrialT(tagSeq+1);
+
+tagStartTime=postSilentStopTime+1;
+tagStopTime=postSilentStopTime+tagDuration;
+tagTime=[tagStartTime tagStopTime];
+
 
 [PulseT]=getTimes(Pulse,Th);
 
