@@ -81,8 +81,11 @@ for i=1:loop
             load(loadname,'ensemble','an','en');
             %classify pyr and int
             [pyr,interneuron,fr,tp,sw]=checkFR(ensemble);
-
-
+            fprintf('real interneuron\n');
+            interneuron=union(dataPath{i,8},dataPath{i,10});%%%%%CC+tag
+            pyrTag=setdiff(dataPath{i,11},interneuron);%%conflict
+            pyr=union(dataPath{i,9},pyrTag);%%%CC+tag
+                                  
             switch  lower(waveType)
               case 'chirp',
                 SeqTime=chirpSeqTime;
@@ -104,18 +107,21 @@ for i=1:loop
                 [pPyr,pInt]=batchGainMap(event,ensemble(:,3),SeqTime,1,[preSilentTime;postSilentTime],pyr,interneuron);
 
                 %cell classification
-                normal=find(tetrodeMap(an,en)==4);
-                %pyramidal
-                [~,ind]=intersect(pyr,1:normal(end));
-                normalPyr=[normalPyr; ind+offSetPyr];
-                if dataPath{i,3}<=4
-                    normalPyrStim=[normalPyrStim; ind+offSetPyr];
-                end
+                normal=find(tetrodeMap(an,en)<=4);
+                if ~isempty(pyr)
+                    %pyramidal
+                    
+                    [~,ind]=intersect(pyr,1:normal(end));
+                    normalPyr=[normalPyr; ind+offSetPyr];
+                    if dataPath{i,3}<=4
+                        normalPyrStim=[normalPyrStim; ind+offSetPyr];
+                    end
 
-                [~,ind]=setdiff(pyr,1:normal(end));
-                PDpyr=[PDpyr; ind+offSetPyr];
-                if dataPath{i,3}>=5
-                    PDpyrStim=[PDpyrStim; ind+offSetPyr];
+                    [~,ind]=setdiff(pyr,1:normal(end));
+                    PDpyr=[PDpyr; ind+offSetPyr];
+                    if dataPath{i,3}>=5
+                        PDpyrStim=[PDpyrStim; ind+offSetPyr];
+                    end
                 end
 
                 %interneuron
