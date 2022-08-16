@@ -5,17 +5,25 @@ params.Fs=1000;%2500
 
 step=Hz./params.Fs;
 Event=decimate(double(Event((tetNum-1)*4+1,:)),step);
+%Event=double(Event((tetNum-1)*4+1,1:step:end));
+
 seq=floor(seq./step);
 normSeq=floor(normSeq./step);
 
 duration=min(floor(diff(seq)/1000)*1000);
 Data1=Event(seq(1):seq(end)+duration)';
 
-%hx=hilbert(Data1);
-%xphase=angle(hx);
 
-xphase0=analogPhase(Data1(1:60000),1.5)';
-xphase=repmat(xphase0,1,20);
+%if duration>20000
+if 0
+    xphase0=analogPhase(Data1(1:duration),1.5)';    
+    xphase=repmat(xphase0,1,20);
+else
+    xphase=chirpPhase(Data1);
+    %    xphase = mod(xphase,2*pi);%covert to 0-2pi rather than -pi:pi
+end
+
+%xphase0=analogPhase(Data1(1:60000),1.5)';
 
 
 phaseHistPyr=calcGM(Data1,xphase,params,ensemble(Pyr),step,seq,normSeq,duration);
@@ -41,7 +49,6 @@ for i=1:loop%unit
   %calculate regular firing rate during pre and post silent periods
   for k=1:2
     nFr(i)=nFr(i)+sum(unit>normSeq(k,1) & unit <normSeq(k,2));
-
   end
   dnFr=sum(diff(normSeq'))./params.Fs;
   nFr(i)=nFr(i)./dnFr;%Hz
@@ -54,7 +61,7 @@ for i=1:loop%unit
     while 1%frequency
       loc=seq(j)+c*segment;
       if loc+segment+alpha > seq(j)+duration
-	break;
+	  break;
       end
       
       spk=unit(unit>loc & unit<loc+segment);
