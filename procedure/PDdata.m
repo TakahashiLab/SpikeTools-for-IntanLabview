@@ -639,7 +639,7 @@ case 'AZ22091401',%normal control,ChR2
                     'AZ22091401/2022100705','theta',6,1,[1:8],[]
                     'AZ22091401/2022100706','gamma',6,1,[1:8],[]
                          };
-        end
+
 
 case 'AZ22091402',%normal control,ChR2
                 dataPath={
