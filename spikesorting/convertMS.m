@@ -6,8 +6,10 @@ en{numOfElectrodes}=[];%this cell is always empty.
 [path,name,ext]=fileparts(basename);
 
 dataFolder=fullfile(path,name);
+dataFolderOrg=dataFolder;
 dataFolder=fullfile(dataFolder,'ms');
 
+step=32;
 an=[];
 ensemble=[];
 c=1;
@@ -15,11 +17,19 @@ for i=1:numOfElectrodes
     dataFolder2=fullfile(dataFolder,[name 'raw' num2str(i)]);
     fn=fullfile(dataFolder2,'firings.curated.mda');
     fprintf('loading %s\n',fn);
+    %added
+    fnOrg=fullfile(dataFolderOrg,[name 'e' num2str(i) '.mat']);
+
     if exist(fn,'file')
         out=readmda(fn);
+        %added
+        load(fnOrg,'x');
+        x=double(x); 
         an{i}=ones(1,length(unique(out(3,:))));
         for j=unique(out(3,:))
             ensemble{c,3}=out(2,find(out(3,:)==j));
+            %added
+	    ensemble{c,1}=extractMS(x,step,ensemble{c,3});
             c=c+1;
         end
     end
