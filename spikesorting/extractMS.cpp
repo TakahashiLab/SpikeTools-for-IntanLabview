@@ -20,7 +20,6 @@ void makeOutputs(double *wv,double *raw,int step,double *seq,int X,int seqLen){
 	  for (j=base-center;j<base+center;j++){
 	    wv[counter]=(double)raw[j];
             counter++;
-	    printf("%d\n",counter);
 	  }
 	}
 
