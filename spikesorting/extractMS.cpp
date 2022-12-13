@@ -8,7 +8,7 @@
 void makeOutputs(double *wv,double *raw,int step,double *seq,int X,int seqLen){
 	int i,j;	
 	int ind=0;
-	int center=step/2;	
+	int center=(step/2)*X;	
 	int base;
 	int counter=0;
 	for(i=0;i<seqLen;i++){
@@ -17,7 +17,7 @@ void makeOutputs(double *wv,double *raw,int step,double *seq,int X,int seqLen){
 
 	  base=ind*X;
 	  //for (j=(ind-1)*step*X;j<ind*step*X;j++){
-	  for (j=base-center*X;j<base+center;j++){
+	  for (j=base-center;j<base+center;j++){
 	    wv[counter]=(double)raw[j];
             counter++;
 	  }
