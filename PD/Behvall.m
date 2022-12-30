@@ -54,7 +54,7 @@ for i=possibleId
         Rid=find(cell2mat(details(:,4))>=5);
         LEDid=find(cell2mat(details(:,3))==cell2mat(details(:,4)));
         
-        if 0
+        if 1
             S=[S;ones(size(LED,1)+size(L,1)+size(R,1),1)*c];%subject
             D=[D;details(LEDid,:)];
             D=[D;details(setdiff(Lid,LEDid),:)];
@@ -144,7 +144,8 @@ switch lower(proc)
             image(resPost.*256);
             title(['Post stimulation (ref:' refs{i} ',led:' ledsides{j} ')']);
 
-            set(gca,'xtick',[1],'xticklabel',{'behav'});
+
+            set(gca,'xtick',1:4,'xticklabel',{'Peak','Trough','Rising','Falling'});
             xlabel('behavior');
             set(gca,'ytick',1:3,'yticklabel',{'\beta','\theta','\gamma'});
             ylabel('Feedback optogenetics');
@@ -152,7 +153,8 @@ switch lower(proc)
             subplot(1,2,2);
             image(resDuring.*256);
             title(['During stimulation (ref:' refs{i} ',led:' ledsides{j} ')']);
-            set(gca,'xtick',[1],'xticklabel',{'behav'});
+
+            set(gca,'xtick',1:4,'xticklabel',{'Peak','Trough','Rising','Falling'});
             xlabel('behavior');
             set(gca,'ytick',1:3,'yticklabel',{'\beta','\theta','\gamma'});
             ylabel('Feedback optogenetics');
@@ -173,11 +175,14 @@ Data=AA;
 if 1
     switch(lower(ref))
       case 'normal',
-        Data=LL;
+        %        Data=LL;
+        rid=find(cell2mat(D(:,4))<=4);
       case 'pd',%
-        Data=LR;
+                %        Data=LR;
+        rid=find(cell2mat(D(:,4))>=5);
       case 'led',%
-        Data=LD;
+                 %        Data=LD;
+        rid=find(cell2mat(D(:,3))==cell2mat(D(:,4)));
     end
 
     switch(lower(ledside))
@@ -189,9 +194,11 @@ if 1
         Id=find(cell2mat(D(:,3))>=5);
     end
 
-Data=Data(Id,:,:);
-D=D(Id,:);
-S=S(Id,:);
+    Id=intersect(Id,rid);
+
+    Data=Data(Id,:,:);
+    D=D(Id,:);
+    S=S(Id,:);
 
 end
 
