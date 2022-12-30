@@ -5,6 +5,7 @@ p.addParamValue('proc', 'individual', @ischar);
 p.addParamValue('ledside', 'either', @ischar);
 p.addParamValue('ref', 'LED', @ischar);
 p.addParamValue('verbose', 1, @isnumeric);
+p.addParamValue('alpha', 0.05, @isnumeric);
 
 p.parse(varargin{:});
 
@@ -14,7 +15,7 @@ ledside=p.Results.ledside;
 verbose=p.Results.verbose;
 
 global alpha;
-alpha=0.05;
+alpha=p.Results.alpha;
 
 Suffix='.mat';
 SuffixLen=size(Suffix,2)-1;
