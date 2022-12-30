@@ -1,4 +1,3 @@
-
 %
 function [LD,LL,LR,P,D]=PL(basename,varargin)
 p = inputParser;
@@ -6,6 +5,7 @@ p.addParamValue('ref', 'LED', @ischar);
 p.addParamValue('ledside', 'either', @ischar);
 p.addParamValue('proc', 'individual', @ischar);
 p.addParamValue('verbose', 1, @isnumeric);
+p.addParamValue('alpha', 0.05, @isnumeric);
 
 p.parse(varargin{:});
 ref = p.Results.ref;
@@ -14,7 +14,8 @@ proc=p.Results.proc;
 verbose=p.Results.verbose;
 
 global alpha;
-alpha=0.05;
+alpha=p.Results.alpha;
+
 
 Suffix='.mat';
 SuffixLen=size(Suffix,2)-1;
