@@ -11,25 +11,32 @@ if 0
     c=multcompare(stats,'CriticalValueType','dunnett','display','off');
     pv=c(:,6);
     pp=find(pv<alpha);
-elseif 1
+elseif 0
 
     %sub=categorical(sub);
     LED=categorical(cell2mat(det(:,3))<=4);%true normal, false: pd
     REF=categorical(cell2mat(det(:,4))<=4);%true normal, false: pd
     SUB=categorical(sub);
     t=table(plc(:,1),plc(:,2),plc(:,3),plc(:,4),plc(:,5),plc(:,6),plc(:,7),plc(:,8),plc(:,9),LED,REF,SUB);
+    %t=table(plc(:,1),plc(:,2),plc(:,3),plc(:,4),plc(:,5),plc(:,6),plc(:,7),plc(:,8),plc(:,9));
     %    within=[1 2 2 2 2 2 2 2 2;1 2 3 2 3 2 3 2 3;1:9]';
     within=[1:9;1 2 3 2 3 2 3 2 3;]';
+    rm=fitrm(t,'Var1-Var9~SUB','withindesign',within);
     %rm=fitrm(t,'Var1-Var9~1','withindesign',within);    
     %rm=fitrm(t,'Var1-Var9~sub*LED*REF','withindesign',within);    
-    rm=fitrm(t,'Var1-Var9~LED*REF+SUB','withindesign',within);    
+    %rm=fitrm(t,'Var1-Var9~LED*REF+SUB','withindesign',within);    
 
     [rtbl]=ranova(rm,'withinmodel','w1+w2');
-    fprintf('LED=%f,REF=%f\n',rtbl.pValue([2 3]));
+    %    fprintf('LED=%f,REF=%f\n',rtbl.pValue([2 3]));
+    fprintf('LED=%f,REF=%f\n',rtbl.pValue([5 8]));
     %p=rtbl.pValue(3);
     p=rtbl.pValue(1);
+
+    %pre-silent vs. opto-stimuli(peak,trough,rising,falling)
     pvLED=multcompare(rm,'w1','by','LED');
     pvREF=multcompare(rm,'w1','by','REF');
+
+    %pre-silent vs. during/following opto-stimuli
     pv2LED=multcompare(rm,'w2','by','LED');
     pv2REF=multcompare(rm,'w2','by','REF');
 
@@ -37,6 +44,28 @@ elseif 1
     %    c=[pv.Time_1(:) pv.Time_2(:)];
     %    pv=pv.pValue(:);
     %    pp=find(pv<alpha);
+elseif 1
+    LED=categorical(cell2mat(det(:,3))<=4);%true normal, false: pd
+    REF=categorical(cell2mat(det(:,4))<=4);%true normal, false: pd
+    SUB=categorical(sub);
+    t=table(plc(:,1),plc(:,2),plc(:,3),plc(:,4),plc(:,5),plc(:,6),plc(:,7),plc(:,8),plc(:,9),SUB);
+    %    within=[1 2 2 2 2 2 2 2 2;1 2 3 2 3 2 3 2 3;1:9]';
+    %within=[1:9;1 2 3 2 3 2 3 2 3;]';
+    within=[1:9]';
+    rm=fitrm(t,'Var1-Var9~SUB','withindesign',within);
+
+%[rtbl]=ranova(rm,'withinmodel','w1+w2');
+[rtbl]=ranova(rm);
+    %    fprintf('LED=%f,REF=%f\n',rtbl.pValue([5 8]));
+    %p=rtbl.pValue(3);
+    p=rtbl.pValue(1);
+
+    %pre-silent vs. opto-stimuli(peak,trough,rising,falling)
+    pv=multcompare(rm,'Time');
+    %    pv=multcompare(rm,'w1');
+    %    pv2=multcompare(rm,'w2');
+
+
 elseif 0
     t=table(plc(:,1),plc(:,2),plc(:,3),plc(:,4),plc(:,5));
     time=[1:5]';
@@ -76,7 +105,7 @@ if 0
             end
         end
     end
-else
+elseif 0
 
     stateC={'During','Post'};
     %PD-stim
@@ -108,7 +137,7 @@ else
         fprintf('%s=%f\n',stateC{pp},pv(pp));
     end
 
-
+    
 
     resD=zeros(1,4);
     resP=zeros(1,4);
@@ -173,6 +202,37 @@ else
         end
         fprintf('**********S vs. %s,p=%f\n',paran{pp(i)+1},pv(pp(i)));
     end
+
+else
+
+    resD=zeros(1,4);
+    resP=zeros(1,4);
+
+    mPLC=median(plc);
+    %PD-stim
+    %PV=pv.pValue(pv.w1_1==1);
+    PV=pv.pValue(pv.Time_1==1);
+    DIF=pv.Difference(pv.Time_1==1);
+    pp=find(PV < alpha); 
+    fprintf('####PD-stim\n');
+    for i=1:length(pp)
+        if any(pp(i)+1==[2 4 6 8])
+            fprintf('Stim::');
+            % resD(1,1)=1;
+            resD(1,(pp(i)+1)/2)=1;
+        elseif any(pp(i)+1==[3 5 7 9])
+            fprintf('Post::');
+            %resP(1,1)=1;
+            resP(1,(pp(i)/2))=1;
+        end
+        fprintf('**********S vs. %s,p=%f\n',paran{pp(i)+1},PV(pp(i)));
+        if mPLC(pp(i)+1) < mPLC(1)
+            fprintf('negative\n');
+        else
+            fprintf('positive\n');
+        end
+    end
+
 
 end
 

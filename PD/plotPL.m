@@ -108,17 +108,4 @@ else
     [resDuring,resPost]=plotStats(plc,pn,det,sub,verbose);
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 return;

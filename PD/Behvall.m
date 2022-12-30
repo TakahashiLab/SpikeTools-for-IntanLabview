@@ -49,28 +49,28 @@ for i=possibleId
         LR=[LR;R];        
         AA=[AA;L];
         AA=[AA;R];
-        S=[S;ones(size(LED,1)+size(L,1)+size(R,1),1)*c];%subject
-
 
         Lid=find(cell2mat(details(:,4))<=4);
         Rid=find(cell2mat(details(:,4))>=5);
         LEDid=find(cell2mat(details(:,3))==cell2mat(details(:,4)));
-
-        D=[D;details(LEDid,:)];
-        D=[D;details(setdiff(Lid,LEDid),:)];
-        D=[D;details(setdiff(Rid,LEDid),:)];
+        
         if 0
-        switch(lower(ref))
-          case 'normal',
-            S=[S;ones(size(L,1),1)*c];%subject
-            D=[D;details(setdiff(Lid,LEDid),:)];
-          case 'pd',%
-            S=[S;ones(size(R,1),1)*c];%subject
-            D=[D;details(setdiff(Rid,LEDid),:)];
-          case 'led',%
-            S=[S;ones(size(LED,1),1)*c];%subject
+            S=[S;ones(size(LED,1)+size(L,1)+size(R,1),1)*c];%subject
             D=[D;details(LEDid,:)];
-        end
+            D=[D;details(setdiff(Lid,LEDid),:)];
+            D=[D;details(setdiff(Rid,LEDid),:)];
+        else
+            switch(lower(ref))
+              case 'normal',
+                S=[S;ones(size(L,1),1)*c];%subject
+                D=[D;details(setdiff(Lid,LEDid),:)];
+              case 'pd',%
+                S=[S;ones(size(R,1),1)*c];%subject
+                D=[D;details(setdiff(Rid,LEDid),:)];
+              case 'led',%
+                S=[S;ones(size(LED,1),1)*c];%subject
+                D=[D;details(LEDid,:)];
+            end
         end
         c=c+1;
     end
@@ -78,6 +78,7 @@ end
 
 switch lower(proc) 
 
+    %The difference of optogenetics stimuli(led,left,right) is ignored
   case 'total',
     [resPost,resDuring]=processData2(AA,D,S,verbose);
     subplot(1,2,1);		
@@ -100,13 +101,15 @@ switch lower(proc)
 
     colormap bone;
 
+    %%% This option must specify refs and ledsides parameters 
   case 'individual',
     [resPost,resDuring]=processData(LD,LL,LR,AA,D,S,ref,ledside,verbose);
 
     subplot(1,2,1);		
             image(resPost.*256);
             title(['Post stimulation (ref:' ref ',led:' ledside ')']);
-            set(gca,'xtick',[1],'xticklabel',{'behav'});
+            %            set(gca,'xtick',[1],'xticklabel',{'behav'});
+            set(gca,'xtick',1:4,'xticklabel',{'Peak','Trough','Rising','Falling'});
             xlabel('behavior');
             set(gca,'ytick',1:3,'yticklabel',{'\beta','\theta','\gamma'});
             ylabel('Feedback optogenetics');
@@ -114,14 +117,16 @@ switch lower(proc)
             subplot(1,2,2);
             image(resDuring.*256);
             title(['During stimulation (ref:' ref ',led:' ledside ')']);
-            set(gca,'xtick',[1],'xticklabel',{'behav'});
+            %            set(gca,'xtick',[1],'xticklabel',{'behav'});
+            set(gca,'xtick',1:4,'xticklabel',{'Peak','Trough','Rising','Falling'});   
+
             xlabel('behavior');
             set(gca,'ytick',1:3,'yticklabel',{'\beta','\theta','\gamma'});
             ylabel('Feedback optogenetics');
             colormap bone;
 
 
-
+%%% This option processes and display all parameters of refs and ledsides at once. 
   case 'all',
 
     refs={'normal','pd','led'};
@@ -165,31 +170,30 @@ function [resPost,resDuring,Data,Lists,S]=processData(LD,LL,LR,AA,D,S,ref,ledsid
 c={'r.','g.','b.','k.'};
 
 Data=AA;
-if 0
-switch(lower(ref))
-  case 'normal',
-    Data=LL;
-  case 'pd',%
-    Data=LR;
-  case 'led',%
-    Data=LD;
-end
+if 1
+    switch(lower(ref))
+      case 'normal',
+        Data=LL;
+      case 'pd',%
+        Data=LR;
+      case 'led',%
+        Data=LD;
+    end
 
-switch(lower(ledside))
-  case 'either',
-    Id=1:size(D,1);
-  case 'normal',
-    Id=find(cell2mat(D(:,3))<=4);
-  case 'pd',
-    Id=find(cell2mat(D(:,3))>=5);
-end
+    switch(lower(ledside))
+      case 'either',
+        Id=1:size(D,1);
+      case 'normal',
+        Id=find(cell2mat(D(:,3))<=4);
+      case 'pd',
+        Id=find(cell2mat(D(:,3))>=5);
+    end
 
 Data=Data(Id,:,:);
 D=D(Id,:);
 S=S(Id,:);
 
 end
-
 
 %beta
 betaList=find(sum(str2mat(D{:,2})=='beta ',2)==5);
