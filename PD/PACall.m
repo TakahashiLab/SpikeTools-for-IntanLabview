@@ -14,7 +14,7 @@ proc=p.Results.proc;
 verbose=p.Results.verbose;
 
 global alpha;
-alpha=p.Resuls.alpha;
+alpha=p.Results.alpha;
 
 Suffix='.mat';
 SuffixLen=size(Suffix,2)-1;
