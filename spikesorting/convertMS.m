@@ -29,6 +29,8 @@ for i=1:numOfElectrodes
         for j=unique(out(3,:))
             ensemble{c,3}=out(2,find(out(3,:)==j));
             %added modified for first spikes
+            ensemble{c,3}(ensemble{c,3}<step)=[];
+            %added modified for first spikes
 	    ensemble{c,1}=extractMS(x,step,ensemble{c,3});
             c=c+1;
         end
