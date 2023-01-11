@@ -60,7 +60,8 @@ for i=1:loop%unit
     alpha=100;
     while 1%frequency
       loc=seq(j)+c*segment;
-      if loc+segment+alpha > seq(j)+duration
+      %if loc+segment+alpha > seq(j)+duration
+      if loc+segment > seq(j)+duration
 	  break;
       end
       
