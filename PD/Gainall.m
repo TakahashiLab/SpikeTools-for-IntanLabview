@@ -132,19 +132,41 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
                 RcharPD = ['normal rec'];
 
             case 'ledstim',
-                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{5}));
-                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{6}));
-                TcharNormal = ['led neighbor'];
+                normalPyr = setdiff(PyrIntList{5}, PyrIntListStim{3});
+                normalInt = setdiff(PyrIntList{6}, PyrIntListStim{4});
+               % normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{5}));
+               % normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{6}));
+                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, normalPyr));
+                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, normalInt));
+
+                TcharNormal = ['normal led neighbor'];
                 RcharNormal = [];
+
+                pdPyr = setdiff(PyrIntList{5}, PyrIntListStim{1});
+                pdInt = setdiff(PyrIntList{6}, PyrIntListStim{2});
+                pdPyrS = cat(3, pdPyrS, phaseHistPyr(:, :, pdPyr));
+                pdIntS = cat(3, pdIntS, phaseHistInt(:, :, pdInt));
+
+                TcharPD = ['pd led neighbor'];
+                RcharPD = [];
 
             case 'tagstim',
-                
-                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{7}));
-                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{8}));
-                TcharNormal = ['tagging units'];
+                normalPyr = setdiff(PyrIntList{7}, PyrIntListStim{3});
+                normalInt = setdiff(PyrIntList{8}, PyrIntListStim{4});
+                %normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{7}));
+                %normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{8}));
+                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, normalPyr));
+                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, normalInt));
+                TcharNormal = ['normal tagging units'];
                 RcharNormal = [];
             
+                pdPyr = setdiff(PyrIntList{7}, PyrIntListStim{1});
+                pdInt = setdiff(PyrIntList{8}, PyrIntListStim{2});
+                pdPyrS = cat(3, pdPyrS, phaseHistPyr(:, :, pdPyr));
+                pdIntS = cat(3, pdIntS, phaseHistInt(:, :, pdInt));
 
+                TcharPD = ['pd tagging neighbor'];
+                RcharPD = [];
         end
 
         if ~strcmp(plt, 'all')
@@ -291,53 +313,27 @@ if strcmp(plt, 'all')
 
         end
 
-        %statistical test for Gain to phase/freq relationship
-        if (strcmp(band, 'freq') | strcmp(band, 'phase'))
-            value = [X Y];
-            group = [repmat((1:size(X, 1))', 1, size(X, 2)) repmat((1:size(Y, 1))', 1, size(Y, 2))];
-            %group = [ones(size(X)) ones(size(Y))*2];
-            %save test.mat X Y
-            for q = 1:size(X, 1)
-                [p, tbl, stats] = kruskalwallis([X(q, :) Y(q, :)], [zeros(1, size(X, 2)) ones(1, size(Y, 2))], 'off');
-
-                if p < 0.01 / size(X, 1)
-                    q
-                    p
-                end
-
-            end
-
-            phaseC = [-pi:pi / 4:pi];
-            phaseC = phaseC(2:end);
-            value = value';
-            t1 = array2table(value);
-            neuron = [zeros(1, size(X, 2)) ones(1, size(Y, 2))]';
-            neuron = nominal(neuron);
-            t2 = table(value(:, 1), neuron, 'variableNames', {'value1', 'neuron'});
-
-            t = outerjoin(t1, t2, 'mergekeys', 1);
-            within = [1:10]';
-
-            rm = fitrm(t, 'value1-value10~neuron', 'withindesign', within);
-            rtbl = ranova(rm, 'withinmodel', 'Time');
-            
-            if rtbl.pValue(5) < alpha
-                c = multcompare(rm, 'neuron', 'by', 'Time');
-                phaseC(c.Time(c.pValue(1:2:20) < alpha))
-            end
-
-        end
+        
 
     elseif strcmp(stim,'ledstim') | strcmp(stim,'tagstim')
         figure;
-        subplot(1, 2, 1);
-        plotGainMap(normalPyrS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        subplot(2, 2, 1);
+        mphPyrS=plotGainMap(normalPyrS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
         title(['PYR:' TcharNormal '- ' RcharNormal]);
 
-        subplot(1, 2, 2);
-        plotGainMap(normalIntS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        subplot(2, 2, 2);
+        mphIntS=plotGainMap(normalIntS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
         title(['INT:' TcharNormal '- ' RcharNormal]);
+        X = mphPyrS;
+        Y = mphIntS;
 
+        subplot(2, 2, 3);
+        plotGainMap(pdPyrS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        title(['PYR:' TcharPD '- ' RcharPD]);
+
+        subplot(2,2,4);
+        plotGainMap(pdIntS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        title(['INT:' TcharPD '- ' RcharPD]);
 
     else%stim/nonstim
 
@@ -361,4 +357,47 @@ if strcmp(plt, 'all')
     end
 
     colormap jet;
+
+   
+    %statistical test for Gain to phase/freq relationship
+    if (strcmp(band, 'freq') | strcmp(band, 'phase'))
+            
+        value = [X Y];
+        group = [repmat((1:size(X, 1))', 1, size(X, 2)) repmat((1:size(Y, 1))', 1, size(Y, 2))];
+        %group = [ones(size(X)) ones(size(Y))*2];
+        %save test.mat X Y
+        for q = 1:size(X, 1)
+            [p, tbl, stats] = kruskalwallis([X(q, :) Y(q, :)], [zeros(1, size(X, 2)) ones(1, size(Y, 2))], 'off');
+
+            if p < 0.01 / size(X, 1)
+                q
+                p
+            end
+
+        end
+
+        phaseC = [-pi:pi / 4:pi];
+        phaseC = phaseC(2:end);
+        value = value';
+        t1 = array2table(value);
+        neuron = [zeros(1, size(X, 2)) ones(1, size(Y, 2))]';
+        neuron = nominal(neuron);
+        t2 = table(value(:, 1), neuron, 'variableNames', {'value1', 'neuron'});
+
+        t = outerjoin(t1, t2, 'mergekeys', 1);
+        within = [1:10]';
+
+        rm = fitrm(t, 'value1-value10~neuron', 'withindesign', within);
+        rtbl = ranova(rm, 'withinmodel', 'Time');
+        rtbl.pValue(5) 
+        if rtbl.pValue(5) < alpha
+            c = multcompare(rm, 'neuron', 'by', 'Time');
+            if strcmp(band, 'phase')
+                fprintf('phase=%f\n',phaseC(c.Time(c.pValue(1:2:20) < alpha)));
+            else
+                fprintf('freq=%f\n',c.Time(c.pValue(1:2:20) < alpha)*2)
+            end
+        end
+
+    end
 end
