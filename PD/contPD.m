@@ -144,10 +144,11 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                                 [~, ind] = intersect(pyr, 1:normal(end));
                                 normalPyr = [normalPyr; ind + offSetPyr];
+
                                 if dataPath{i, 3} <= 4
                                     normalPyrStim = [normalPyrStim; ind + offSetPyr];
                                 end
-                                
+
                                 if ~isempty(lc0)
                                     [~, ind] = intersect(pyr, lc0);
                                     ledPyr = [ledPyr; ind + offSetPyr];
@@ -157,8 +158,6 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                     [~, ind] = intersect(pyr, lcR);
                                     tagPyr = [tagPyr; ind + offSetPyr];
                                 end
-
-                                
 
                                 [~, ind] = setdiff(pyr, 1:normal(end));
                                 PDpyr = [PDpyr; ind + offSetPyr];
@@ -173,10 +172,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 %interneuron
                                 [~, ind] = intersect(interneuron, 1:normal(end));
                                 normalInt = [normalInt; ind + offSetInt];
+
                                 if dataPath{i, 3} <= 4
                                     normalIntStim = [normalIntStim; ind + offSetInt];
                                 end
-                               
 
                                 if ~isempty(lc0)
                                     [~, ind] = intersect(interneuron, lc0);
@@ -188,7 +187,6 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                     tagInt = [tagInt; ind + offSetInt];
                                 end
 
-                               
                                 [~, ind] = setdiff(interneuron, 1:normal(end));
                                 PDint = [PDint; ind + offSetInt];
 
