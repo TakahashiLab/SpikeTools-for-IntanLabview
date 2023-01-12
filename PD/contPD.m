@@ -33,6 +33,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     normalInt = [];
     PDpyr = [];
     PDint = [];
+    ledPyr = [];
+    ledInt = [];
+    tagPyr = [];
+    tagInt = [];
 
     normalPyrStim = [];
     normalIntStim = [];
@@ -88,30 +92,26 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyr = union(dataPath{i, 9}, pyrTag); % % %CC+tag
 
-                    if localCell
+                    if dataPath{i, 3} <= 4
+                        lcq = 1:4;
+                    else
+                        lcq = 5:8;
+                    end
 
-                        lc = find(tetrodeMap(an, en) == dataPath{i, 3});
+                    lc0 = find(tetrodeMap(an, en) == dataPath{i, 3}); % units detected from a tetrode with an optical fiber
+                    lcR = []; %units detected from a tetrode, whose spikes tagged with optical signals
 
-                        if dataPath{i, 3} <= 4
-                            lcq = 1:4;
-                        else
-                            lcq = 5:8;
+                    for q = lcq
+                        cand = find(tetrodeMap(an, en) == q);
+
+                        if ~isempty(intersect(cand, dataPath{i, 10}))
+                            lcR = [lcR cand];
                         end
-
-                        for q = lcq
-                            cand = find(tetrodeMap(an, en) == q);
-
-                            if ~isempty(intersect(cand, dataPath{i, 10}))
-                                lc = [lc cand];
-                            end
-
-                        end
-
-                        
-                        interneuron = intersect(interneuron, lc);
-                        pyr = intersect(pyr, lc);
 
                     end
+
+                    %interneuron = intersect(interneuron, lc);
+                    %pyr = intersect(pyr, lc);
 
                     switch lower(waveType)
                         case 'chirp',
@@ -144,10 +144,21 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                                 [~, ind] = intersect(pyr, 1:normal(end));
                                 normalPyr = [normalPyr; ind + offSetPyr];
-
                                 if dataPath{i, 3} <= 4
                                     normalPyrStim = [normalPyrStim; ind + offSetPyr];
                                 end
+                                
+                                if ~isempty(lc0)
+                                    [~, ind] = intersect(pyr, lc0);
+                                    ledPyr = [ledPyr; ind + offSetPyr];
+                                end
+
+                                if ~isempty(lcR)
+                                    [~, ind] = intersect(pyr, lcR);
+                                    tagPyr = [tagPyr; ind + offSetPyr];
+                                end
+
+                                
 
                                 [~, ind] = setdiff(pyr, 1:normal(end));
                                 PDpyr = [PDpyr; ind + offSetPyr];
@@ -158,19 +169,33 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                             end
 
-                            %interneuron
-                            [~, ind] = intersect(interneuron, 1:normal(end));
-                            normalInt = [normalInt; ind + offSetInt];
+                            if ~isempty(interneuron)
+                                %interneuron
+                                [~, ind] = intersect(interneuron, 1:normal(end));
+                                normalInt = [normalInt; ind + offSetInt];
+                                if dataPath{i, 3} <= 4
+                                    normalIntStim = [normalIntStim; ind + offSetInt];
+                                end
+                               
 
-                            if dataPath{i, 3} <= 4
-                                normalIntStim = [normalIntStim; ind + offSetInt];
-                            end
+                                if ~isempty(lc0)
+                                    [~, ind] = intersect(interneuron, lc0);
+                                    ledInt = [ledInt; ind + offSetInt];
+                                end
 
-                            [~, ind] = setdiff(interneuron, 1:normal(end));
-                            PDint = [PDint; ind + offSetInt];
+                                if ~isempty(lcR)
+                                    [~, ind] = intersect(interneuron, lcR);
+                                    tagInt = [tagInt; ind + offSetInt];
+                                end
 
-                            if dataPath{i, 3} >= 5
-                                PDintStim = [PDintStim; ind + offSetInt];
+                               
+                                [~, ind] = setdiff(interneuron, 1:normal(end));
+                                PDint = [PDint; ind + offSetInt];
+
+                                if dataPath{i, 3} >= 5
+                                    PDintStim = [PDintStim; ind + offSetInt];
+                                end
+
                             end
 
                             offSetPyr = offSetPyr + length(pyr);
@@ -193,6 +218,11 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
         PyrIntList{2} = normalInt;
         PyrIntList{3} = PDpyr;
         PyrIntList{4} = PDint;
+        PyrIntList{5} = ledPyr;
+        PyrIntList{6} = ledInt;
+        PyrIntList{7} = tagPyr;
+        PyrIntList{8} = tagInt;
+
         PyrIntListStim{1} = normalPyrStim;
         PyrIntListStim{2} = normalIntStim;
         PyrIntListStim{3} = PDpyrStim;

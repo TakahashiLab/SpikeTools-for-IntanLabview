@@ -131,6 +131,20 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
                 RcharNormal = ['PD rec'];
                 RcharPD = ['normal rec'];
 
+            case 'ledstim',
+                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{5}));
+                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{6}));
+                TcharNormal = ['led neighbor'];
+                RcharNormal = [];
+
+            case 'tagstim',
+                
+                normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, PyrIntList{7}));
+                normalIntS = cat(3, normalIntS, phaseHistInt(:, :, PyrIntList{8}));
+                TcharNormal = ['tagging units'];
+                RcharNormal = [];
+            
+
         end
 
         if ~strcmp(plt, 'all')
@@ -314,7 +328,18 @@ if strcmp(plt, 'all')
 
         end
 
-    else
+    elseif strcmp(stim,'ledstim') | strcmp(stim,'tagstim')
+        figure;
+        subplot(1, 2, 1);
+        plotGainMap(normalPyrS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        title(['PYR:' TcharNormal '- ' RcharNormal]);
+
+        subplot(1, 2, 2);
+        plotGainMap(normalIntS, 'display', disp, 'band', band, 'hist', histon, 'topFreq', topFreq);
+        title(['INT:' TcharNormal '- ' RcharNormal]);
+
+
+    else%stim/nonstim
 
         figure;
         subplot(2, 2, 1);
