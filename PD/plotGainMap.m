@@ -51,7 +51,7 @@ function outMph = plotGainMap(phaseHist, varargin)
             title('ascending');
             set(gca, 'ydir', 'normal');
             set(gca, 'ytick', [1:5:topFreq], 'yticklabel', [0:5:topFreq] * 2);
-            set(gca, 'xtick', [1 11 21 31 41], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
+            set(gca, 'xtick', [1 10 20 30 40], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
             hold on;
             t = 0:40;
             plot(t + 1, cos(t / pi) * topFreq / 2 + topFreq / 2, 'w');
@@ -78,7 +78,7 @@ function outMph = plotGainMap(phaseHist, varargin)
             set(gca, 'ydir', 'normal');
             %set(gca,'ytick',[1:5:40],'yticklabel',[(40:-5:1)-4]*2);
             set(gca, 'ytick', [1:5:topFreq], 'yticklabel', [0:5:topFreq] * 2);
-            set(gca, 'xtick', [1 11 21 31 41], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
+            set(gca, 'xtick', [1 10 20 30 40], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
             hold on;
             t = 0:40;
             plot(t + 1, cos(t / pi) * topFreq / 2 + topFreq / 2, 'w');
@@ -131,9 +131,9 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
         seMph = (std(mph, 0, 2) ./ sqrt(size(mph, 2))')'; %sem
         mph = mean(mph, 2)';
 
-        mph = mph(1:end - 1);
-        seMph = seMph(1:end - 1);
-        outMph = outMph(1:end - 1, :);
+        %mph = mph(1:end - 1);
+        %seMph = seMph(1:end - 1);
+        %outMph = outMph(1:end - 1, :);
 
         hf = length(mph) / 2;
         mph = [mph(:, hf + 1:end) mph mph(:, 1:hf)];
@@ -210,7 +210,7 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
             ylabel('Neuron number');
         end
 
-        set(gca, 'xtick', [1 11 21 31 41], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
+        set(gca, 'xtick', [1 10 20 30 40], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
         hold on;
         t = 0:40;
         plot(t + 1, cos(t / pi) * 10 + 10.5, 'w');
@@ -232,7 +232,7 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
         mph = mean(mph);
         mph = SmoothMat(mph, [3 3], 1);
         bar(mph);
-        set(gca, 'xtick', [1 11 21 31 41], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
+        set(gca, 'xtick', [1 10 20 30 40], 'xticklabel', {'-2\pi', '-\pi', '0', '\pi', '2\pi'});
     end
 
     return;
