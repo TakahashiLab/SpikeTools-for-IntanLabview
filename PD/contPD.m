@@ -1,5 +1,5 @@
 %dn: 2018,2019,2020
-function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs] = contPD(dn, an, varargin)
+function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl] = contPD(dn, an, varargin)
 
     p = inputParser;
     p.addParamValue('method', 'gainmap', @ischar);
@@ -26,6 +26,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
     phaseHistPyr = [];
     phaseHistInt = [];
+    phaseHistPyrCtrl = [];
+    phaseHistIntCtrl = [];
     offSetPyr = 0;
     offSetInt = 0;
 
@@ -134,11 +136,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             load(loadname, 'event');
 
                             %calc gain map
-                            [pPyr, pInt] = batchGainMap(event, ensemble(:, 3), SeqTime, 1, [preSilentTime; postSilentTime], pyr, interneuron);
+                            [pPyr, pInt, pPyrCtrl, pIntCtrl] = batchGainMap(event, ensemble(:, 3), SeqTime, 1, [preSilentTime; postSilentTime], pyr, interneuron);
 
                             %cell classification
                             normal = find(tetrodeMap(an, en) <= 4);
 
+                            %putative pyramidal cell
                             if ~isempty(pyr)
                                 %pyramidal
 
@@ -168,6 +171,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                             end
 
+                            %interneuron or PV
                             if ~isempty(interneuron)
                                 %interneuron
                                 [~, ind] = intersect(interneuron, 1:normal(end));
@@ -201,6 +205,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                             phaseHistPyr = cat(3, phaseHistPyr, pPyr);
                             phaseHistInt = cat(3, phaseHistInt, pInt);
+
+                            phaseHistPyrCtrl = cat(3, phaseHistPyrCtrl, pPyrCtrl);
+                            phaseHistIntCtrl = cat(3, phaseHistIntCtrl, pIntCtrl);
+
                         end
 
                     end
