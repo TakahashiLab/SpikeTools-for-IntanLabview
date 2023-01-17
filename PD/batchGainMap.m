@@ -35,7 +35,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
         segmentSec = 0.5;
         segment = segmentSec * params.Fs; %0.5sec
-        phaseCnt=10;
+        phaseCnt = 10;
         loop = size(ensemble, 1);
         phaseHist = zeros(phaseCnt, 120, loop);
 
@@ -62,7 +62,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
                 while 1 %frequency
                     loc = seq(j) + c * segment;
-                    phaseLoc= 1+c*segment:(c+1)*segment;
+                    phaseLoc = 1 + c * segment:(c + 1) * segment;
 
                     %if loc+segment+alpha > seq(j)+duration
                     if loc + segment > seq(j) + duration
@@ -72,7 +72,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                     spk = unit(unit >= loc & unit < loc + segment);
                     spk = spk - seq(1);
                     xphasePos = xphase;
-                    
+
                     %phase
                     %base phase hist for normalization
                     %basehist = hist(xphasePos(phaseLoc), -pi:pi / 9.5:pi);
@@ -96,7 +96,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
             segmentSec = 0.5;
             segment = segmentSec * params.Fs; %0.5sec
-            phaseCnt=10;
+            phaseCnt = 10;
 
             loop = size(ensemble, 1);
             phaseHist = zeros(phaseCnt, 120, loop);
@@ -122,19 +122,24 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
                     for c = 0:(120 - 1) %frequency
                         loc = loc0 + c * segment;
-                        phaseLoc= 1+c*segment:(c+1)*segment;
+                        phaseLoc = 1 + c * segment:(c + 1) * segment;
 
                         spk = unit(unit >= loc & unit < loc + segment);
                         spk = spk - normSeq(1);
-                        if ~isempty(spk)
-                        xphasePos = xphase;
 
-                        %base phase hist for normalization
-                        basehist = histcounts(xphasePos(phaseLoc), phaseCnt);
-                        
-                        %normalized phase
-                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), phaseCnt) ./ (basehist / mean(basehist)) ./ (segmentSec / 20); %Hz
+                        if ~isempty(spk)
+                            xphasePos = xphase;
+
+                            if spk(1)==0
+                                spk(1)=1;
+                            end
+                            %base phase hist for normalization
+                            basehist = histcounts(xphasePos(phaseLoc), phaseCnt);
+
+                            %normalized phase
+                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), phaseCnt) ./ (basehist / mean(basehist)) ./ (segmentSec / 20); %Hz
                         end
+
                     end
 
                     loc0 = loc;
