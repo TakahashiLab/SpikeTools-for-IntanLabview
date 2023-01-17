@@ -126,9 +126,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
                         spk = unit(unit >= loc & unit < loc + segment);
                         spk = spk - normSeq(1);
-                        if spk(1)==0
-                            spk(1)=1;
-                        end
+                        if ~isempty(spk)
                         xphasePos = xphase;
 
                         %base phase hist for normalization
@@ -136,7 +134,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                         
                         %normalized phase
                         phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), phaseCnt) ./ (basehist / mean(basehist)) ./ (segmentSec / 20); %Hz
-
+                        end
                     end
 
                     loc0 = loc;
