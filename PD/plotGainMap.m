@@ -43,7 +43,7 @@ function outMph = plotGainMap(phaseHist, varargin)
             %mph=SmoothMat(mean(phaseHist(:,[1:40],:),3)', [9 9],2);
             %mph=SmoothMat(mean(phaseHist(:,[1:topFreq],:),3)', [9 9],2);
             mph = mean(phaseHist(:, [1:topFreq], :), 3)';
-            mph = [mph(:, 11:20) mph mph(:, 1:10)];
+            mph = [mph(:, size(mph, 2) / 2 + 1:end) mph mph(:, 1:size(mph, 2) / 2)];
             mph = SmoothMat(mph, [9 9], 2);
             subplot(1, 2, 1);
             %imagesc([mph(:,11:20) mph mph(:,1:10)]);
@@ -71,7 +71,8 @@ function outMph = plotGainMap(phaseHist, varargin)
             %mph=SmoothMat(mean(phaseHist(:,[120:-1:81],:),3)', [9 9],2);
             %mph=SmoothMat(mean(phaseHist(:,[120:-1:120-topFreq+1],:),3)', [9 9],2);
             mph = mean(phaseHist(:, [120:-1:120 - topFreq + 1], :), 3)';
-            mph = SmoothMat([mph(:, 11:20) mph mph(:, 1:10)], [9 9], 2);
+            mph = [mph(:, size(mph, 2) / 2 + 1:end) mph mph(:, 1:size(mph, 2) / 2)];
+            mph = SmoothMat(mph, [9 9], 2);
             %    imagesc([mph(:,11:20) mph mph(:,1:10)]);
             imagesc(mph);
             title('descending');
@@ -124,7 +125,8 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
 
     if strcmp(band, 'all')
         mph = mean(phaseHist(:, xr, :), 3)';
-        mph = [mph(:, 11:20) mph mph(:, 1:10)];
+        mph = [mph(:, size(mph, 2) / 2 + 1:end) mph mph(:, 1:size(mph, 2) / 2)];
+
     elseif strcmp(band, 'phase')
         mph = squeeze(mean(phaseHist(:, xr, :), 2));
         outMph = mph;
@@ -174,21 +176,23 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
         set(gca, 'xtick', xrange, 'xticklabel', xrange * 2 * binsize);
         xlabel('Frequency [Hz]');
         ylabel('Gain');
-    else
+    else %other
         frange = unique(floor(frange / 2));
 
         mph = squeeze(mean(phaseHist(:, xr(frange), :), 2))';
+
         [maxMph, maxMphId] = max(mph, [], 2);
         [~, id] = sort(maxMphId, 'descend');
         %mph = mph(:, id);
 
-        [~, id] = sort(maxMph, 'descend');
-        mph = mph(id,:);
-        mph = [mph(:, 11:20) mph mph(:, 1:10)];
+        % [~, id] = sort(maxMph, 'descend');
+        mph = mph(id, :);
+       
+        mph = [mph(:, size(mph, 2) / 2 + 1:end) mph mph(:, 1:size(mph, 2) / 2)];
     end
 
     if (strcmp(band, 'freq') | strcmp(band, 'phase'))
-     
+
     elseif strcmp(histon, 'off')
 
         mph = SmoothMat(mph, [9 9], 2);
@@ -203,7 +207,7 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
             ylabel('Frequency [Hz]');
         else
 
-            if size(mph, 1) ~= 1
+            if size(mph, 1) > 1
                 set(gca, 'ytick', [1 size(mph, 1)], 'yticklabel', [1 size(mph, 1)]);
             end
 
@@ -218,8 +222,13 @@ function outMph = plotfnc(phaseHist, xr, xrange, kernel, frange, band, histon)
         colormap(jet);
         colorbar;
 
-        if size(mph, 1) ~= 1
-            caxis([0.5 max(mph(:))]);
+        %if size(mph, 1) ~= 1
+        if ~isempty(mph)
+
+            if ~isnan(mph(1))
+                caxis([0.5 max(mph(:))]);
+            end
+
         end
 
     else
