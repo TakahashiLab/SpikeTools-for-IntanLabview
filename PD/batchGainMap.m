@@ -89,7 +89,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                         basehist = histcounts(xphasePos(phaseLoc), edges);
                         basehist(basehist==0)=1;
                         %normalized phase
-                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ basehist .* mean(basehist) ./ (segmentSec / phaseCnt); %Hz
+                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (basehist./max(basehist)) ./ (segmentSec / phaseCnt); %Hz
                         %phaseHist(:, c + 1, i) = hist(xphasePos(spk), -pi:pi / 9.5:pi) ./ (segmentSec / 20); %Hz
                     end
 
@@ -153,7 +153,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                             basehist = histcounts(xphasePos(phaseLoc), edges);
                             basehist(basehist==0)=1;
                             %normalized phase
-                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ basehist .* mean(basehist) ./ (segmentSec / phaseCnt); %Hz
+                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (basehist./max(basehist)) ./ (segmentSec / phaseCnt); %Hz
                             %phaseHist(:, c + 1, i) = basehist; %Hz
                         end
 
