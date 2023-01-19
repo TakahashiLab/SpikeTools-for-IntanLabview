@@ -29,7 +29,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     end
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
-    phaseCnt = 40; %18 degree?
+    phaseCnt = 20; %18 degree?
     phaseHistPyr = calcGM(xphase, params, ensemble(Pyr), step, seq, normSeq, duration, phaseCnt);
     phaseHistInt = calcGM(xphase, params, ensemble(Int), step, seq, normSeq, duration, phaseCnt);
     phaseHistPyrCtrl = calcGM4Ctrl(xphase, params, ensemble(Pyr), step, normSeq, phaseCnt);
@@ -94,8 +94,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                             else
                                 cycle = (c + 1);
                             end
-                        else 
-                            cycle =1;
+
+                        else
+                            cycle = 1;
 
                         end
 
@@ -165,8 +166,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                                 else
                                     cycle = (c + 1);
                                 end
+
                             else
-                                cycle =1;
+                                cycle = 1;
 
                             end
 
