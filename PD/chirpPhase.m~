@@ -1,0 +1,18 @@
+function out=chirpPhase(x)
+phase=angle(hilbert(x));
+dPhase=diff(phase);
+
+ind=find(dPhase<-1);
+
+if ind(1)<10
+    ind(1)=1;
+end
+
+dInd=diff(ind)
+
+out=[];
+for i=1:length(dInd)
+    out=[out -pi:(2*pi)/dInd:pi];
+end
+
+end

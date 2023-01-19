@@ -20,16 +20,16 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase0 = analogPhase(Data1(1:duration), 1.5)';
         xphase = repmat(xphase0, 1, 20);
     else
-        step4chirp=Hz./ params.Fs;
+        step4chirp = Hz ./ params.Fs;
         decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
         Data4chirp = decEvent(seq(1):seq(end) + duration)';
         xphase = chirpPhase(Data4chirp);
-        xphase = interp1(1:step4chirp:length(Data4chirp)*step4chirp,xphase,1:length(Data4chirp)*step4chirp,'linear','extrap');
+        xphase = interp1(1:step4chirp:length(Data4chirp) * step4chirp, xphase, 1:length(Data4chirp) * step4chirp, 'linear', 'extrap');
         %    xphase = mod(xphase,2*pi);%covert to 0-2pi rather than -pi:pi
     end
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
-    phaseCnt=40;%18 degree?
+    phaseCnt = 40; %18 degree?
     phaseHistPyr = calcGM(xphase, params, ensemble(Pyr), step, seq, normSeq, duration, phaseCnt);
     phaseHistInt = calcGM(xphase, params, ensemble(Int), step, seq, normSeq, duration, phaseCnt);
     phaseHistPyrCtrl = calcGM4Ctrl(xphase, params, ensemble(Pyr), step, normSeq, phaseCnt);
@@ -37,12 +37,12 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
     return;
     %%%%%%%%%%%%%%%%%%%%%%%%%
-    function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, duration,phaseCnt)
+    function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, duration, phaseCnt)
 
         segmentSec = 0.5;
         segment = segmentSec * params.Fs; %0.5sec
-       
-        edges=-pi:pi/(phaseCnt/2):pi;
+
+        edges = -pi:pi / (phaseCnt / 2):pi;
 
         loop = size(ensemble, 1);
         phaseHist = zeros(phaseCnt, 120, loop);
@@ -87,13 +87,19 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                             spk(1) = 1;
                         end
 
-                        %phase
-                        %base phase hist for normalization
-                        %basehist = hist(xphasePos(phaseLoc), -pi:pi / 9.5:pi);
-                        basehist = histcounts(xphasePos(phaseLoc), edges);
-                        basehist(basehist==0)=1;
-                        %normalized phase
-                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (segmentSec / phaseCnt); %Hz
+                        if 0
+                            %the number of cycles within 0.5sec
+                            if c > 60
+                                cycle = (120 - (c + 1));
+                            else
+                                cycle = (c + 1);
+                            end
+                        else 
+                            cycle =1;
+
+                        end
+
+                        phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + histcounts(xphasePos(spk), edges)' ./ cycle ./ (segmentSec / phaseCnt); %Hz
                         %phaseHist(:, c + 1, i) = hist(xphasePos(spk), -pi:pi / 9.5:pi) ./ (segmentSec / 20); %Hz
                     end
 
@@ -102,7 +108,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
             end
 
-            phaseHist(:, :, i) = phaseHist(:, :, i) ./ nFr(i);
+            %gain
+            phaseHist(:, :, i) = phaseHist(:, :, i) ./ length(seq) ./ nFr(i);
 
         end
 
@@ -112,8 +119,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
             segmentSec = 0.5;
             segment = segmentSec * params.Fs; %0.5sec
-            phaseCnt = 60;
-            edges=-pi:pi/(phaseCnt/2):pi;
+
+            edges = -pi:pi / (phaseCnt / 2):pi;
 
             loop = size(ensemble, 1);
             phaseHist = zeros(phaseCnt, 120, loop);
@@ -146,18 +153,24 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                         spk = spk - loc0;
 
                         if ~isempty(spk)
-                           
 
                             if spk(1) == 0
                                 spk(1) = 1;
                             end
 
-                            %base phase hist for normalization
-                            
-                            basehist = histcounts(xphasePos(phaseLoc), edges);
-                            basehist(basehist==0)=1;
-                            %normalized phase
-                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (segmentSec / phaseCnt); %Hz
+                            if 0
+                                %the number of cycles within 0.5sec
+                                if c > 60
+                                    cycle = (120 - (c + 1));
+                                else
+                                    cycle = (c + 1);
+                                end
+                            else
+                                cycle =1;
+
+                            end
+
+                            phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + histcounts(xphasePos(spk), edges)' ./ cycle ./ (segmentSec / phaseCnt); %Hz
                             %phaseHist(:, c + 1, i) = basehist; %Hz
                         end
 
@@ -166,7 +179,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                     loc0 = loc;
                 end
 
-                phaseHist(:, :, i) = phaseHist(:, :, i) ./ nFr(i);
+                %gain
+                phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10 ./ nFr(i);
 
             end
 
