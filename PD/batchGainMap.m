@@ -20,7 +20,11 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase0 = analogPhase(Data1(1:duration), 1.5)';
         xphase = repmat(xphase0, 1, 20);
     else
-        xphase = chirpPhase(Data1);
+        step4chirp=Hz./ params.Fs;
+        decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
+        Data4chirp = decEvent(seq(1):seq(end) + duration)';
+        xphase = chirpPhase(Data4chirp);
+        xphase = interp1(1:step4chirp:length(Data4chirp)*step4chirp,xphase,1:length(Data4chirp)*step4chirp,'linear','extrap');
         %    xphase = mod(xphase,2*pi);%covert to 0-2pi rather than -pi:pi
     end
 
@@ -89,7 +93,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                         basehist = histcounts(xphasePos(phaseLoc), edges);
                         basehist(basehist==0)=1;
                         %normalized phase
-                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (basehist./max(basehist)) ./ (segmentSec / phaseCnt); %Hz
+                        phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (segmentSec / phaseCnt); %Hz
                         %phaseHist(:, c + 1, i) = hist(xphasePos(spk), -pi:pi / 9.5:pi) ./ (segmentSec / 20); %Hz
                     end
 
@@ -153,7 +157,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                             basehist = histcounts(xphasePos(phaseLoc), edges);
                             basehist(basehist==0)=1;
                             %normalized phase
-                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (basehist./max(basehist)) ./ (segmentSec / phaseCnt); %Hz
+                            phaseHist(:, c + 1, i) = histcounts(xphasePos(spk), edges) ./ (segmentSec / phaseCnt); %Hz
                             %phaseHist(:, c + 1, i) = basehist; %Hz
                         end
 
