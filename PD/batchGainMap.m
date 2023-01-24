@@ -3,8 +3,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     Hz = 25000;
     params.Fs = 1000; %2500
 
-    step = Hz ./ params.Fs;
+    % step = Hz ./ params.Fs;
     step = 1;
+
     params.Fs = Hz;
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
     %Event=double(Event((tetNum-1)*4+1,1:step:end));
@@ -78,29 +79,12 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                     end
 
                     spk = unit(unit >= loc & unit < loc + segment);
-                    spk = spk - seq(1);
+                    spk = spk - seq(1) + 1;
                     xphasePos = xphase;
 
                     if ~isempty(spk)
 
-                        if spk(1) == 0
-                            spk(1) = 1;
-                        end
-
-                        if 0
-                            %the number of cycles within 0.5sec
-                            if c > 60
-                                cycle = (120 - (c + 1));
-                            else
-                                cycle = (c + 1);
-                            end
-
-                        else
-                            cycle = 1;
-
-                        end
-
-                        phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + histcounts(xphasePos(spk), edges)' ./ cycle ./ (segmentSec / phaseCnt); %Hz
+                        phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + (histcounts(xphasePos(spk), edges)' ./ (segmentSec / phaseCnt)); %Hz
                         %phaseHist(:, c + 1, i) = hist(xphasePos(spk), -pi:pi / 9.5:pi) ./ (segmentSec / 20); %Hz
                     end
 
@@ -109,8 +93,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
             end
 
-            %gain
-            phaseHist(:, :, i) = phaseHist(:, :, i) ./ length(seq) ./ nFr(i);
+            %average
+            %phaseHist(:, :, i) = phaseHist(:, :, i) ./ length(seq) ./ nFr(i);
+            phaseHist(:, :, i) = phaseHist(:, :, i) ./ length(seq); %length(seq)= optostim cycles
 
         end
 
@@ -151,38 +136,21 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                         phaseLoc = 1 + c * segment:(c + 1) * segment;
 
                         spk = unit(unit >= loc & unit < loc + segment);
-                        spk = spk - loc0;
+                        spk = spk - loc0 + 1;
 
                         if ~isempty(spk)
-
-                            if spk(1) == 0
-                                spk(1) = 1;
-                            end
-
-                            if 0
-                                %the number of cycles within 0.5sec
-                                if c > 60
-                                    cycle = (120 - (c + 1));
-                                else
-                                    cycle = (c + 1);
-                                end
-
-                            else
-                                cycle = 1;
-
-                            end
-
-                            phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + histcounts(xphasePos(spk), edges)' ./ cycle ./ (segmentSec / phaseCnt); %Hz
+                            phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + (histcounts(xphasePos(spk), edges)' ./ (segmentSec / phaseCnt)); %Hz
                             %phaseHist(:, c + 1, i) = basehist; %Hz
                         end
 
                     end
 
-                    loc0 = loc;
+                    loc0 = 120*segment;
                 end
 
-                %gain
-                phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10 ./ nFr(i);
+                %average
+                %phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10 ./ nFr(i);
+                phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10; %10 phase cycles
 
             end
 

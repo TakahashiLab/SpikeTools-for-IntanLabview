@@ -20,9 +20,11 @@ function out = chirpPhase(x)
     for i = 1:length(dInd)
         out = [out -pi:(2 * pi) / dInd(i):pi];
     end
-
+  
     %correction for initial phase
-    out(1:601)=[-pi*(3/4):(pi*(7/4))/600:pi];
+   
+    out(1:601)=phase(1:601)*2;
     out(600:900)=-pi:(2*pi)/300:pi;
-
+    
+    
 end
