@@ -1,5 +1,5 @@
 %dn: 2018,2019,2020
-function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl] = contPD(dn, an, varargin)
+function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs] = contPD(dn, an, varargin)
 
     p = inputParser;
     p.addParamValue('method', 'gainmap', @ischar);
@@ -19,6 +19,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     [homePath, dataPath] = PDdataC(dn, an);
     TimingData = 'timing.mat';
     EnsembleData = 'ensemble.mat';
+    ClassifyData = 'rensemble.mat';
     details = dataPath;
 
     loop = size(dataPath, 1);
@@ -52,6 +53,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     TPs = [];
     SWs = [];
     PIs = [];
+    CQs = [];
 
     for i = 1:loop
 
@@ -80,6 +82,30 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             LFPoutR = [LFPoutR; cellfun(@median, segPara(:, 2))']; %1:speed, 2:maxdist
                         end
 
+                    end
+
+                case 'cellclassify',
+                    loadname = fullfile(homePath, dataPath{i, 1}, ClassifyData);
+
+                    if exist(loadname, 'file')
+                        load(loadname, 'rensemble');
+                        TPs = [TPs; cell2mat(rensemble(:, 4))];
+                        SWs = [SWs; cell2mat(rensemble(:, 5))];
+
+                        pi = zeros(size(rensemble, 1), 1);
+                        %interneuron (corr)
+                       
+                        pi(dataPath{i, 8}) = 1;
+                        %pyramidal cell(corr)
+                        pi(dataPath{i, 9}) = 2;
+                        %PV (tag)
+                        pi(dataPath{i, 10}) = 3;
+
+                        PIs = [PIs; pi];
+
+                        loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
+                        load(loadname, 'IS', 'LR');
+                        CQs = [CQs; IS LR];
                     end
 
                 case 'gainmap',
