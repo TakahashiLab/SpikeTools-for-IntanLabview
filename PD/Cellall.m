@@ -27,6 +27,7 @@ function [TPs, SWs, PIs] = Cellall(basename, varargin)
 
     Suffix = '.mat';
     SuffixLen = size(Suffix, 2) - 1;
+    cellclassfile='cellclass.mat';
 
     [path, name, ext] = fileparts(basename);
     dataFolder = fullfile(path, name);
@@ -37,7 +38,7 @@ function [TPs, SWs, PIs] = Cellall(basename, varargin)
 
     for i = 1:loop
 
-        if length(d(i).name) > SuffixLen
+        if length(d(i).name) > SuffixLen & ~strcmp(d(i).name,cellclassfile)
             possibleId = [possibleId i];
         end
 
@@ -53,53 +54,72 @@ function [TPs, SWs, PIs] = Cellall(basename, varargin)
     for i = possibleId
         if strncmp(d(i).name( end - SuffixLen:end), Suffix, SuffixLen)
         filename = fullfile(dataFolder, d(i).name);
+       
         fprintf('loading %s\n', filename);
         load(filename, 'tp', 'sw', 'pi', 'cq');
         TPs = [TPs; tp];
         SWs = [SWs; sw];
         PIs = [PIs; pi];
         CQs = [CQs; cq];
+       end
     end
 
-end
-
 %good units
-GU = find(CQs(:, 2) < 0.05);
+GU = find(CQs(:, 2) < .1);
+
 TPs = TPs(GU);
 SWs = SWs(GU);
 PIs = PIs(GU);
 
-if 1
-    %plot(TPs, SWs, 'k.');
-    hold on;
+X = [TPs SWs];
+ind = find(PIs == 1 | PIs == 2);
+Xnew = X;
+X = X(ind, :);
 
-    plot(TPs(PIs == 1), SWs(PIs == 1), 'bo');
-    plot(TPs(PIs == 2), SWs(PIs == 2), 'go');
-    scatter(TPs(PIs == 3), SWs(PIs == 3), 'o', 'markerfacecolor', 'b');
+GMModel = fitgmdist(X, 2, 'sharedcovariance', true, 'covariancetype', 'full', 'start', 'randSample');
+y = PIs(ind) - 1;
+
+subplot(1, 2, 1)
+h = gscatter(X(:, 1), X(:, 2), y);
+hold on
+gmPDF = @(x, y) arrayfun(@(x0, y0) pdf(GMModel, [x0 y0]), x, y);
+
+g = gca;
+fcontour(gmPDF, [0 1.0 0 1.6])
+title('{\bf Scatter Plot and Fitted Gaussian Mixture Contours}')
+legend(h, 'Model 0', 'Model1')
+
+subplot(1, 2, 2);
+[idx, ~, p] = cluster(GMModel, Xnew);
+idx(~(p(:, 1) < 0.05 | p(:, 2) < 0.05)) = 3;
+
+%check the cell type consistency 
+idxGU=idx(find(GU(ind)));
+intN=1;
+pyrN=2;
+if sum(idxGU(PIs(ind)==2)==2) < sum(idxGU(PIs(ind)==2)==1)
+    intN=2;
+    pyrN=1;
 end
 
-if 0
-    idx = kmeans([TPs SWs], 2);
-    figure;
+gscatter(Xnew(:, 1), Xnew(:, 2), idx);
 
-    hold on;
-    plot(TPs(idx == 1), SWs(idx == 1), 'bo');
-    plot(TPs(idx == 2), SWs(idx == 2), 'go');
-elseif 0
-    X = [TPs SWs];
-    ind = find(PIs == 1 | PIs == 2);
-    X = sparse(X(ind, :));
-    y = PIs(ind);
-    Mdl = fitclinear(X, y);
-    label = predict(Mdl, X);
-
-    figure
-    scatter(X(label == 1, 1), X(label == 1, 2), 'r.');
-    hold on
-    scatter(X(label == 2, 1), X(label == 2, 2), 'g.');
-    scatter(X(y == 1, 1), X(y == 1, 2), 'ro');
-    scatter(X(y == 2, 1), X(y == 2, 2), 'go');
-    hold off
+save(cellclassfile,'GMModel','X','Xnew','intN','pyrN');
+for i = possibleId
+    if strncmp(d(i).name( end - SuffixLen:end), Suffix, SuffixLen)
+        filename = fullfile(dataFolder, d(i).name);
+        fprintf('loading %s\n', filename);
+        load(filename, 'tp', 'sw', 'pi', 'cq');
+        X = [tp sw];
+        [idx, ~, p] = cluster(GMModel, X);
+        idx(~(p(:, 1) < 0.05 | p(:, 2) < 0.05)) = 3;
+        [~,name]=fileparts(d(i).name);
+        execbuf=[name '= idx;'];
+        eval(execbuf);
+       
+        save(cellclassfile,name,'-append');
+      
+   end
 end
 
 return

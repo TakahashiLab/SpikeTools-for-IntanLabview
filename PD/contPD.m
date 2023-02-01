@@ -60,10 +60,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     CQs = [];
 
     if strcmp(method,'gainmap')
-    filename=an;
-    load('cellclass.mat',filename);
-    eval(['pi=' filename ';']);
-    cPI=1;
+        filename=an;
+        load('cellclass.mat',filename,'intN','pyrN');
+        eval(['pi=' filename ';']);
+        cPI=1;
     end
 
     for i = 1:loop
@@ -135,12 +135,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
                     interneuronPV=dataPath{i,10};
                     interneuronCC=dataPath{i,8};
-                    interneuron=union(interneuron,find(piCP==2));
+                    interneuron=union(interneuron,find(piCP==intN));
                   
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
                     
-                    pyr= union(pyrCC,find(piCP==1));
+                    pyr= union(pyrCC,find(piCP==pyrN));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
