@@ -55,10 +55,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     PIs = [];
     CQs = [];
 
+    if strcmp(method,'gainmap')
     filename=an;
     load('cellclass.mat',filename);
     eval(['pi=' filename ';']);
     cPI=1;
+    end
 
     for i = 1:loop
 
