@@ -135,12 +135,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
                     interneuronPV=dataPath{i,10};
                     interneuronCC=dataPath{i,8};
-                    interneuron=union(interneuron,find(piCP==1));
+                    interneuron=union(interneuron,find(piCP==2));
                   
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
                     
-                    pyr= union(pyrCC,find(piCP==2));
+                    pyr= union(pyrCC,find(piCP==1));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
