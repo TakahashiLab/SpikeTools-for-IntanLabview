@@ -55,6 +55,11 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     PIs = [];
     CQs = [];
 
+    filename=an;
+    load('cellclass.mat',filename);
+    eval(['pi=' filename ';']);
+    cPI=1;
+
     for i = 1:loop
 
         if dataPath{i, 7} == Intensity
@@ -109,24 +114,24 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     end
 
                 case 'gainmap',
-                    filename=an;
+                    
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
                     load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
                     load(loadname, 'ensemble', 'an', 'en');
-
-                    load('cellclass.mat',filename);
-                   
-                     eval(['pi=' filename ';']);
                     
+                   
+                    piCP=pi(cPI:cPI+size(ensemble,1)-1);
+                    cPI=cPI+size(ensemble,1);
                     fprintf('real interneuron\n');
                     
+                   
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
-                    interneuron=union(interneuron,find(pi==1));
+                    interneuron=union(interneuron,find(piCP==1));
                   
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyr = union(dataPath{i, 9}, pyrTag); % % %CC+tag
-                    pyr= union(pyr,find(pi==2));
+                    pyr= union(pyr,find(piCP==2));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
