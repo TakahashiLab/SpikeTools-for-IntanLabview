@@ -40,6 +40,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     ledInt = [];
     tagPyr = [];
     tagInt = [];
+  
+    CCPyr=[];
+    CCInt=[];
+    PVInt = [];
 
     normalPyrStim = [];
     normalIntStim = [];
@@ -129,11 +133,14 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     
                    
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
+                    interneuronPV=dataPath{i,10};
+                    interneuronCC=dataPath{i,8};
                     interneuron=union(interneuron,find(piCP==1));
                   
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
-                    pyr = union(dataPath{i, 9}, pyrTag); % % %CC+tag
-                    pyr= union(pyr,find(piCP==2));
+                    pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
+                    
+                    pyr= union(pyrCC,find(piCP==2));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
@@ -192,7 +199,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 if dataPath{i, 3} <= 4
                                     normalPyrStim = [normalPyrStim; ind + offSetPyr];
                                 end
-
+                                    
+                                [~, ind] = intersect(pyr, pyrCC);
+                                CCPyr = [CCPyr; ind + offSetPyr];
+                                    
                                 if ~isempty(lc0)
                                     [~, ind] = intersect(pyr, lc0);
                                     ledPyr = [ledPyr; ind + offSetPyr];
@@ -221,6 +231,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 if dataPath{i, 3} <= 4
                                     normalIntStim = [normalIntStim; ind + offSetInt];
                                 end
+
+                                [~, ind] = intersect(interneuron, interneuronCC);
+                                CCInt = [CCInt; ind + offSetInt];
+
+                                [~, ind] = intersect(interneuron, interneuronPV);
+                                PVInt = [PVInt; ind + offSetInt];
 
                                 if ~isempty(lc0)
                                     [~, ind] = intersect(interneuron, lc0);
@@ -269,6 +285,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
         PyrIntList{6} = ledInt;
         PyrIntList{7} = tagPyr;
         PyrIntList{8} = tagInt;
+        PyrIntList{9} = CCPyr;
+        PyrIntList{10} = CCInt;
+        PyrIntList{11} = PVInt;
+       
 
         PyrIntListStim{1} = normalPyrStim;
         PyrIntListStim{2} = normalIntStim;
