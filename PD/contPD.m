@@ -109,16 +109,24 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     end
 
                 case 'gainmap',
-
+                    filename=an;
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
                     load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
                     load(loadname, 'ensemble', 'an', 'en');
 
+                    load('cellclass.mat',filename);
+                   
+                     eval(['pi=' filename ';']);
+                    
                     fprintf('real interneuron\n');
+                    
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
+                    interneuron=union(interneuron,find(pi==1));
+                  
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyr = union(dataPath{i, 9}, pyrTag); % % %CC+tag
+                    pyr= union(pyr,find(pi==2));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
