@@ -23,9 +23,11 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     else
         step4chirp = Hz ./ params.Fs;
         decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
-        Data4chirp = decEvent(seq(1):seq(end) + duration)';
+        %Data4chirp = decEvent(seq(1):seq(end) + duration)';
+        Data4chirp = decEvent(seq(1):seq(1) + Hz*60)';
         xphase = chirpPhase(Data4chirp);
-        xphase = interp1(1:step4chirp:length(Data4chirp) * step4chirp, xphase, 1:length(Data4chirp) * step4chirp, 'linear', 'extrap');
+        xphase= repmat(xphase,1,round(length(seq(1):seq(end))/size(xphase,2))+1);
+        %xphase = interp1(1:step4chirp:length(Data4chirp) * step4chirp, xphase, 1:length(Data4chirp) * step4chirp, 'linear', 'extrap');
         %    xphase = mod(xphase,2*pi);%covert to 0-2pi rather than -pi:pi
     end
 
