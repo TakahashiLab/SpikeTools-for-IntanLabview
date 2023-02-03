@@ -1,4 +1,7 @@
-function batchCondPD(server)
+function batchCondPD(server,method)
+if nargin==1
+    method='gainmap';
+end
 
     switch (server)
         case 'deepMachine',
@@ -26,6 +29,6 @@ function batchCondPD(server)
     end
 
     for i = 1:size(dataParing, 1)
-        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, ~, ~, ~, ~, phaseHistPyrCtrl, phaseHistIntCtrl] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1);
+        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, ~, ~, ~, ~, phaseHistPyrCtrl, phaseHistIntCtrl] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1,'method',method);
         save([dataParing{i,2} '.mat'],'phaseHistPyr','phaseHistInt','PyrIntList','PyrIntListStim','phaseHistPyrCtrl','phaseHistIntCtrl');
     end

@@ -40,9 +40,9 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     ledInt = [];
     tagPyr = [];
     tagInt = [];
-  
-    CCPyr=[];
-    CCInt=[];
+
+    CCPyr = [];
+    CCInt = [];
     PVInt = [];
 
     normalPyrStim = [];
@@ -59,11 +59,16 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     PIs = [];
     CQs = [];
 
-    if strcmp(method,'gainmap')
-        filename=an;
-        load('cellclass.mat',filename,'intN','pyrN');
+    if strcmp(method, 'gainmap') | strcmp(method, 'coherence')
+        method2 = method;
+        method = 'gainOrCohere';
+    end
+
+    if strcmp(method, 'gainOrCohere')
+        filename = an;
+        load('cellclass.mat', filename, 'intN', 'pyrN');
         eval(['pi=' filename ';']);
-        cPI=1;
+        cPI = 1;
     end
 
     for i = 1:loop
@@ -105,7 +110,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                         pi = zeros(size(rensemble, 1), 1);
                         %interneuron (corr)
-                       
+
                         pi(dataPath{i, 8}) = 1;
                         %pyramidal cell(corr)
                         pi(dataPath{i, 9}) = 2;
@@ -119,28 +124,26 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                         CQs = [CQs; IS LR];
                     end
 
-                case 'gainmap',
-                    
+                case 'gainorcohere',
+
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
                     load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
                     load(loadname, 'ensemble', 'an', 'en');
                     
-                   
-                    piCP=pi(cPI:cPI+size(ensemble,1)-1);
-                    cPI=cPI+size(ensemble,1);
+                    piCP = pi(cPI:cPI + size(ensemble, 1) - 1);
+                    cPI = cPI + size(ensemble, 1);
                     fprintf('real interneuron\n');
-                    
-                   
+
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
-                    interneuronPV=dataPath{i,10};
-                    interneuronCC=dataPath{i,8};
-                    interneuron=union(interneuron,find(piCP==intN));
-                  
+                    interneuronPV = dataPath{i, 10};
+                    interneuronCC = dataPath{i, 8};
+                    interneuron = union(interneuron, find(piCP == intN));
+
                     pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
                     pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
-                    
-                    pyr= union(pyrCC,find(piCP==pyrN));
+
+                    pyr = union(pyrCC, find(piCP == pyrN));
 
                     if dataPath{i, 3} <= 4
                         lcq = 1:4;
@@ -183,8 +186,15 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             loadname = fullfile(homePath, dataPath{i, 1}, [name 'Event.mat']);
                             load(loadname, 'event');
 
-                            %calc gain map
-                            [pPyr, pInt, pPyrCtrl, pIntCtrl] = batchGainMap(event, ensemble(:, 3), SeqTime, 1, [preSilentTime; postSilentTime], pyr, interneuron);
+                            if strcmp(method2, 'gainmap')
+                                %calc gain map
+                                [pPyr, pInt, pPyrCtrl, pIntCtrl] = batchGainMap(event, ensemble(:, 3), SeqTime, 1, [preSilentTime; postSilentTime], pyr, interneuron);
+                            elseif strcmp(method2, 'coherence')
+                                %[Cs,phis,fs]=batchMTS(LFP,ensemble,chirpSeqTime,tetNum);
+                                %coherence LED and neuronal ensemble
+                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1);
+                                %plotMTS(Cs,phis,fs,pyr,interneuron,confCs);
+                            end
 
                             %cell classification
                             normal = find(tetrodeMap(an, en) <= 4);
@@ -199,10 +209,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 if dataPath{i, 3} <= 4
                                     normalPyrStim = [normalPyrStim; ind + offSetPyr];
                                 end
-                                    
+
                                 [~, ind] = intersect(pyr, pyrCC);
                                 CCPyr = [CCPyr; ind + offSetPyr];
-                                    
+
                                 if ~isempty(lc0)
                                     [~, ind] = intersect(pyr, lc0);
                                     ledPyr = [ledPyr; ind + offSetPyr];
@@ -260,11 +270,20 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             offSetPyr = offSetPyr + length(pyr);
                             offSetInt = offSetInt + length(interneuron);
 
-                            phaseHistPyr = cat(3, phaseHistPyr, pPyr);
-                            phaseHistInt = cat(3, phaseHistInt, pInt);
+                            if strcmp(method2, 'gainmap')
+                                phaseHistPyr = cat(3, phaseHistPyr, pPyr);
+                                phaseHistInt = cat(3, phaseHistInt, pInt);
 
-                            phaseHistPyrCtrl = cat(3, phaseHistPyrCtrl, pPyrCtrl);
-                            phaseHistIntCtrl = cat(3, phaseHistIntCtrl, pIntCtrl);
+                                phaseHistPyrCtrl = cat(3, phaseHistPyrCtrl, pPyrCtrl);
+                                phaseHistIntCtrl = cat(3, phaseHistIntCtrl, pIntCtrl);
+                            elseif strcmp(method2, 'coherence')
+                                phaseHistPyr = cat(1, phaseHistPyr, Cs);
+                                phaseHistInt = cat(1, phaseHistInt, phis);
+
+                                phaseHistPyrCtrl = cat(1, phaseHistPyrCtrl, fs);
+                                phaseHistIntCtrl = cat(1, phaseHistIntCtrl, confCs);
+
+                            end
 
                         end
 
@@ -288,7 +307,6 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
         PyrIntList{9} = CCPyr;
         PyrIntList{10} = CCInt;
         PyrIntList{11} = PVInt;
-       
 
         PyrIntListStim{1} = normalPyrStim;
         PyrIntListStim{2} = normalIntStim;
