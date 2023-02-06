@@ -1,7 +1,7 @@
 function [C,phi,f,confC,phistd,zerosp]=mtanalysiscpt(data,tetNum,unit,params,seq,step)
 Hz=25000;
 movingwin=[1 0.5];
-unit=floor(unit./step);
+unit=unit./step;
 
 loop=size(seq,2);
 if loop==2
@@ -26,8 +26,9 @@ else %segmentation every 1sec
   win=.5;%sec
   Data1=data(seq(1):seq(end)+duration)';
   spk=unit(unit>seq(1) & unit<seq(end)+duration);
-  Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
-  [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,1);
+  %Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
+Spk.times=(double(spk')-seq(1));
+[C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,1);
 end
 
 
