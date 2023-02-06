@@ -1,5 +1,5 @@
 %dn: 2018,2019,2020
-function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs] = contPD(dn, an, varargin)
+function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs, pyr, interneuron] = contPD(dn, an, varargin)
 
     p = inputParser;
     p.addParamValue('method', 'gainmap', @ischar);
