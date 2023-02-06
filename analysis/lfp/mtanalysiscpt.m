@@ -26,9 +26,9 @@ else %segmentation every 1sec
   win=.5;%sec
   Data1=data(seq(1):seq(end)+duration)';
   spk=unit(unit>seq(1) & unit<seq(end)+duration);
-  %Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
-Spk.times=(double(spk')-seq(1));
-[C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,1);
+  Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
+
+  [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,1);
 end
 
 
