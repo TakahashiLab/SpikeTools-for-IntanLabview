@@ -271,8 +271,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                             end
 
-                            PYR=[PYR; pyr+offSetEns];
-                            INTERNEURON=[INTERNEURON; interneuron+offSetEns];
+                            PYR=[PYR pyr(:)+offSetEns];
+                            INTERNEURON=[INTERNEURON interneuron(:)+offSetEns];
 
                             offSetPyr = offSetPyr + length(pyr);
                             offSetInt = offSetInt + length(interneuron);
