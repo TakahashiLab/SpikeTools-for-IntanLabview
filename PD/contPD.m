@@ -31,6 +31,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     phaseHistIntCtrl = [];
     offSetPyr = 0;
     offSetInt = 0;
+    offSetEns =0;
 
     normalPyr = [];
     normalInt = [];
@@ -270,11 +271,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                             end
 
-                            PYR=[PYR; pyr+offSetPyr];
-                            INTERNEURON=[INTERNEURON;interneuron+offSetInt];
+                            PYR=[PYR pyr+offSetEns];
+                            INTERNEURON=[INTERNEURON interneuron+offSetEns];
 
                             offSetPyr = offSetPyr + length(pyr);
                             offSetInt = offSetInt + length(interneuron);
+                            offSetEns=offSetEns+size(ensemble,1);
 
                             if strcmp(method2, 'gainmap')
                                 phaseHistPyr = cat(3, phaseHistPyr, pPyr);
