@@ -1,5 +1,5 @@
 %dn: 2018,2019,2020
-function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs,pyr,interneuron] = contPD(dn, an, varargin)
+function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs,PYR,INTERNEURON] = contPD(dn, an, varargin)
 
     p = inputParser;
     p.addParamValue('method', 'gainmap', @ischar);
@@ -58,6 +58,9 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     SWs = [];
     PIs = [];
     CQs = [];
+
+    PYR=[];
+    INTERNEURON=[];
 
     if strcmp(method, 'gainmap') | strcmp(method, 'coherence')
         method2 = method;
@@ -266,6 +269,9 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 end
 
                             end
+
+                            PYR=[PYR; pyr+offSetPyr];
+                            INTERNEURON=[INTERNEURON;interneuron+offSetInt];
 
                             offSetPyr = offSetPyr + length(pyr);
                             offSetInt = offSetInt + length(interneuron);
