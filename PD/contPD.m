@@ -7,6 +7,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     p.addParamValue('intensity', 5, @isnumeric);
     p.addParamValue('cellclass', 0, @isnumeric); %cell classification mode
     p.addParamValue('localcell', 0, @isnumeric); %cells only monitored from an optogenetic tetrode
+    p.addParamValue('trialave',1, @isnumeric);
 
     p.parse(varargin{:});
     method = p.Results.method;
@@ -14,6 +15,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     Intensity = p.Results.intensity;
     cellClass = p.Results.cellclass;
     localCell = p.Results.localcell;
+    trialave = p.Results.trialave;
 
     alpha = 0.05;
     [homePath, dataPath] = PDdataC(dn, an);
@@ -196,7 +198,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             elseif strcmp(method2, 'coherence')
                                 %[Cs,phis,fs]=batchMTS(LFP,ensemble,chirpSeqTime,tetNum);
                                 %coherence LED and neuronal ensemble
-                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1);
+                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave);
                                 %plotMTS(Cs,phis,fs,pyr,interneuron,confCs);
                             end
 
