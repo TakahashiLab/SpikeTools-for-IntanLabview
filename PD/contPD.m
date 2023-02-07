@@ -270,7 +270,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 end
 
                             end
-
+                            size(pyr)
+                            size(PYR)
                             PYR=[PYR; pyr+offSetEns];
                             INTERNEURON=[INTERNEURON; interneuron+offSetEns];
 
