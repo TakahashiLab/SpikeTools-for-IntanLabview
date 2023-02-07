@@ -144,7 +144,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     interneuronCC = dataPath{i, 8};
                     interneuron = union(interneuron', find(piCP == intN));
 
-                    pyrTag = setdiff(dataPath{i, 11}, interneuron); % %conflict
+                    pyrTag = setdiff(dataPath{i, 11}, interneuron'); % %conflict
                     pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
 
                     pyr = union(pyrCC', find(piCP == pyrN));
@@ -270,8 +270,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 end
 
                             end
-                            size(pyr)
-                            size(PYR)
+                           
                             PYR=[PYR; pyr+offSetEns];
                             INTERNEURON=[INTERNEURON; interneuron+offSetEns];
 
