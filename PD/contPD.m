@@ -275,6 +275,11 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             if px < py
                                 pyr=pyr';
                             end
+                            [px,py]=size(interneuron);
+                            if px < py
+                                interneuron=interneuron';
+                            end
+
                             PYR=[PYR; pyr+offSetEns];
                             INTERNEURON=[INTERNEURON; interneuron+offSetEns];
 
