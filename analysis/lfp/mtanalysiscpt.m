@@ -23,7 +23,7 @@ if 0 %trial average
   end
   [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencycpt(Data1,Spk,params,1);
 else %segmentation every 1sec
-  win=30;%segment duration in sec
+  win=2;%segment duration in sec
   Data1=data(seq(1):seq(end)+duration)';
   spk=unit(unit>seq(1) & unit<seq(end)+duration);
   Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
