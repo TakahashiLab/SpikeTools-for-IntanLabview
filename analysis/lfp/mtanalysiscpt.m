@@ -1,7 +1,7 @@
 function [C,phi,f,confC,phistd,zerosp]=mtanalysiscpt(data,tetNum,unit,params,seq,step)
 Hz=25000;
 movingwin=[1 0.5];
-unit=unit./step;
+unit=double(unit)./step;
 
 loop=size(seq,2);
 if loop==2
@@ -23,7 +23,7 @@ if 0 %trial average
   end
   [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencycpt(Data1,Spk,params,1);
 else %segmentation every 1sec
-  win=.5;%sec
+  win=30;%segment duration in sec
   Data1=data(seq(1):seq(end)+duration)';
   spk=unit(unit>seq(1) & unit<seq(end)+duration);
   Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
