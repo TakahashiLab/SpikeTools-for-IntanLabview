@@ -31,7 +31,10 @@ else %segmentation every 1sec
   [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,0);
 end
 
-
+Cs=C;
+Cs=cat(3,Cs,S12);
+Cs=cat(3,Cs,S1);
+Cs=cat(3,Cs,S2);
 %[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,1);
 
 for i=1:size(phistd,2)
