@@ -32,7 +32,7 @@ else %segmentation every 1sec
 end
 
 
-%[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,1);
+%[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,0);
 
 for i=1:size(phistd,2)
   nanRange=find(phistd(:,i)>2);
