@@ -28,11 +28,11 @@ else %segmentation every 1sec
   spk=unit(unit>seq(1) & unit<seq(end)+duration);
   Spk.times=(double(spk')-seq(1))./params.Fs;%convert from kHz to Hz
 
-  [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,1);
+  [C,phi,S12,S1,S2,f,zerosp,confC,phistd]=coherencysegcpt(Data1,Spk,win,params,0);
 end
 
 
-%[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,0);
+%[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,1);
 
 for i=1:size(phistd,2)
   nanRange=find(phistd(:,i)>2);
