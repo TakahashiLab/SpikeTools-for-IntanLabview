@@ -1,4 +1,4 @@
-function [C,phi,f,confC,phistd,zerosp]=mtanalysiscpt(data,tetNum,unit,params,seq,step)
+function [Cs,phi,f,confC,phistd,zerosp]=mtanalysiscpt(data,tetNum,unit,params,seq,step)
 Hz=25000;
 movingwin=[1 0.5];
 unit=double(unit)./step;
