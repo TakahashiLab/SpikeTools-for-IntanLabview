@@ -28,7 +28,8 @@ end
                           };
     end
 
+    %for i=1
     for i = 1:size(dataParing, 1)
         [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, ~, ~, ~, ~, phaseHistPyrCtrl, phaseHistIntCtrl,~,pyr,interneuron] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1,'method',method);
-        save([dataParing{i,2} '.mat'],'phaseHistPyr','phaseHistInt','PyrIntList','PyrIntListStim','phaseHistPyrCtrl','phaseHistIntCtrl','pyr','interneuron');
+        save([dataParing{i,2} '.mat'],'-v7.3','phaseHistPyr','phaseHistInt','PyrIntList','PyrIntListStim','phaseHistPyrCtrl','phaseHistIntCtrl','pyr','interneuron');
     end
