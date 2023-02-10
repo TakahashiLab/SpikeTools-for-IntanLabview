@@ -74,7 +74,7 @@ function S = getDir(S, div)
     repeat = 20;
 
     if div > 0 % 1:ascending, 2:descending
-        S = reshape(S, size(S, 1), segment, repeat);
+        S = reshape(S, size(S, 1), repeat,segment);
 
         switch (div)
             case 1,
@@ -85,7 +85,7 @@ function S = getDir(S, div)
                 dir = 1:20;
         end
 
-        S = S(:, :, dir);
+        S = S(:, dir,:);
         S = reshape(S, size(S, 1), segment * length(dir));
 
     end
