@@ -55,9 +55,7 @@ end
 %%%%
 function [C, phi] = calcCohere(S12,S1,S2, div)
 
-    S12 = squeeze(Coh(:, :, 2));
-    S1 = squeeze(Coh(:, :, 3));
-    S2 = squeeze(Coh(:, :, 4));
+    
     S12 = getDir(S12, div);
     S1 = getDir(S1, div);
     S2 = getDir(S2, div);
