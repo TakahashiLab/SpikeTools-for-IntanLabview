@@ -1,4 +1,4 @@
-function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit, params, seq, step)
+function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit, params, seq, step, pSeq)
     Hz = 25000;
     movingwin = [1 0.5];
     unit = double(unit) ./ step;
@@ -12,35 +12,35 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     duration = min(floor(diff(seq) / 1000) * 1000);
     unitDuration = duration * step;
 
-    if 0 %trial average
-        Data1 = zeros(duration, loop);
+    %segmentation every 1sec
+    win = 1; %segment duration in sec
+    Data1 = data(seq(1):seq(end) + duration)';
+    spk = unit(unit > seq(1) & unit < seq(end) + duration);
+    Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
 
-        for i = 1:loop
-            Data1(:, i) = data(seq(i) + 1:seq(i) + duration);
-            %  spk=unit(unit>seq(i) & unit<seq(i)+unitDuration);
-            spk = unit(unit > seq(i) & unit < seq(i) + duration);
+    [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
 
-            %  Spk(i).times=(double(spk')-seq(i))./Hz;
-            Spk(i).times = (double(spk') - seq(i)) ./ params.Fs;
-        end
+    [Cs, phi] = calcCohere(S12, S1, S2, 1); %ascending
+    [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 2); %descending
+    Cs = cat(3, Cs, Ctmp);
+    phi = cat(3, phi, phiTmp);
+    [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 3); %both
+    Cs = cat(3, Cs, Ctmp);
+    phi = cat(3, phi, phiTmp);
 
-        [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencycpt(Data1, Spk, params, 1);
-    else %segmentation every 1sec
-        win = 1; %segment duration in sec
-        Data1 = data(seq(1):seq(end) + duration)';
-        spk = unit(unit > seq(1) & unit < seq(end) + duration);
-        Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
+    %preSilent control
+    Data1=data(pSeq(1):pSeq(1)+length(Data1))';
+    [~, ~, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
 
-        [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
-    end
-
-    [Cs,phi] = calcCohere(S12,S1,S2, 1); %ascending
-    [Ctmp,phiTmp]=calcCohere(S12,S1,S2,2);%descending
+    [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 1); %ascending
     Cs=cat(3,Cs,Ctmp);
     phi=cat(3,phi,phiTmp);
-    [Ctmp,phiTmp]=calcCohere(S12,S1,S2,3);%both
-    Cs=cat(3,Cs,Ctmp);
-    phi=cat(3,phi,phiTmp);
+    [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 2); %descending
+    Cs = cat(3, Cs, Ctmp);
+    phi = cat(3, phi, phiTmp);
+    [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 3); %both
+    Cs = cat(3, Cs, Ctmp);
+    phi = cat(3, phi, phiTmp);
 
     %[C,phi,S12,S1,S2,t,f,zerosp,confC,phistd]=cohgramcpt(Data1,Spk,movingwin,params,1);
 
@@ -53,9 +53,8 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
 end
 
 %%%%
-function [C, phi] = calcCohere(S12,S1,S2, div)
+function [C, phi] = calcCohere(S12, S1, S2, div)
 
-    
     S12 = getDir(S12, div);
     S1 = getDir(S1, div);
     S2 = getDir(S2, div);
@@ -74,7 +73,7 @@ function S = getDir(S, div)
     repeat = 20;
 
     if div > 0 % 1:ascending, 2:descending
-        S = reshape(S, size(S, 1), repeat,segment);
+        S = reshape(S, size(S, 1), repeat, segment);
 
         switch (div)
             case 1,
@@ -85,7 +84,7 @@ function S = getDir(S, div)
                 dir = 1:20;
         end
 
-        S = S(:, dir,:);
+        S = S(:, dir, :);
         S = reshape(S, size(S, 1), segment * length(dir));
 
     end

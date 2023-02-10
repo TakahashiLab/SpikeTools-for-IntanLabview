@@ -201,7 +201,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             elseif strcmp(method2, 'coherence')
                                 %[Cs,phis,fs]=batchMTS(LFP,ensemble,chirpSeqTime,tetNum);
                                 %coherence LED and neuronal ensemble
-                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave);
+                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave, preSilentTime);
                                 %plotMTS(Cs,phis,fs,pyr,interneuron,confCs);
                             end
 
@@ -300,9 +300,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 phaseHistPyrCtrl = cat(3, phaseHistPyrCtrl, pPyrCtrl);
                                 phaseHistIntCtrl = cat(3, phaseHistIntCtrl, pIntCtrl);
                             elseif strcmp(method2, 'coherence')
+                               
                                 phaseHistPyr = cat(1, phaseHistPyr, Cs);
                                 phaseHistInt = cat(1, phaseHistInt, phis);
-
+                               
                                 phaseHistPyrCtrl = cat(1, phaseHistPyrCtrl, fs);
                                 phaseHistIntCtrl = cat(1, phaseHistIntCtrl, confCs);
 
