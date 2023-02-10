@@ -1,4 +1,4 @@
-function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, seq, tetNum,trialave)
+function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, seq, tetNum, trialave, preSilentSeq)
     Hz = 25000;
     params.Fs = 1000; %2500
     params.fpass = [0 120];
@@ -24,10 +24,14 @@ function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, se
     %Event=Event((tetNum-1)*4+1,:);
     seq = floor(seq ./ step);
 
+    %preSilentPeriod
+    pSeq = floor(preSilentSeq./step);
+    
+
     for i = 1:loop
         %for i=1
         fprintf('loop=%d/%d\n', i, loop);
-        [Cs{i}, phis{i}, fs{i}, confCs{i}, phistds{i}, zerosps{i}] = mtanalysiscpt(Event, tetNum, ensemble{i}, params, seq, step);
+        [Cs{i}, phis{i}, fs{i}, confCs{i}, phistds{i}, zerosps{i}] = mtanalysiscpt(Event, tetNum, ensemble{i}, params, seq, step, pSeq);
     end
 
     return;
