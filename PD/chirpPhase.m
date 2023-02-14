@@ -29,8 +29,10 @@ function out = chirpPhase(x)
     for q=1:loop
       tmp=out(1+(q-1)*interval:q*interval);
       
-      tmp(1:601)=[0:pi/600:pi];
-      tmp(interval-600:interval)=[-pi:pi/600:0];
+      tmp(1:601)=[-pi:2*pi/600:pi];
+      tmp(601:901)=[-pi:2*pi/300:pi];
+      tmp(interval-600:interval)=[-pi:2*pi/600:pi];
+      tmp(interval-900:interval-600)=[-pi:2*pi/300:pi];
 
       out(1+(q-1)*interval:q*interval)=tmp;
     end

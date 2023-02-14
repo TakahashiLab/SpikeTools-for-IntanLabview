@@ -3,10 +3,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     Hz = 25000;
     params.Fs = 1000; %2500
 
-    % step = Hz ./ params.Fs;
-    step = 1;
-
-    params.Fs = Hz;
+   step = Hz ./ params.Fs;
+  
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
     %Event=double(Event((tetNum-1)*4+1,1:step:end));
 
@@ -14,19 +12,20 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     normSeq = floor(normSeq ./ step);
 
     duration = min(floor(diff(seq) / 1000) * 1000);
-
-    step4chirp = Hz ./ params.Fs;
-    decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
-    decEvent = decEvent(seq(1):seq(end) + duration)';
+  
+    Event = Event(seq(1):seq(end) + duration)';
 
     if size(seq, 2) == 30 %for noise
-        Data4phase = hilbert(decEvent);
+        Data4phase = hilbert(Event);
         xphase = angle(Data4phase);
     elseif size(seq, 2) == 20 %chirp
-        xphase = chirpPhase(decEvent);
+        
+        xphase = chirpPhase(Event);
+        
     elseif size(seq, 2) == 10 %pulse
 
     end
+    
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
     phaseCnt = 20; %18 degree?
@@ -52,7 +51,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         for i = 1:loop %unit
             fprintf('loop=%d/%d\n', i, loop);
             unit = ensemble{i};
-            unit = floor(unit ./ step);
+            unit = round(unit ./ step);
 
             %calculate regular firing rate during pre and post silent periods
             for k = 1 %pre silent preriod only, if both pre and post periods, then 1:2
