@@ -14,21 +14,18 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     normSeq = floor(normSeq ./ step);
 
     duration = min(floor(diff(seq) / 1000) * 1000);
-    Data1 = Event(seq(1):seq(end) + duration)';
 
-    %if duration>20000
-    if 0 %for noise?
-        xphase0 = analogPhase(Data1(1:duration), 1.5)';
-        xphase = repmat(xphase0, 1, 20);
-    else
-        step4chirp = Hz ./ params.Fs;
-        decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
-        %Data4chirp = decEvent(seq(1):seq(end) + duration)';
-        Data4chirp = decEvent(seq(1):seq(1) + Hz*60)';
-        xphase = chirpPhase(Data4chirp);
-        xphase= repmat(xphase,1,round(length(seq(1):seq(end))/size(xphase,2))+2);
-        %xphase = interp1(1:step4chirp:length(Data4chirp) * step4chirp, xphase, 1:length(Data4chirp) * step4chirp, 'linear', 'extrap');
-        %    xphase = mod(xphase,2*pi);%covert to 0-2pi rather than -pi:pi
+    step4chirp = Hz ./ params.Fs;
+    decEvent = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step4chirp);
+    decEvent = decEvent(seq(1):seq(end) + duration)';
+
+    if size(seq, 2) == 30 %for noise
+        Data4phase = hilbert(decEvent);
+        xphase = angle(Data4phase);
+    elseif size(seq, 2) == 20 %chirp
+        xphase = chirpPhase(decEvent);
+    elseif size(seq, 2) == 10 %pulse
+
     end
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
@@ -147,7 +144,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
                     end
 
-                    loc0 = 120*segment;
+                    loc0 = 120 * segment;
                 end
 
                 %average
