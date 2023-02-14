@@ -21,11 +21,18 @@ function out = chirpPhase(x)
         out = [out -pi:(2 * pi) / dInd(i):pi];
     end
   
+    %interval 60 sec 1kHz
     %correction for start phase
-    out(1:15001)=phase(1:15001)*2;
-    out(15000:22500)=-pi:(2*pi)/7500:pi;
+    interval=60*1000;
+    loop=floor(length(out)/interval);
 
-    out(end-22500:end-15000)=-pi:(2*pi)/7500:pi;
-    out(end-15001:end)=phase(end-15001:end)*2;
-  
+    for q=1:loop
+      tmp=out(1+(q-1)*interval:q*interval);
+      
+      tmp(1:601)=[0:pi/600:pi];
+      tmp(interval-600:interval)=[-pi:pi/600:0];
+
+      out(1+(q-1)*interval:q*interval)=tmp;
+    end
+
 end
