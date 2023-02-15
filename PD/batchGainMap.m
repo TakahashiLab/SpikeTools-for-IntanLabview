@@ -28,7 +28,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     
     %resetting
     step=1;
-    seq=OrgSeq;
+    seq=orgSeq;
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
     phaseCnt = 20; %18 degree?
