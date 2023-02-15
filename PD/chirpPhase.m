@@ -1,6 +1,5 @@
 function out = chirpPhase(x)
     
-
     phase = angle(hilbert(x));
     dPhase = diff(phase);
 

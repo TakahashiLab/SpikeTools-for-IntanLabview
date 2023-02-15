@@ -8,24 +8,27 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
     %Event=double(Event((tetNum-1)*4+1,1:step:end));
 
+    
+   % normSeq = floor(normSeq ./ step);
+    orgSeq=seq;
     seq = floor(seq ./ step);
-    normSeq = floor(normSeq ./ step);
-
     duration = min(floor(diff(seq) / 1000) * 1000);
-  
-    Event = Event(seq(1):seq(end) + duration)';
+        Event = Event(seq(1):seq(end) + duration)';
 
     if size(seq, 2) == 30 %for noise
         Data4phase = hilbert(Event);
         xphase = angle(Data4phase);
     elseif size(seq, 2) == 20 %chirp
-        
         xphase = chirpPhase(Event);
-        
+        %expansion
+        xphase=interp1(1:length(xphase),xphase,1:1/step:length(xphase));
     elseif size(seq, 2) == 10 %pulse
 
     end
     
+    %resetting
+    step=1;
+    seq=OrgSeq;
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
     phaseCnt = 20; %18 degree?
