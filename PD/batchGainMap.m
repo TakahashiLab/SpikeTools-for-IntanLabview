@@ -3,8 +3,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     Hz = 25000;
     params.Fs = 1000; %2500
 
-   step = Hz ./ params.Fs;
-  
+    step = Hz ./ params.Fs;
+ 
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
     %Event=double(Event((tetNum-1)*4+1,1:step:end));
 
@@ -13,7 +13,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     orgSeq=seq;
     seq = floor(seq ./ step);
     duration = min(floor(diff(seq) / 1000) * 1000);
-        Event = Event(seq(1):seq(end) + duration)';
+    Event = Event(seq(1):seq(end) + duration)';
 
     if size(seq, 2) == 30 %for noise
         Data4phase = hilbert(Event);
@@ -26,7 +26,6 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
     end
     
-    %resetting
     step=1;
     seq=orgSeq;
 
@@ -42,7 +41,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, duration, phaseCnt)
 
         segmentSec = 0.5;
-        segment = segmentSec * params.Fs; %0.5sec
+        segment = segmentSec * params.Fs*(25/step); %0.5sec
 
         edges = -pi:pi / (phaseCnt / 2):pi;
 
@@ -105,7 +104,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseCnt)
 
             segmentSec = 0.5;
-            segment = segmentSec * params.Fs; %0.5sec
+            segment = segmentSec * params.Fs*(25/step); %0.5sec
 
             edges = -pi:pi / (phaseCnt / 2):pi;
 
