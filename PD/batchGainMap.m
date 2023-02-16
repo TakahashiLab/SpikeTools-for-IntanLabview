@@ -6,8 +6,6 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     step = Hz ./ params.Fs;
  
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
-    %Event=double(Event((tetNum-1)*4+1,1:step:end));
-
     
    % normSeq = floor(normSeq ./ step);
     orgSeq=seq;
@@ -28,6 +26,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     
     step=1;
     seq=orgSeq;
+    duration=duration*25;
 
     %xphase0=analogPhase(Data1(1:60000),1.5)';
     phaseCnt = 20; %18 degree?
