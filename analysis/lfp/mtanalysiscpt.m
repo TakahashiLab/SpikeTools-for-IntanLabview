@@ -71,9 +71,14 @@ end
 
 %%%%%%
 function S = getDir(S, div)
-    segment = 60;
-    repeat = 40;
-    size(S)
+    if size(S,2)==2400
+        segment = 60;
+        repeat = 40;
+    elseif size(S,2)==600
+        segment=10;
+        repeat=60;
+    end
+    
     if div > 0 % 1:ascending, 2:descending
        % S = reshape(S, size(S, 1), repeat, segment);
         S = reshape(S, size(S, 1), segment,repeat);
