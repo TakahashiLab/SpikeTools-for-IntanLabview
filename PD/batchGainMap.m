@@ -16,6 +16,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     if size(seq, 2) == 30 %for noise
         Data4phase = hilbert(Event);
         xphase = angle(Data4phase);
+        xphase=interp1(1:length(xphase),xphase,1:1/step:length(xphase));
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
         %expansion
