@@ -71,7 +71,7 @@ end
 
 %%%%%%
 function S = getDir(S, div)
-    segment = 30;
+    segment = 60;
     repeat = 40;
 
     if div > 0 % 1:ascending, 2:descending
