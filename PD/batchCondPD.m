@@ -1,7 +1,11 @@
-function batchCondPD(server, method)
+function batchCondPD(server, method, waveType)
 
     if nargin == 1
         method = 'gainmap';
+        waveType = 'chirp';
+    elseif nargin == 2
+        waveType = 'chirp';
+
     end
 
     switch (server)
@@ -29,12 +33,13 @@ function batchCondPD(server, method)
                           };
     end
 
-    %for i=6:7
-    for i = 1:size(dataParing, 1)
-        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, fr, tp, sw, pi, phaseHistPyrCtrl, phaseHistIntCtrl, cq, pyr, interneuron] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1, 'method', method);
+    %for i=7
+      
+            for i = 1:size(dataParing, 1)
+        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, fr, tp, sw, pi, phaseHistPyrCtrl, phaseHistIntCtrl, cq, pyr, interneuron] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1, 'method', method, 'waveType', waveType);
 
         if strcmp(method, 'cellclassify')
-            save([dataParing{i,2} '.mat'],'tp','sw','pi','cq');
+            save([dataParing{i, 2} '.mat'], 'tp', 'sw', 'pi', 'cq');
         else
             save([dataParing{i, 2} '.mat'], '-v7.3', 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl', 'pyr', 'interneuron');
         end
