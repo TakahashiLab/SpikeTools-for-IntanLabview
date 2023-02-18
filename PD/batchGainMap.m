@@ -21,7 +21,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         %second half
         xphase2 = WhitePhase(Event(params.Fs/2+1:params.Fs),params.Fs);
         xphase1(2:2:60,:)=xphase2(2:2:60,:);
-        xphase=[xphase1 xphase1(60:-1:1,:)];m
+        xphase=[xphase1 xphase1(60:-1:1,:)];
         xphase=repmat(reshape(xphase',1,prod(size(xphase))),1,10);
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
         
