@@ -16,10 +16,18 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     if size(seq, 2) == 30 %for noise
         %Data4phase = hilbert(Event);
         %xphase = angle(Data4phase);
-        xphase = WhitePhase(Event(1:params.Fs/2),params.Fs);
+        %first half
+        xphase1 = WhitePhase(Event(1:params.Fs/2),params.Fs);
+        %second half
+        xphase2 = WhitePhase(Event(params.Fs/2+1:params.Fs),params.Fs);
+        xphase1(2:2:60,:)=xphase2(2:2:60,:);
+        xphase=[xphase1 xphase1(60:-1:1,:)];m
         xphase=repmat(reshape(xphase',1,prod(size(xphase))),1,10);
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
         
+        seq=seq(1:6:end);
+        duration=min(floor(diff(seq) / 1000) * 1000);
+
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
         %expansion
