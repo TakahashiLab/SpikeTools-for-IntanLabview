@@ -19,7 +19,6 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase = WhitePhase(Event(1:params.Fs/2),params.Fs);
         xphase=repmat(reshape(xphase',1,prod(size(xphase))),1,10);
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
-        size(xphase)
         
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
