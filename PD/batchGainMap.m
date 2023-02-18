@@ -14,8 +14,10 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     Event = Event(seq(1):seq(end) + duration)';
 
     if size(seq, 2) == 30 %for noise
-        Data4phase = hilbert(Event);
-        xphase = angle(Data4phase);
+        %Data4phase = hilbert(Event);
+        %xphase = angle(Data4phase);
+        xphase = WhitePhase(Event(1:params.Fs/2),params.Fs);
+        xphase=repmat(reshape(xphase',1,prod(size(xphase))),1,10);
         xphase=interp1(1:length(xphase),xphase,1:1/step:length(xphase));
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
