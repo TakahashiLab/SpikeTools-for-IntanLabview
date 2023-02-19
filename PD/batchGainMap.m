@@ -23,8 +23,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase1(2:2:60,:)=xphase2(2:2:60,:);
         
         CtrlN=5;
-        xphase1=repmat(reshape(xphase1',1,prod(size(xphase1))),1,CtrlN);
         xphase2=xphase1(60:-1:1,:);
+        xphase1=repmat(reshape(xphase1',1,prod(size(xphase1))),1,CtrlN);
         xphase2=repmat(reshape(xphase2',1,prod(size(xphase2))),1,CtrlN);
         xphase=[xphase1 xphase2];
         
