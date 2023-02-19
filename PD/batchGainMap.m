@@ -21,8 +21,13 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         %second half
         xphase2 = WhitePhase(Event(params.Fs/2+1:params.Fs),params.Fs);
         xphase1(2:2:60,:)=xphase2(2:2:60,:);
-        xphase=[xphase1 xphase1(60:-1:1,:)];
-        xphase=repmat(reshape(xphase',1,prod(size(xphase))),1,10);
+        
+        CtrlN=5;
+        xphase1=repmat(reshape(xphase1',1,prod(size(xphase1))),1,CtrlN);
+        xphase2=xphase1(60:-1:1,:);
+        xphase2=repmat(reshape(xphase2',1,prod(size(xphase2))),1,CtrlN);
+        xphase=[xphase1 xphase2];
+        
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
         
         seq=seq(1:6:end);
@@ -32,6 +37,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase = chirpPhase(Event);
         %expansion
         xphase=interp1(1:length(xphase),xphase,1:1/step:length(xphase));
+        CtrlN=10;
     elseif size(seq, 2) == 10 %pulse
 
     end
@@ -44,8 +50,8 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     phaseCnt = 20; %18 degree?
     phaseHistPyr = calcGM(xphase, params, ensemble(Pyr), step, seq, normSeq, duration, phaseCnt);
     phaseHistInt = calcGM(xphase, params, ensemble(Int), step, seq, normSeq, duration, phaseCnt);
-    phaseHistPyrCtrl = calcGM4Ctrl(xphase, params, ensemble(Pyr), step, normSeq, phaseCnt);
-    phaseHistIntCtrl = calcGM4Ctrl(xphase, params, ensemble(Int), step, normSeq, phaseCnt);
+    phaseHistPyrCtrl = calcGM4Ctrl(xphase, params, ensemble(Pyr), step, normSeq, phaseCnt,CtrlN);
+    phaseHistIntCtrl = calcGM4Ctrl(xphase, params, ensemble(Int), step, normSeq, phaseCnt,CtrlN);
 
     return;
     %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -112,7 +118,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
         return;
         %%%%%%%%%%%%%%%%%%%%%%%%%
-        function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseCnt)
+        function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseCnt,CtrlN)
 
             segmentSec = 0.5;
             segment = segmentSec * params.Fs*(25/step); %0.5sec
@@ -140,7 +146,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
                 loc0 = normSeq(1);
                 xphasePos = xphase;
 
-                for j = 1:10
+                for j = 1:CtrlN
 
                     for c = 0:(120 - 1) %frequency
                         loc = loc0 + c * segment;
@@ -161,7 +167,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
 
                 %average
                 %phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10 ./ nFr(i);
-                phaseHist(:, :, i) = phaseHist(:, :, i) ./ 10; %10 phase cycles
+                phaseHist(:, :, i) = phaseHist(:, :, i) ./ CtrlN; %CtrlN phase cycles
 
             end
 
