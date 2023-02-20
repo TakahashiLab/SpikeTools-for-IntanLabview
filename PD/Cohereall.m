@@ -1,5 +1,5 @@
 %
-function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
+function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin)
     p = inputParser;
     p.addParamValue('proc', 'individual', @ischar);
     p.addParamValue('stimulation', 'both', @ischar);
@@ -58,26 +58,54 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
     pdPyrnSCtrl = [];
     pdIntnSCtrl = [];
 
+    normalPyrs = [];
+    normalInts = [];
+    pdPyrs = [];
+    pdInts = [];
+    offSet = zeros(1, 2);
+
     possibleId = [];
-    cellclassfile='cellclass.mat';
+    cellclassfile = 'cellclass.mat';
+
     for i = 1:loop
 
-        if length(d(i).name) > SuffixLen & ~strcmp(d(i).name,cellclassfile)
+        if length(d(i).name) > SuffixLen & ~strcmp(d(i).name, cellclassfile)
             possibleId = [possibleId i];
         end
 
     end
 
     c = 1;
+    div=0;
+    switch (disp)
+    case 'ascend',
+        div=1;
+    case 'descend',
+        div=2;
+    case 'both',
+        div=3;
+    end
+    
 
     for i = possibleId
 
         if strncmp(d(i).name( end - SuffixLen:end), Suffix, SuffixLen)
         filename = fullfile(dataFolder, d(i).name);
         fprintf('loading %s\n', filename);
-        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl');
-            %phaseHistPyr=phaseHistPyrCtrl;
-            %phaseHistInt=phaseHistIntCtrl;
+        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl', 'pyr', 'interneuron');
+        [~, fn] = fileparts(filename);
+
+        if 0
+            %from cellclass.mat
+            eval(['PI=' fn ';']);
+            pyr = find(PI == pyrN); %classification
+            pyr = unique([pyr; cell2mat(PyrIntList([1 3 9])')]); %cc, pv
+            interneuron = find(PI == intN); %classification
+            interneuron = unique([interneuron; cell2mat(PyrIntList([2 4 10 11])')]);
+            PyrIntList{1}
+            PyrIntList{2}
+        end
+
         switch lower(stim)
             case 'both',
                 normalPyr = PyrIntList{1};
@@ -208,86 +236,52 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
 
         switch (lower(celltype))
             case 'cc',
-                normalPyr=intersect(normalPyr,PyrIntList{9});
-                normalInt=intersect(normalInt,PyrIntList{10});
-                pdPyr=intersect(pdPyr,PyrIntList{9});
-                pdInt=intersect(pdInt,PyrIntList{10});
+                normalPyr = intersect(normalPyr, PyrIntList{9});
+                normalInt = intersect(normalInt, PyrIntList{10});
+                pdPyr = intersect(pdPyr, PyrIntList{9});
+                pdInt = intersect(pdInt, PyrIntList{10});
             case 'pv',
-                normalInt=intersect(normalInt,PyrIntList{11});
-                pdInt=intersect(pdInt,PyrIntList{11});
+                normalInt = intersect(normalInt, PyrIntList{11});
+                pdInt = intersect(pdInt, PyrIntList{11});
             case 'ccpv',
-                normalPyr=intersect(normalPyr,PyrIntList{9});
-                normalInt=intersect(normalInt,union(PyrIntList{10},PyrIntList{11}));
-                pdPyr=intersect(pdPyr,PyrIntList{9});
-                pdInt=intersect(pdInt,union(PyrIntList{10},PyrIntList{11}));
+                normalPyr = intersect(normalPyr, PyrIntList{9});
+                normalInt = intersect(normalInt, union(PyrIntList{10}, PyrIntList{11}));
+                pdPyr = intersect(pdPyr, PyrIntList{9});
+                pdInt = intersect(pdInt, union(PyrIntList{10}, PyrIntList{11}));
             case 'all',
-                %nothing
-              
-        end
-
-        PyrIntList{1}
-        normalPyr
-        normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, normalPyr));
-        normalIntS = cat(3, normalIntS, phaseHistInt(:, :, normalInt));
-        normalPyrSCtrl = cat(3, normalPyrSCtrl, phaseHistPyrCtrl(:, :, normalPyr));
-        normalIntSCtrl = cat(3, normalIntSCtrl, phaseHistIntCtrl(:, :, normalInt));
-
-        pdPyrS = cat(3, pdPyrS, phaseHistPyr(:, :, pdPyr));
-        pdIntS = cat(3, pdIntS, phaseHistInt(:, :, pdInt));
-        pdPyrSCtrl = cat(3, pdPyrSCtrl, phaseHistPyrCtrl(:, :, pdPyr));
-        pdIntSCtrl = cat(3, pdIntSCtrl, phaseHistIntCtrl(:, :, pdInt));
-
-        if ~strcmp(plt, 'all')
-
-            if isempty(strfind(stim, 'stim'))
-
-                figure;
-
-                switch lower(stim)
-                    case 'pd',
-
-                        subplot(2, 2, 1);
-                        plotGainMap(pdPyrS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['PYR:' TcharNormal '- ' RcharNormal]);
-
-                        subplot(2, 2, 2);
-                        plotGainMap(pdIntS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['INT:' TcharNormal '- ' RcharNormal]);
-
-                        subplot(2, 2, 3);
-                        plotGainMap(pdPyrnS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['PYR:' TcharPD '- ' RcharPD]);
-
-                        subplot(2, 2, 4);
-                        plotGainMap(pdIntnS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['INT:' TcharPD '- ' RcharPD]);
-
-                    case 'normal',
-                        subplot(2, 2, 1);
-                        plotGainMap(snormalPyrS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['PYR:' TcharNormal '- ' RcharNormal]);
-
-                        subplot(2, 2, 2);
-                        plotGainMap(snormalIntS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['INT:' TcharNormal '- ' RcharNormal]);
-
-                        subplot(2, 2, 3);
-                        plotGainMap(snormalPyrnS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['PYR:' TcharPD '- ' RcharPD]);
-
-                        subplot(2, 2, 4);
-                        plotGainMap(snormalIntnS, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-                        title(['INT:' TcharPD '- ' RcharPD]);
-                end
-
-                title(filename);
-            end
 
         end
 
+        normal = [pyr(normalPyr)' interneuron(normalInt)'];
+        
+        normalPyrs = [normalPyrs (1:length(normalPyr)) + offSet(1)];
+       
+        normalInts = [normalInts (length(normalPyr) + 1:length(normal)) + offSet(1)];
+        
+        if ~isempty(normal)
+            normalPyrS = cat(1, normalPyrS, phaseHistPyr(normal));
+            normalIntS = cat(1, normalIntS, phaseHistInt(normal));
+            normalPyrSCtrl = cat(1, normalPyrSCtrl, phaseHistPyrCtrl(normal));
+            normalIntSCtrl = cat(1, normalIntSCtrl, phaseHistIntCtrl(normal));
+        end
+
+        pd = [pyr(pdPyr)' interneuron(pdInt)'];
+
+        pdPyrs = [pdPyrs (1:length(pdPyr)) + offSet(2)];
+        pdInts = [pdInts (length(pdPyr) + 1:length(pd)) + offSet(2)];
+
+        if ~isempty(pd)
+            pdPyrS = cat(1, pdPyrS, phaseHistPyr(pd));
+            pdIntS = cat(1, pdIntS, phaseHistInt(pd));
+            pdPyrSCtrl = cat(1, pdPyrSCtrl, phaseHistPyrCtrl(pd));
+            pdIntSCtrl = cat(1, pdIntSCtrl, phaseHistIntCtrl(pd));
+        end
+
+        offSet = offSet + [length(normal) length(pd)];
     end
 
 end
+
 
 if strcmp(plt, 'all')
     %pd or normal
@@ -308,8 +302,7 @@ if strcmp(plt, 'all')
                 pdIntnSCtrl = normalIntnSCtrl;
         end
 
-        if 0
-        %if strcmp(disp, 'both')
+        if strcmp(disp, 'both')
             figure;
             Ctrl{1} = pdPyrSCtrl;
             mphpdPyrS = plotGainMap(pdPyrS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
@@ -358,7 +351,7 @@ if strcmp(plt, 'all')
 
     elseif strcmp(stim, 'ledstim') | strcmp(stim, 'tagstim') | strcmp(stim, 'ledtagstim') | strcmp(stim, 'farstim') | strcmp(stim, 'contrastim')
         if 0
-       %if strcmp(disp, 'both')
+        %if strcmp(disp, 'both')
             figure;
 
             Ctrl{1} = normalPyrSCtrl;
@@ -374,42 +367,39 @@ if strcmp(plt, 'all')
 
             figure;
             Ctrl{1} = pdPyrSCtrl;
-            mphpdPyrS=plotGainMap(pdPyrS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
+            mphpdPyrS = plotGainMap(pdPyrS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
             title(['PYR:' TcharPD '- ' RcharPD]);
 
             figure;
             Ctrl{1} = pdIntSCtrl;
-            mphpdIntS=plotGainMap(pdIntS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
+            mphpdIntS = plotGainMap(pdIntS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
             title(['INT:' TcharPD '- ' RcharPD]);
 
-            p=mult_comp_perm_corr(mphnormalPyrS,mphpdPyrS);
-            
+            p = mult_comp_perm_corr(mphnormalPyrS, mphpdPyrS);
+
         else
-           
-            figure;
-            subplot(2, 2, 1);
-            Ctrl{1} = normalPyrSCtrl;
-            mphnormalPyrS = plotGainMap(normalPyrS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-            title(['PYR:' TcharNormal '- ' RcharNormal]);
-
-            subplot(2, 2, 2);
-            Ctrl{1} = normalIntSCtrl;
-            mphnormalIntS = plotGainMap(normalIntS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-            title(['INT:' TcharNormal '- ' RcharNormal]);
-            X = mphnormalPyrS;
-            Y = mphnormalIntS;
-
-            subplot(2, 2, 3);
-            Ctrl{1} = pdPyrSCtrl;
-            mphpdPyrS=plotGainMap(pdPyrS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-            title(['PYR:' TcharPD '- ' RcharPD]);
-
-            subplot(2, 2, 4);
-            Ctrl{1} = pdIntSCtrl;
-            mphpdIntS=plotGainMap(pdIntS, 'control', Ctrl, 'display', disp, 'band', band, 'xyaxis', xyaxis, 'hist', histon, 'topFreq', topFreq);
-            title(['INT:' TcharPD '- ' RcharPD]);
             
+            Cs = normalPyrS;
+            phis = normalIntS;
+            fs = normalPyrSCtrl;
+            confCs = normalIntSCtrl;
          
+            fslabel = [2:2:topFreq];
+         
+            [thetaIdxNormal,peakCohNormal,peakFreqNormal] = plotMTS(Cs, phis, fs, normalPyrs, normalInts, confCs, fslabel, topFreq,div);
+
+            Cs = pdPyrS;
+            phis = pdIntS;
+            fs = pdPyrSCtrl;
+            confCs = pdIntSCtrl;
+
+            figure;
+            [thetaIdxPD,peakCohPD,peakFreqPD] = plotMTS(Cs, phis, fs, pdPyrs, pdInts, confCs, fslabel, topFreq,div);
+
+            compThetaIdx(thetaIdxNormal, thetaIdxPD,'theta index');
+            compThetaIdx(peakCohNormal,peakCohPD,'peak coherence');
+            compThetaIdx(peakFreqNormal,peakFreqPD,'peak frequency (Hz)');
+
         end
 
     else %stim/nonstim
@@ -481,4 +471,22 @@ if strcmp(plt, 'all')
 
     end
 
+end
+end
+%%%%%%%%%%%55
+function compThetaIdx(thetaIdxNormal, thetaIdxPD,yLABEL)
+    x = [cell2mat(thetaIdxNormal) cell2mat(thetaIdxPD)];
+    grp = [ones(size(thetaIdxNormal{1})) ones(size(thetaIdxNormal{2})) * 2 ones(size(thetaIdxPD{1})) * 3 ones(size(thetaIdxPD{2})) * 4];
+    [p, tbl, stat] = kruskalwallis(x, grp,'off');
+   
+    [c,m]=multcompare(stat,'CriticalValueType','bonferroni','Display','off');
+   c
+    [avg,se]=grpstats(x,grp,["mean","sem"]);
+    figure;
+    bar(avg);
+    hold on;
+    errorbar([1:4],avg,se,'.');
+    ylabel(yLABEL);
+    set(gca,'xtick',1:4,'xticklabel',{'n-Pyr','n-PV','pd-Pyr','pd-PV'})
+    
 end
