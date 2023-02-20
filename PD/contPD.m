@@ -116,13 +116,13 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                         pi = zeros(size(rensemble, 1), 1);
                         %interneuron (corr)
-
+ 
                         pi(dataPath{i, 8}) = 1;
                         %pyramidal cell(corr)
                         pi(dataPath{i, 9}) = 2;
                         %PV (tag)
                         pi(dataPath{i, 10}) = 3;
-        size(pi)
+      
                         PIs = [PIs; pi];
 
                         loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
