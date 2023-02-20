@@ -122,7 +122,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                         pi(dataPath{i, 9}) = 2;
                         %PV (tag)
                         pi(dataPath{i, 10}) = 3;
-
+        size(pi)
                         PIs = [PIs; pi];
 
                         loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
@@ -133,7 +133,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                 case 'gainorcohere',
 
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
-                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime');
+                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime','pulseSeqTime');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
                     load(loadname, 'ensemble', 'an', 'en');
                     
@@ -180,6 +180,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             SeqTime = chirpSeqTime;
                         case 'noise',
                             SeqTime = noiseSeqTime;
+                        case 'pulse',
+                            SeqTime =pulseSeqTime;
                     end
 
                     if cellClass
