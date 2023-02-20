@@ -29,10 +29,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase=[xphase1 xphase2];
         
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
-        
-        seq=seq(1:6:end);
-        duration=min(floor(diff(seq) / 1000) * 1000);
-
+        duration=1000*60;
+        seq=seq(1)+(0:4)*duration;
+     
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
         %expansion
