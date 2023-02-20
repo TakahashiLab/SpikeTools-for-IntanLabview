@@ -31,6 +31,7 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
         duration=1000*60;
         seq=seq(1)+(0:4)*duration;
+        orgSeq=seq*25;
      
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
