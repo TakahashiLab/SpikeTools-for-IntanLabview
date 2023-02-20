@@ -7,7 +7,6 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
  
     Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
     
-   % normSeq = floor(normSeq ./ step);
     orgSeq=seq;
     seq = floor(seq ./ step);
     duration = min(floor(diff(seq) / 1000) * 1000);
@@ -30,9 +29,9 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
         
         xphase=interp1(1:length(xphase),xphase,1:1/(step+.01):length(xphase));
         duration=1000*60;
-        seq=seq(1)+(0:4)*duration;
+        seq=seq(1)+(0:(CtrlN-1))*duration;
         orgSeq=seq*25;
-     
+        normSeq=orgSeq;
     elseif size(seq, 2) == 20 %chirp
         xphase = chirpPhase(Event);
         %expansion
