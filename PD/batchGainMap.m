@@ -158,14 +158,14 @@ function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseC
                 spk = spk - loc0 + 1;
 
                 if ~isempty(spk)
-
                     phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + (histcounts(xphasePos(spk), edges)' ./ (segmentSec / phaseCnt)); %Hz
                     %phaseHist(:, c + 1, i) = basehist; %Hz
                 end
 
             end
 
-            loc0 = loc0 + 120 * segment;
+            loc0 = loc + segment; 
+           
         end
 
         %average
