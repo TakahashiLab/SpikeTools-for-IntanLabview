@@ -108,21 +108,20 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                 case 'cellclassify',
                     loadname = fullfile(homePath, dataPath{i, 1}, ClassifyData);
-                   
-
+                    
                     if exist(loadname, 'file')
                         load(loadname, 'rensemble');
                         TPs = [TPs; cell2mat(rensemble(:, 4))];
                         SWs = [SWs; cell2mat(rensemble(:, 5))];
 
                         pi = zeros(size(rensemble, 1), 1);
-                        %interneuron (corr)
  
-                        pi(dataPath{i, 8}) = 1;
+                        %interneuron (corr)
+                         pi(dataPath{i, 8}) = 1;
                         %pyramidal cell(corr)
                         pi(dataPath{i, 9}) = 2;
                         %PV (tag)
-                        pi(dataPath{i, 10}) = 3;
+                        pi(dataPath{i, 10}) = 1;
       
                         PIs = [PIs; pi];
 
@@ -132,7 +131,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                         if size(ensemble,1)~=size(rensemble,1)
                             fprintf('mismatch\n');
                         end
-                        
+
                         CQs = [CQs; IS LR];
                     end
 
