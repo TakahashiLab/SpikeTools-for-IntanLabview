@@ -186,7 +186,7 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
         mph = log10(mph);
         imagesc(mph);
         set(gca, 'ytick', [1 size(mph, 1)], 'yticklabel', [1 size(mph, 1)]);
-        if isMATLABRelaseOlderThan("R2021b")
+        if isMATLABReleaseOlderThan("R2021b")
             caxis([-1 2]);
         else
             clim([-1 2]);
