@@ -80,6 +80,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
         dnFr = sum(diff(normSeq')) ./ params.Fs;
         nFr(i) = nFr(i) ./ dnFr; %Hz
 
+        xphasePos = xphase;
         for j = 1:length(seq)
             %    spk=unit(unit>seq(j) & unit<seq(j)+duration);
             %    spk=(double(spk')-seq(j))./params.Fs;
@@ -88,8 +89,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
 
             while 1 %frequency
                 loc = seq(j) + c * segment;
-                phaseLoc = 1 + c * segment:(c + 1) * segment;
-
+              
                 %if loc+segment+alpha > seq(j)+duration
                 if loc + segment > seq(j) + duration
                     break;
@@ -97,8 +97,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
 
                 spk = unit(unit >= loc & unit < loc + segment);
                 spk = spk - seq(1) + 1;
-                xphasePos = xphase;
-
+                
                 if ~isempty(spk)
 
                     phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + (histcounts(xphasePos(spk), edges)' ./ (segmentSec / phaseCnt)); %Hz
@@ -147,13 +146,13 @@ function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseC
 
         loc0 = normSeq(1);
         xphasePos = xphase;
+        locC=loc0;
 
         for j = 1:CtrlN
 
             for c = 0:(120 - 1) %frequency
-                loc = loc0 + c * segment;
-                phaseLoc = 1 + c * segment:(c + 1) * segment;
-
+                loc = locC + c * segment;
+          
                 spk = unit(unit >= loc & unit < loc + segment);
                 spk = spk - loc0 + 1;
 
@@ -164,7 +163,7 @@ function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseC
 
             end
 
-            loc0 = loc + segment; 
+            locC = loc + segment; 
            
         end
 
