@@ -108,6 +108,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                 case 'cellclassify',
                     loadname = fullfile(homePath, dataPath{i, 1}, ClassifyData);
+                   
 
                     if exist(loadname, 'file')
                         load(loadname, 'rensemble');
@@ -126,7 +127,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                         PIs = [PIs; pi];
 
                         loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
-                        load(loadname, 'IS', 'LR');
+                        load(loadname, 'IS', 'LR','ensemble');
+
+                        if size(ensemble,1)~=size(rensemble,1)
+                            fprintf('mismatch\n');
+                        end
+                        
                         CQs = [CQs; IS LR];
                     end
 
