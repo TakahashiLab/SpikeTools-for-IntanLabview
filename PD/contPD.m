@@ -140,8 +140,9 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
                     load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime','pulseSeqTime');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
-                    load(loadname, 'ensemble', 'an', 'en');
+                    load(loadname, 'ensemble', 'an', 'en','IS','LR');
                     
+                    CQs = [CQs; IS LR];
                     piCP = pi(cPI:cPI + size(ensemble, 1) - 1);
                     cPI = cPI + size(ensemble, 1);
                     fprintf('real interneuron\n');
