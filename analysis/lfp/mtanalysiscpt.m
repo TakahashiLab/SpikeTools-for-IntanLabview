@@ -26,7 +26,7 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     else
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
     end
-   size(S12)
+   
     [Cs, phi] = calcCohere(S12, S1, S2, 1); %ascending
     [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 2); %descending
     Cs = cat(3, Cs, Ctmp);
@@ -83,6 +83,10 @@ function S = getDir(S, div)
     elseif size(S,2)==600
         segment=10;
         repeat=60;
+    else
+        segment=139;
+        repeat=20;
+        S=S(:,1:segment*repeat);
     end
     
     if div > 0 % 1:ascending, 2:descending
