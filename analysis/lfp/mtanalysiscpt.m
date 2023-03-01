@@ -2,6 +2,7 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     Hz = 25000;
     movingwin = [1 0.5];
     unit = double(unit) ./ step;
+    SeqPoint=SeqPoint./step;
 
     loop = size(seq, 2);
 
@@ -20,7 +21,7 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
 
     if ~isempty(SeqPoint)
-        Stim.times=(SeqPoint-seq(1)) ./ params.Fs;
+        Stim.times=(SeqPoint'-seq(1)) ./ params.Fs;
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegpt(Stim, Spk, win, params, 0);
     else
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
