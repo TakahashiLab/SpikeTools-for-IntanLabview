@@ -1,4 +1,4 @@
-function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit, params, seq, step, pSeq)
+function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit, params, seq, step, pSeq,SeqPoint)
     Hz = 25000;
     movingwin = [1 0.5];
     unit = double(unit) ./ step;
@@ -15,18 +15,16 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     %segmentation every 1sec
     win = .5; %segment duration in sec
 
-    if length(data)<10000
-        Stim.times=(data-seq(1)) ./ params.Fs;
-        spk = unit(unit > seq(1) & unit < seq(end) + duration);
-        Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
+    Data1 = data(seq(1):seq(end) + duration)';
+    spk = unit(unit > seq(1) & unit < seq(end) + duration);
+    Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
+
+    if ~isempty(SeqPoint)
+        Stim.times=(SeqPoint'-seq(1)) ./ params.Fs;
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegpt(Stim, Spk, win, params, 0);
     else
-        Data1 = data(seq(1):seq(end) + duration)';
-        spk = unit(unit > seq(1) & unit < seq(end) + duration);
-        Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
     end
-
    
     [Cs, phi] = calcCohere(S12, S1, S2, 1); %ascending
     [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 2); %descending

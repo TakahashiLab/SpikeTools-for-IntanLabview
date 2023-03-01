@@ -21,12 +21,8 @@ function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, se
 
     step = Hz ./ params.Fs; 
 
-    if isempty(SeqPoint)
-        Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
-    else
-        Event=SeqPoint;
-    end
-
+    Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
+   
     seq = floor(seq ./ step);
 
     %preSilentPeriod
@@ -36,7 +32,7 @@ function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, se
     for i = 1:loop
         %for i=1
         fprintf('loop=%d/%d\n', i, loop);
-        [Cs{i}, phis{i}, fs{i}, confCs{i}, phistds{i}, zerosps{i}] = mtanalysiscpt(Event, tetNum, ensemble{i}, params, seq, step, pSeq);
+        [Cs{i}, phis{i}, fs{i}, confCs{i}, phistds{i}, zerosps{i}] = mtanalysiscpt(Event, tetNum, ensemble{i}, params, seq, step, pSeq,SeqPoint);
     end
 
     return;
