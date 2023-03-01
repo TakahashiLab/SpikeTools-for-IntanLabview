@@ -20,12 +20,12 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
 
     if ~isempty(SeqPoint)
-        Stim.times=(SeqPoint'-seq(1)) ./ params.Fs;
+        Stim.times=(SeqPoint-seq(1)) ./ params.Fs;
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegpt(Stim, Spk, win, params, 0);
     else
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
     end
-   
+   size(S12)
     [Cs, phi] = calcCohere(S12, S1, S2, 1); %ascending
     [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 2); %descending
     Cs = cat(3, Cs, Ctmp);
