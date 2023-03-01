@@ -15,8 +15,8 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
     %segmentation every 1sec
     win = .5; %segment duration in sec
 
-    if length(Data1)<10000
-        Stim.times=(Data1-seq(1)) ./ params.Fs;
+    if length(data)<10000
+        Stim.times=(data-seq(1)) ./ params.Fs;
         spk = unit(unit > seq(1) & unit < seq(end) + duration);
         Spk.times = (double(spk') - seq(1)) ./ params.Fs; %convert from kHz to Hz
         [C, phi, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegpt(Stim, Spk, win, params, 0);
