@@ -1,4 +1,4 @@
-function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, seq, tetNum, trialave, preSilentSeq)
+function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, seq, tetNum, trialave, preSilentSeq,SeqPoint)
     Hz = 25000;
     params.Fs = 1000; %2500
     params.fpass = [0 120];
@@ -19,9 +19,14 @@ function [Cs, phis, fs, confCs, phistds, zerosps] = batchMTS(Event, ensemble, se
     phistds = cell(loop, 1);
     zerosps = cell(loop, 1);
 
-    step = Hz ./ params.Fs;
-    Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
-    %Event=Event((tetNum-1)*4+1,:);
+    step = Hz ./ params.Fs; 
+
+    if isempty(SeqPoint)
+        Event = decimate(double(Event((tetNum - 1) * 4 + 1, :)), step);
+    else
+        Event=SeqPoint;
+    end
+
     seq = floor(seq ./ step);
 
     %preSilentPeriod

@@ -138,11 +138,12 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                 case 'gainorcohere',
 
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
-                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime','pulseSeqTime');
+                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime','pulseSeqTime','pulsePoint');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
                     load(loadname, 'ensemble', 'an', 'en','IS','LR');
                     
                     CQs = [CQs; IS LR];
+
                     piCP = pi(cPI:cPI + size(ensemble, 1) - 1);
                     cPI = cPI + size(ensemble, 1);
                     fprintf('real interneuron\n');
@@ -184,10 +185,13 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     switch lower(waveType)
                         case 'chirp',
                             SeqTime = chirpSeqTime;
+                            SeqPoint=[];
                         case 'noise',
                             SeqTime = noiseSeqTime;
+                            SeqPoint=[];
                         case 'pulse',
                             SeqTime =pulseSeqTime;
+                            SeqPoint=pulsePoint;
                     end
 
                     if cellClass
@@ -209,7 +213,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                             elseif strcmp(method2, 'coherence')
                                 %[Cs,phis,fs]=batchMTS(LFP,ensemble,chirpSeqTime,tetNum);
                                 %coherence LED and neuronal ensemble
-                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave, preSilentTime);
+                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave, preSilentTime,SeqPoint);
                                 %plotMTS(Cs,phis,fs,pyr,interneuron,confCs);
                             end
 
