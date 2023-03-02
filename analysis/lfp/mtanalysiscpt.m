@@ -37,7 +37,7 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
   
 
     %preSilent control
-    Data1=data(pSeq(1):pSeq(1)+length(Data1))';
+    %Data1=data(pSeq(1):pSeq(1)+length(Data1))';
     spk = unit(unit > pSeq(1) & unit < pSeq(1) + length(Data1));
     Spk.times = (double(spk') - pSeq(1)) ./ params.Fs; %convert from kHz to Hz
     if ~isempty(SeqPoint)
