@@ -38,7 +38,14 @@ function [Cs, phi, f, confC, phistd, zerosp] = mtanalysiscpt(data, tetNum, unit,
 
     %preSilent control
     Data1=data(pSeq(1):pSeq(1)+length(Data1))';
-    [~, ~, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
+    spk = unit(unit > pSeq(1) & unit < pSeq(1) + length(Data1));
+    Spk.times = (double(spk') - pSeq(1)) ./ params.Fs; %convert from kHz to Hz
+    if ~isempty(SeqPoint)
+        Stim.times=(SeqPoint'-seq(1)) ./ params.Fs;
+         [~, ~, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegpt(Stim, Spk, win, params, 0);
+    else
+        [~, ~, S12, S1, S2, f, zerosp, confC, phistd] = coherencysegcpt(Data1, Spk, win, params, 0);
+    end
 
     [Ctmp, phiTmp] = calcCohere(S12, S1, S2, 1); %ascending
     Cs=cat(3,Cs,Ctmp);
@@ -86,7 +93,13 @@ function S = getDir(S, div)
     else
         segment=139;
         repeat=20;
-        S=S(:,1:segment*repeat);
+        if size(S,2)<segment*repeat
+            Sbuff=S;
+            S=zeros(size(S,1),segment*repeat);
+            S(:,1:size(Sbuff,2))=Sbuff;
+        else    
+            S=S(:,1:segment*repeat);
+        end
     end
     
     if div > 0 % 1:ascending, 2:descending
