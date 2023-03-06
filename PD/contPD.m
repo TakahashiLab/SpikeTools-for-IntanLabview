@@ -1,5 +1,5 @@
 %dn: 2018,2019,2020
-function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs,PYR,INTERNEURON] = contPD(dn, an, varargin)
+function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs, PIs, phaseHistPyrCtrl, phaseHistIntCtrl, CQs, PYR, INTERNEURON] = contPD(dn, an, varargin)
 
     p = inputParser;
     p.addParamValue('method', 'gainmap', @ischar);
@@ -7,7 +7,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     p.addParamValue('intensity', 5, @isnumeric);
     p.addParamValue('cellclass', 0, @isnumeric); %cell classification mode
     p.addParamValue('localcell', 0, @isnumeric); %cells only monitored from an optogenetic tetrode
-    p.addParamValue('trialave',1, @isnumeric);
+    p.addParamValue('trialave', 1, @isnumeric);
+    p.addParamValue('rawlfp', 0, @isnumeric); %0: not used, 1: left lfp, 2: right lfp
 
     p.parse(varargin{:});
     method = p.Results.method;
@@ -16,6 +17,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     cellClass = p.Results.cellclass;
     localCell = p.Results.localcell;
     trialave = p.Results.trialave;
+    rawlfp = p.Results.rawlfp;
 
     alpha = 0.05;
     [homePath, dataPath] = PDdataC(dn, an);
@@ -33,7 +35,7 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     phaseHistIntCtrl = [];
     offSetPyr = 0;
     offSetInt = 0;
-    offSetEns =0;
+    offSetEns = 0;
 
     normalPyr = [];
     normalInt = [];
@@ -62,8 +64,8 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
     PIs = [];
     CQs = [];
 
-    PYR=[];
-    INTERNEURON=[];
+    PYR = [];
+    INTERNEURON = [];
 
     if strcmp(method, 'gainmap') | strcmp(method, 'coherence')
         method2 = method;
@@ -108,27 +110,27 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                 case 'cellclassify',
                     loadname = fullfile(homePath, dataPath{i, 1}, ClassifyData);
-                    
+
                     if exist(loadname, 'file')
                         load(loadname, 'rensemble');
                         TPs = [TPs; cell2mat(rensemble(:, 4))];
                         SWs = [SWs; cell2mat(rensemble(:, 5))];
 
                         pi = zeros(size(rensemble, 1), 1);
- 
+
                         %interneuron (corr)
-                         pi(dataPath{i, 8}) = 1;
+                        pi(dataPath{i, 8}) = 1;
                         %pyramidal cell(corr)
                         pi(dataPath{i, 9}) = 2;
                         %PV (tag)
                         pi(dataPath{i, 10}) = 1;
-      
+
                         PIs = [PIs; pi];
 
                         loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
-                        load(loadname, 'IS', 'LR','ensemble');
+                        load(loadname, 'IS', 'LR', 'ensemble');
 
-                        if size(ensemble,1)~=size(rensemble,1)
+                        if size(ensemble, 1) ~= size(rensemble, 1)
                             fprintf('mismatch\n');
                         end
 
@@ -138,10 +140,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                 case 'gainorcohere',
 
                     loadname = fullfile(homePath, dataPath{i, 1}, TimingData);
-                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime','pulseSeqTime','pulsePoint');
+                    load(loadname, 'preSilentTime', 'postSilentTime', 'chirpSeqTime', 'noiseSeqTime', 'pulseSeqTime', 'pulsePoint');
                     loadname = fullfile(homePath, dataPath{i, 1}, EnsembleData);
-                    load(loadname, 'ensemble', 'an', 'en','IS','LR');
-                    
+                    load(loadname, 'ensemble', 'an', 'en', 'IS', 'LR');
+
                     CQs = [CQs; IS LR];
 
                     piCP = pi(cPI:cPI + size(ensemble, 1) - 1);
@@ -151,14 +153,14 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     interneuron = union(dataPath{i, 8}, dataPath{i, 10}); % % % % %CC+tag
                     interneuronPV = dataPath{i, 10};
                     interneuronCC = dataPath{i, 8};
-                    
+
                     pyrTag = setdiff(dataPath{i, 11}, interneuron'); % %conflict
                     pyrCC = union(dataPath{i, 9}, pyrTag); % % %CC+tag
-                    
-                    pyrConf=setdiff(find(piCP==pyrN),interneuron);
+
+                    pyrConf = setdiff(find(piCP == pyrN), interneuron);
                     pyr = union(pyrCC', pyrConf);
-                    
-                    interneuronConf=setdiff(find(piCP==intN),pyrCC);
+
+                    interneuronConf = setdiff(find(piCP == intN), pyrCC);
                     interneuron = union(interneuron', interneuronConf);
 
                     if dataPath{i, 3} <= 4
@@ -185,13 +187,13 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     switch lower(waveType)
                         case 'chirp',
                             SeqTime = chirpSeqTime;
-                            SeqPoint=[];
+                            SeqPoint = [];
                         case 'noise',
                             SeqTime = noiseSeqTime;
-                            SeqPoint=[];
+                            SeqPoint = [];
                         case 'pulse',
-                            SeqTime =pulseSeqTime;
-                            SeqPoint=pulsePoint;
+                            SeqTime = pulseSeqTime;
+                            SeqPoint = pulsePoint;
                     end
 
                     if cellClass
@@ -204,16 +206,27 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                     else
 
                         if ~isempty(pyr) | ~isempty(interneuron)
-                            loadname = fullfile(homePath, dataPath{i, 1}, [name 'Event.mat']);
-                            load(loadname, 'event');
+
+                            switch lower(waveType)
+                                case 'lfp',
+                                    loadname = fullfile(homePath, dataPath{i, 1}, [name 'LFP.mat']);
+                                    load(loadname, 'lfp');
+                                    event = lfp;
+                                    tetNum = dataPath{i, 4}(rawlfp);
+                                   
+                                otherwise,
+                                    loadname = fullfile(homePath, dataPath{i, 1}, [name 'Event.mat']);
+                                    load(loadname, 'event');
+                                    tetNum = 1;
+                            end
 
                             if strcmp(method2, 'gainmap')
                                 %calc gain map
-                                [pPyr, pInt, pPyrCtrl, pIntCtrl] = batchGainMap(event, ensemble(:, 3), SeqTime, 1, [preSilentTime; postSilentTime], pyr, interneuron);
+                                [pPyr, pInt, pPyrCtrl, pIntCtrl] = batchGainMap(event, ensemble(:, 3), SeqTime, tetNum, [preSilentTime; postSilentTime], pyr, interneuron, waveType);
                             elseif strcmp(method2, 'coherence')
                                 %[Cs,phis,fs]=batchMTS(LFP,ensemble,chirpSeqTime,tetNum);
                                 %coherence LED and neuronal ensemble
-                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, 1,trialave, preSilentTime,SeqPoint);
+                                [Cs, phis, fs, confCs] = batchMTS(event, ensemble(:, 3), SeqTime, tetNum, trialave, preSilentTime, SeqPoint);
                                 %plotMTS(Cs,phis,fs,pyr,interneuron,confCs);
                             end
 
@@ -287,23 +300,26 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 end
 
                             end
-                            
-                            [px,py]=size(pyr);
+
+                            [px, py] = size(pyr);
+
                             if px < py
-                                pyr=pyr';
+                                pyr = pyr';
                             end
-                            [px,py]=size(interneuron);
+
+                            [px, py] = size(interneuron);
+
                             if px < py
-                                interneuron=interneuron';
+                                interneuron = interneuron';
                             end
-                          
-                            PYR=[PYR; pyr+offSetEns];
-                          
-                            INTERNEURON=[INTERNEURON; interneuron+offSetEns];
+
+                            PYR = [PYR; pyr + offSetEns];
+
+                            INTERNEURON = [INTERNEURON; interneuron + offSetEns];
 
                             offSetPyr = offSetPyr + length(pyr);
                             offSetInt = offSetInt + length(interneuron);
-                            offSetEns=offSetEns+size(ensemble,1);
+                            offSetEns = offSetEns + size(ensemble, 1);
 
                             if strcmp(method2, 'gainmap')
                                 phaseHistPyr = cat(3, phaseHistPyr, pPyr);
@@ -312,10 +328,10 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
                                 phaseHistPyrCtrl = cat(3, phaseHistPyrCtrl, pPyrCtrl);
                                 phaseHistIntCtrl = cat(3, phaseHistIntCtrl, pIntCtrl);
                             elseif strcmp(method2, 'coherence')
-                               
+
                                 phaseHistPyr = cat(1, phaseHistPyr, Cs);
                                 phaseHistInt = cat(1, phaseHistInt, phis);
-                               
+
                                 phaseHistPyrCtrl = cat(1, phaseHistPyrCtrl, fs);
                                 phaseHistIntCtrl = cat(1, phaseHistIntCtrl, confCs);
 

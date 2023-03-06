@@ -1,4 +1,4 @@
-function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batchGainMap(Event, ensemble, seq, tetNum, normSeq, Pyr, Int)
+function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batchGainMap(Event, ensemble, seq, tetNum, normSeq, Pyr, Int, waveType)
     %function [Data1]=batchGainMap(Event,ensemble,seq,tetNum)
     Hz = 25000;
     params.Fs = 1000; %2500
@@ -12,33 +12,37 @@ function [phaseHistPyr, phaseHistInt, phaseHistPyrCtrl, phaseHistIntCtrl] = batc
     duration = min(floor(diff(seq) / 1000) * 1000);
     Event = Event(seq(1):seq(end) + duration)';
 
-    if size(seq, 2) == 30 %for noise
-        %Data4phase = hilbert(Event);
-        %xphase = angle(Data4phase);
-        %first half
-        xphase1 = WhitePhase(Event(1:params.Fs / 2), params.Fs);
-        %second half
-        xphase2 = WhitePhase(Event(params.Fs / 2 + 1:params.Fs), params.Fs);
-        xphase1(2:2:60, :) = xphase2(2:2:60, :);
+    switch lower(waveType)
+        case 'noise', % size(seq, 2) == 30 %for noise
+            %Data4phase = hilbert(Event);
+            %xphase = angle(Data4phase);
+            %first half
+            xphase1 = WhitePhase(Event(1:params.Fs / 2), params.Fs);
+            %second half
+            xphase2 = WhitePhase(Event(params.Fs / 2 + 1:params.Fs), params.Fs);
+            xphase1(2:2:60, :) = xphase2(2:2:60, :);
 
-        CtrlN = 5;
-        xphase2 = xphase1(60:-1:1, :);
-        xphase1 = repmat(reshape(xphase1', 1, prod(size(xphase1))), 1, CtrlN);
-        xphase2 = repmat(reshape(xphase2', 1, prod(size(xphase2))), 1, CtrlN);
-        xphase = [xphase1 xphase2];
+            CtrlN = 5;
+            xphase2 = xphase1(60:-1:1, :);
+            xphase1 = repmat(reshape(xphase1', 1, prod(size(xphase1))), 1, CtrlN);
+            xphase2 = repmat(reshape(xphase2', 1, prod(size(xphase2))), 1, CtrlN);
+            xphase = [xphase1 xphase2];
 
-        xphase = interp1(1:length(xphase), xphase, 1:1 / (step + .01):length(xphase));
-        duration = 1000 * 60;
-        seq = seq(1) + (0:(CtrlN - 1)) * duration;
-        orgSeq = seq * 25;
-        normSeq = orgSeq;
-    elseif size(seq, 2) == 20 %chirp
-        xphase = chirpPhase(Event);
-        %expansion
-        xphase = interp1(1:length(xphase), xphase, 1:1 / step:length(xphase));
-        CtrlN = 10;
-    elseif size(seq, 2) == 10 %pulse
-
+            xphase = interp1(1:length(xphase), xphase, 1:1 / (step + .01):length(xphase));
+            duration = 1000 * 60;
+            seq = seq(1) + (0:(CtrlN - 1)) * duration;
+            orgSeq = seq * 25;
+            normSeq = orgSeq;
+        case 'chirp', % size(seq, 2) == 20 %chirp
+            xphase = chirpPhase(Event);
+            %expansion
+            xphase = interp1(1:length(xphase), xphase, 1:1 / step:length(xphase));
+            CtrlN = 10;
+        case 'pulse', %    elseif size(seq, 2) == 10 %pulse
+        case 'lfp',
+            xphase = WhitePhase(Event, params.Fs);
+            xphase = interp1(1:length(xphase), xphase, 1:1 / (step + .01):length(xphase));
+            CtrlN = 10;
     end
 
     step = 1;
@@ -81,6 +85,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
         nFr(i) = nFr(i) ./ dnFr; %Hz
 
         xphasePos = xphase;
+
         for j = 1:length(seq)
             %    spk=unit(unit>seq(j) & unit<seq(j)+duration);
             %    spk=(double(spk')-seq(j))./params.Fs;
@@ -89,7 +94,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
 
             while 1 %frequency
                 loc = seq(j) + c * segment;
-              
+
                 %if loc+segment+alpha > seq(j)+duration
                 if loc + segment > seq(j) + duration
                     break;
@@ -97,7 +102,7 @@ function phaseHist = calcGM(xphase, params, ensemble, step, seq, normSeq, durati
 
                 spk = unit(unit >= loc & unit < loc + segment);
                 spk = spk - seq(1) + 1;
-                
+
                 if ~isempty(spk)
 
                     phaseHist(:, c + 1, i) = phaseHist(:, c + 1, i) + (histcounts(xphasePos(spk), edges)' ./ (segmentSec / phaseCnt)); %Hz
@@ -146,13 +151,13 @@ function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseC
 
         loc0 = normSeq(1);
         xphasePos = xphase;
-        locC=loc0;
+        locC = loc0;
 
         for j = 1:CtrlN
 
             for c = 0:(120 - 1) %frequency
                 loc = locC + c * segment;
-          
+
                 spk = unit(unit >= loc & unit < loc + segment);
                 spk = spk - loc0 + 1;
 
@@ -163,8 +168,8 @@ function phaseHist = calcGM4Ctrl(xphase, params, ensemble, step, normSeq, phaseC
 
             end
 
-            locC = loc + segment; 
-           
+            locC = loc + segment;
+
         end
 
         %average

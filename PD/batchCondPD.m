@@ -1,12 +1,14 @@
-function batchCondPD(server, method, waveType)
+function batchCondPD(server, varargin)
+    p = inputParser;
+    p.addParamValue('method', 'gainmap', @ischar);
+    p.addParamValue('wavetype', 'chirp', @ischar);
+    p.addParamValue('rawlfp', 0, @isnumeric); %0: not used, 1: left lfp, 2: right lfp
 
-    if nargin == 1
-        method = 'gainmap';
-        waveType = 'chirp';
-    elseif nargin == 2
-        waveType = 'chirp';
+    p.parse(varargin{:});
+    method = p.Results.method;
+    waveType = p.Results.wavetype;
+    rawlfp = p.Results.rawlfp;
 
-    end
 
     switch (server)
         case 'deepMachine',
@@ -36,7 +38,7 @@ function batchCondPD(server, method, waveType)
     %for i=7
 
     for i = 1:size(dataParing, 1)
-        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, fr, tp, sw, pi, phaseHistPyrCtrl, phaseHistIntCtrl, cq, pyr, interneuron] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1, 'method', method, 'waveType', waveType);
+        [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, fr, tp, sw, pi, phaseHistPyrCtrl, phaseHistIntCtrl, cq, pyr, interneuron] = contPD(dataParing{i, 1}, dataParing{i, 2}, 'cellClass', 0, 'localcell', 1, 'method', method, 'waveType', waveType, 'rawlfp', rawlfp);
 
         if strcmp(method, 'cellclassify')
             save([dataParing{i, 2} '.mat'], 'tp', 'sw', 'pi', 'cq');
