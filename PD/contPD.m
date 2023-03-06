@@ -207,17 +207,16 @@ function [phaseHistPyr, phaseHistInt, PyrIntList, PyrIntListStim, FRs, TPs, SWs,
 
                         if ~isempty(pyr) | ~isempty(interneuron)
 
-                            switch lower(waveType)
-                                case 'lfp',
-                                    loadname = fullfile(homePath, dataPath{i, 1}, [name 'LFP.mat']);
-                                    load(loadname, 'lfp');
-                                    event = lfp;
-                                    tetNum = dataPath{i, 4}(rawlfp);
-                                   
-                                otherwise,
-                                    loadname = fullfile(homePath, dataPath{i, 1}, [name 'Event.mat']);
-                                    load(loadname, 'event');
-                                    tetNum = 1;
+                            if rawlfp
+                                loadname = fullfile(homePath, dataPath{i, 1}, [name 'LFP.mat']);
+                                load(loadname, 'lfp');
+                                event = lfp;
+                                tetNum = dataPath{i, 4}(rawlfp);
+                                waveType='lfp';
+                            else
+                                loadname = fullfile(homePath, dataPath{i, 1}, [name 'Event.mat']);
+                                load(loadname, 'event');
+                                tetNum = 1;
                             end
 
                             if strcmp(method2, 'gainmap')
