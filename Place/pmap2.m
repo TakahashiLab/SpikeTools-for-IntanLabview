@@ -22,7 +22,7 @@
 %%for display
 %%imagePmap(ratemap,ocmap);
 
-function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim, ydim] = pmap2(Spks, Traj, msT, varargin)
+function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, xdim, ydim] = pmap2(Spks, Traj, msT, varargin)
     corrFlag = 0;
     year = 2018;
     shuffleN = 100;
@@ -59,7 +59,8 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     p.addParamValue('spon', 0, @isnumeric);
     p.addParamValue('speed', 2.5, @isnumeric);
     p.addParamValue('shuffle', 0, @isnumeric);
-    p.addParamValue('shufflen', 0, @isnumeric);
+    p.addParamValue('shufflen', 100, @isnumeric);
+    p.addParamValue('shuffletype', 'shift', @ischar);
     p.addParamValue('verbose', 0, @isnumeric);
     p.addParamValue('posture', [3 4 5 6], @isvector);
     p.addParamValue('binwidth', 2.5, @isnumeric);
@@ -68,9 +69,11 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     p.addParamValue('ydim', [], @isvector);
     p.addParamValue('grid', [], @isvector);
     p.addParamValue('spatialscale', -1, @isnumeric);
-    p.addParamValue('hdseg', 0, @isnumeric);
+    p.addParamValue('mode', 'spatial', @ischar);
+    p.addParamValue('dirtype', 'head', @ischar);
 
     p.parse(varargin{:});
+
     fstart = p.Results.fstart;
     Linear = p.Results.linear;
     maxdist = p.Results.maxdist;
@@ -80,18 +83,33 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     ThS = p.Results.speed;
     shuffle = p.Results.shuffle;
     shuffleN = p.Results.shufflen;
+    shuffleType = p.Results.shuffletype;
     verbose = p.Results.verbose;
     posture = p.Results.posture;
     BinWidthCm = p.Results.binwidth;
     binside = p.Results.std;
     spatial_scale = p.Results.spatialscale;
-    hdseg = p.Results.hdseg;
+    calcMode = p.Results.mode;
+    dirType = p.Results.dirtype;
 
     xdim = p.Results.xdim;
     ydim = p.Results.ydim;
     GRID = p.Results.grid;
 
     cmPerPixel = maxdist / Len; %
+
+    switch (calcMode)
+        case 'hdseg',
+            calcMode = 1;
+        case 'velocity-vector',
+            calcMode = 2;
+        case 'spatialview',
+            calcMode = 3;
+        case 'spatial',
+            calcMode = 0;
+        otherwise
+            calcMode = 0;
+    end
 
     %%%%%%%%%%%%%%
     %%%For bird, large arena
@@ -108,6 +126,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     %%%else 'maxdist',160
 
     if size(Traj, 1) ~= size(msT, 1)
+
         msFPS = median(diff(msT));
         seq = 1:length(Traj);
         seq = seq - 1;
@@ -139,26 +158,12 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     x2 = Traj(posture(3), :);
     y2 = Traj(posture(4), :);
     Traj = Traj';
-    headdir = atan2d(x - x2, y - y2)';
-
-    pX = [x(5:end) x(1:4)];
-    pY = [y(5:end) y(1:4)];
-    movedir = atan2d(x - pX, y - pY)';
-    %headdir=movedir;
-    %Good=find( headdir>0 & headdir <90);
-    %Good=find( headdir>90);
-    %Good=find( headdir<0 & headdir>-90);
-    Good = find(headdir <- 90);
-
-    %Traj=Traj(Good,:);
-    %msT=msT(Good);
 
     if Linear
         dTraj = diff(Traj);
         ind = find(abs(dTraj) > max(Traj) / 2);
         dTraj(ind) = dTraj(ind) - sign(dTraj(ind)) * max(Traj);
         movement = sqrt(sum(dTraj .^ 2, 2)) * cmPerPixel; %
-
     else
         movement = sqrt(sum(diff(Traj(:, posture(3:4))) .^ 2, 2)) * cmPerPixel; % 1:2 -> 5:6
     end
@@ -166,6 +171,45 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     speed = movement ./ diff(msT);
 
     speed = smooth(speed, FPS, 'moving') * 1000;
+
+    sx = smooth(x, 30)';
+    sy = smooth(y, 30)';
+    sx2 = smooth(x2, 30)';
+    sy2 = smooth(y2, 30)';
+    headdir = atan2d(sx - sx2, sy - sy2)';
+
+    pX = [sx(5:end) sx(1:4)];
+    pY = [sy(5:end) sy(1:4)];
+    movedir = atan2d(pX - x, pY - y)';
+    hovering = find(speed < 5)'; %5cm/s
+    movedir = movedir +180;
+    movedir(movedir > 180) = movedir(movedir > 180) - 360;
+
+    if hovering(1) == 1
+        hovering(1) = [];
+    end
+
+    for k = hovering
+        movedir(k) = movedir(k - 1);
+    end
+
+    switch (dirType)
+        case 'move',
+            headdir = movedir;
+
+        case 'diff',
+            headdir = movedir - headdir;
+            
+            headdir(headdir > 180) = headdir(headdir > 180) - 360;
+            headdir(headdir < -180) = headdir(headdir <- 180) + 360;
+
+    end
+
+    %for polar plot or quiver
+    hddir = headdir +180;
+    hddir(hddir > 180) = hddir(hddir > 180) - 360;
+
+    hddirQ = hddir;
 
     %analyzed if the speed is more than 5cm/s
     if spON
@@ -208,7 +252,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     end
 
     %head direction segmentation
-    if hdseg
+    if calcMode == 1
         % 進行方向を8つのセグメントに分割
         direction_segments = -180:45:180;
         num_segments = length(direction_segments) - 1;
@@ -266,27 +310,8 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
     %Firing rate contrast Index
     windowSize = 2000; %2s
     Th = nanmedian(speed);
-    FrHigh = [];
-    FrLow = [];
 
-    for k = StartTraj:windowSize:(EndTraj - windowSize)
-        fr = sum(Spks > k & Spks < k + windowSize);
-        instSpeed = nanmedian(speed(msT > k & msT < k + windowSize));
-
-        if instSpeed > Th
-            FrHigh = [FrHigh fr];
-        else
-            FrLow = [FrLow fr];
-        end
-
-    end
-
-    FrHigh = sum(FrHigh) / (length(FrHigh) * (windowSize / 1000));
-    FrLow = sum(FrLow) / (length(FrLow) * (windowSize / 1000));
-
-    FrIndex(1, 1) = (FrHigh - FrLow) / (FrHigh + FrLow);
-    FrIndex(1, 2) = FrHigh;
-    FrIndex(1, 3) = FrLow;
+    FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
 
     spk_x = [];
     spk_y = [];
@@ -306,16 +331,28 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
         lenSpks = length(Spks);
         SpksShuffle = zeros(shuffleN, lenSpks);
 
-        for i = 1:shuffleN
-            spkss = Spks + rp(i);
-            topSpks = find(spkss >= endSpks);
-            spkss(topSpks) = spkss(topSpks) - endSpks + beginSpks;
-            SpksShuffle(i, :) = sort(spkss);
+        switch (shuffleType)
+            case 'shift',
+
+                for i = 1:shuffleN
+                    spkss = Spks + rp(i);
+                    topSpks = find(spkss >= endSpks);
+                    spkss(topSpks) = spkss(topSpks) - endSpks + beginSpks;
+                    SpksShuffle(i, :) = sort(spkss);
+                end
+
+            case 'bootstrap',
+
+                for i = 1:shuffleN
+                    bootsamp = sort(randsample(length(Spks), length(Spks), true));
+                    SpksShuffle(i, :) = Spks(bootsamp);
+                end
+
         end
 
         if ~fieldShuffleFlag
 
-            for i = 1:shuffleN
+            parfor i = 1:shuffleN
                 Spks = SpksShuffle(i, :);
                 spk_x = [];
                 spk_y = [];
@@ -332,14 +369,53 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
 
                 if Linear
                     [rate_map(i, :, :)] = rateLinearMap(spk_x, x, spatial_scale, fs_video, binside);
-                else
+                elseif calcMode == 2 %velocity-vector
+                    SpkTimes = [];
+
+                    for j = 1:(size(Traj, 1) - 1)
+                        spkcnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
+                        SpkTimes = [SpkTimes spkcnt];
+                    end
+
+                    hd = headdir;
+                    hd(end) = [];
+
+                    [rate_map(i, :, :)] = velocityVector(SpkTimes, hd, speed, 100, fs_video);
+                elseif calcMode == 3 %spatial view
+
+                    [~, ~, ~, oc_map] = ratemap(spk_x, spk_y, x, y, spatial_scale, fs_video, 1);
+
+                    [svp] = svmap(spk_x, spk_y, x, y, spatial_scale, fs_video, oc_map, ...
+                        headdir, Traj);
+
+                    sv_x = [];
+                    sv_y = [];
+
+                    for j = 1:(size(Traj, 1) - 1)
+                        SpkCnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
+                        sv_x = [sv_x; repmat(svp(j, 1), SpkCnt, 1)];
+                        sv_y = [sv_y; repmat(svp(j, 2), SpkCnt, 1)];
+                    end
+
+                    [occupancy, xdim, ydim] = Occupancy(svp(:, 1), svp(:, 2), spatial_scale, binside, fs_video);
+
+                    spikes = hist3([sv_x, sv_y], 'Edges', {xdim, ydim});
+                    rate_map(i, :, :) = SmoothMat(spikes, GRID, binside);
+                    oc_map = occupancy;
+
+                else %spatial map
                     [rate_map(i, :, :)] = ratemap(spk_x, spk_y, x, y, ...
                         spatial_scale, fs_video, binside);
                 end
 
+                %Firing rate index
+                FrIndex(i, :) = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
             end
 
             oc_map = [];
+            pp = [];
+            rate_mapB = [];
+
         else %fieldShuffle
 
             SpkCnt = [];
@@ -422,6 +498,8 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
             U = zeros(size(spk_x));
             V = zeros(size(spk_y));
 
+            headdir = hddirQ;
+
             % 各スパイクの進行方向ベクトルを計算
             for i = 1:length(spk_x)
                 idx = find(msT <= Spks(i), 1, 'last');
@@ -446,7 +524,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
         if Linear
             [rate_map, xdim, oc_map] = rateLinearMap(spk_x, x, spatial_scale, fs_video, binside);
 
-        elseif hdseg
+        elseif calcMode == 1
             % 各方向セグメントに対してプレースマップを計算
             pmaps = cell(1, num_segments);
 
@@ -454,7 +532,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
 
                 if ~isempty(spk_x_segments{i})
                     %inactivate omitIsLands function
-                    [pmaps{i}, ~, ~, ocmaps{i}] = ratemap(spk_x_segments{i}, spk_y_segments{i}, x_segments{i}, y_segments{i}, spatial_scale, fs_video, binside,-1);
+                    [pmaps{i}, ~, ~, ocmaps{i}] = ratemap(spk_x_segments{i}, spk_y_segments{i}, x_segments{i}, y_segments{i}, spatial_scale, fs_video, binside, -1);
                 else
                     pmaps{i} = []; % 空のセグメントの場合
                     ocmaps{i} = [];
@@ -464,6 +542,44 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
 
             rate_map = pmaps;
             oc_map = ocmaps;
+
+        elseif calcMode == 2 %velocity-vector
+
+            SpkTimes = [];
+
+            for j = 1:(size(Traj, 1) - 1)
+                spkcnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
+                SpkTimes = [SpkTimes spkcnt];
+            end
+
+            hd = headdir;
+            hd(end) = [];
+
+            [rate_map, oc_map] = velocityVector(SpkTimes, hd, speed, 100, fs_video);
+            xdim = [];
+            ydim = [];
+
+        elseif calcMode == 3 % spatial view
+            [~, ~, ~, oc_map] = ratemap(spk_x, spk_y, x, y, spatial_scale, fs_video, 1);
+
+            [svp] = svmap(spk_x, spk_y, x, y, spatial_scale, fs_video, oc_map, ...
+                headdir, Traj);
+
+            sv_x = [];
+            sv_y = [];
+
+            for j = 1:(size(Traj, 1) - 1)
+                SpkCnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
+                sv_x = [sv_x; repmat(svp(j, 1), SpkCnt, 1)];
+                sv_y = [sv_y; repmat(svp(j, 2), SpkCnt, 1)];
+            end
+
+            [occupancy, xdim, ydim] = Occupancy(svp(:, 1), svp(:, 2), spatial_scale, binside, fs_video);
+            %    occupancy = OmitIslands(occupancy);
+
+            spikes = hist3([sv_x, sv_y], 'Edges', {xdim, ydim});
+            rate_map = SmoothMat(spikes, GRID, binside);
+            oc_map = occupancy;
         else
 
             if ~isempty(xdim) & ~isempty(GRID)
@@ -482,5 +598,58 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, rate_mapB, FrIndex, xdim
 
         end
 
+        if ~iscell(rate_map)
+            pp = pfIdent(rate_map, oc_map, Traj, spatial_scale, binside, 0);
+        else
+            pp = [];
+        end
+
+        %Firing rate index
+        FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
+
         rate_mapB = [];
+
     end
+
+    %%%%
+    function FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed)
+        debug = 0;
+
+        FrHigh = [];
+        FrLow = [];
+        instSpeeds = [];
+        Frs = [];
+
+        for k = StartTraj:windowSize:(EndTraj - windowSize)
+            fr = sum(Spks > k & Spks < k + windowSize);
+            instSpeed = nanmedian(speed(msT > k & msT < k + windowSize));
+            instSpeeds = [instSpeeds instSpeed];
+            Frs = [Frs fr];
+
+            if instSpeed > Th
+                FrHigh = [FrHigh fr];
+            else
+                FrLow = [FrLow fr];
+            end
+
+        end
+
+        FrHigh = sum(FrHigh) / (length(FrHigh) * (windowSize / 1000));
+        FrLow = sum(FrLow) / (length(FrLow) * (windowSize / 1000));
+
+        FrIndex(1, 1) = (FrHigh - FrLow) / (FrHigh + FrLow);
+        FrIndex(1, 2) = FrHigh;
+        FrIndex(1, 3) = FrLow;
+        %c=corrcoef(instSpeeds,Frs);
+        instSpeeds = instSpeeds';
+        Frs = Frs';
+        FrIndex(1, 4) = corr(instSpeeds, Frs);
+
+        if debug
+            figure;
+            plot(instSpeeds)
+            hold on;
+            plot(Frs);
+        end
+
+        return;
