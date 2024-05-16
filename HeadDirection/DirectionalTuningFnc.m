@@ -1,21 +1,7 @@
 function [tuning_curve, theta, wu2,ang_hd, mr,mvl,occupancy,num_spikes,sig,spk,headdir] = DirectionalTuningFnc(Spks, Traj, msT, varargin)
-% Computes the head direction tuning curve.
-%
-% Arguments (see syntax (2)):
-%
-% binsize -> width of binsize in degrees
-% Continuize -> merge overlapping epochs, and concatonate all data from
-% root.epoch
-%
-% Returns
-%
-% tuning_curve -> NxMxO matrix where N is the number of bins as per
-% 'binsize', O is the number of epochs and M is the number of cells
-%
-% theta -> vector of bin centers in degrees
-% (1) [tuning_curve, theta] = root.DirectionalTuningFcn(cel);
-% (2) [tuning_curve, theta] = root.DirectionalTuningFcn(cel, 'binsize', degrees, 'Continuize', 1);
-% from https://github.com/hasselmonians/CMBHOME
+% original from https://github.com/hasselmonians/CMBHOME
+%modified 2024/05/16
+
 shuffleLag = 20000; %20sec
 SpksShuffle = [];
 sig=0;
