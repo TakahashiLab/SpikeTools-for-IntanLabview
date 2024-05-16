@@ -228,6 +228,7 @@ else
     Spks = Spks(find(Spks > StartTraj & Spks < EndTraj));
 
     spk_headdir = [];
+    spk_headdir_t = [];
 
     for i = 1:(size(headdir, 1) - 1)
         if msT(i+1)-msT(i) < msFPS*2
