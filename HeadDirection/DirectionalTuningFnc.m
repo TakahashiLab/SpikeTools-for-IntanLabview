@@ -203,7 +203,7 @@ if shuffle
         spk_headdir = [];
 
         for j = 1:(size(headdir, 1) - 1)
-            if msT(i+j)-msT(j) < msFPS*2
+            if msT(j+1)-msT(j) < msFPS*2
                 spk_headdir = [spk_headdir ones(1, sum(Spks >= msT(j) & Spks < msT(j + 1))) .* headdir(j)];
             end
         end
@@ -230,7 +230,7 @@ else
     spk_headdir = [];
 
     for i = 1:(size(headdir, 1) - 1)
-        if msT(i+j)-msT(j) < msFPS*2
+        if msT(i+1)-msT(i) < msFPS*2
             spk_headdir=[spk_headdir ones(1,sum(Spks >= msT(i) & Spks < msT(i+1))).*headdir(i)];
             spk_headdir_t=[spk_headdir_t ones(1,sum(Spks >= msT(i) & Spks < msT(i+1))).*msT(i)];
 
