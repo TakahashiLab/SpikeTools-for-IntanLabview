@@ -59,7 +59,7 @@ phy template-gui params.py
 
 ### Additional Info
 
-Ctrl+Alt+Nでノイズを指定し、Gでmergeします。Filter windowで`group!=’noise’`とすると見やすくなります。保存後、カレーション後（ks_postprocessingなど）、`.phy`フォルダをリネームします。
+Alt+Nでノイズを指定し、Gでmergeします。Filter windowで`group!=’noise’`とすると見やすくなります。
 
 # Spikeinterface
 
@@ -73,32 +73,24 @@ conda env si_env
 ```
 
 ### Additional Info
-
-VS Codeで`np1_r1.ipynb`をopenし、spike sortingはエラーになるので実行しません。`stFolder`と`???.raw`ファイルが生成されます。
+jupyter notebookをVS code上で実行した方が便利かもしれません。その場合、si_env kernelを指定して実行する。
+VS Codeで`np1_r1.ipynb`を実行し、`stFolder`と`???.raw`ファイルが生成されます。
 
 # Ecephys_spike_sorting Process
 
-Kilosort4を実行し、Kilosort4フォルダで`phy template-gui params.py`を実行し、そのまま何もせずに保存します。その後、VS Codeで`exportPhy.ipynb`をopenし、`base_folder`に処理したいフォルダをセットします。`mPhy`フォルダが作成され、結果が入ります。
+Kilosort4を???.rawファイルを指定して実行し、Kilosort4フォルダで`phy template-gui params.py`を実行する。そのまま何もせずに保存します。その後、VS Codeで`exportPhy.ipynb`をopenし、`base_folder`に処理したいフォルダをセットします。`mPhy`フォルダが作成され、結果が入ります。
 
 ### Steps
 
-1. `phy template-gui params.py`でカレーションを行います。Alt+GでGood unitを設定して保存します。
-2. 再度、`exportPhy.ipynb`を実行します。`remove_duplicated_spikes`を`ms=1.4`に変更し、`waveforms-kilosort4`を`waveforms-kilosort4-2`に変更し、`mPhy`を`mPhy2`に変更します。
+1. mPhyフォルダ上で、`phy template-gui params.py`でcurationを行います。Alt+GでGood unitを設定して保存します。
+2. `exportPhy2.ipynb`を実行します。exportPhy.ipynbとの違いは、`remove_duplicated_spikes`を`ms=1.4`に変更し、`waveforms-kilosort4`を`waveforms-kilosort4-2`に変更し、`mPhy`を`mPhy2`に変更したことです。
 3. `mPhy2`に結果が入ります。`mPhy`は`prePhy`という名前に変更します（後処理で`mPhy`を自動検出してしまうため）。
 4. 最後に、`mPhy2`フォルダの中で`phy template-gui params.py`を実行し、Alt+GですべてのユニットをGood unitに指定して終了します。
 
 ### Notes
 
-- d-primeが~3.0以下はノイズの可能性あり。
+- d-primeが~3.0以下はノイズの可能性あり。waveformを見てチェックしてください。不審な点がある場合は、`remove_duplicated_spikes`の`ms`パラメータを変更する。
 - Similarity >0.85以上はmergeの可能性あり。Mono-synaptic or burstを考慮すべきです。
-
-# DIO Data
-
-### Command
-
-```sh
-trodesexport -dio -rec 20220930_145002.rec
-```
 
 ### MATLAB Commands
 
