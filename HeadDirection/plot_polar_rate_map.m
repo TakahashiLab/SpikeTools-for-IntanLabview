@@ -1,4 +1,4 @@
-function [ratemap, ang_hd, mr, sig] = plot_polar_rate_map(Spks, Traj, msT, varargin)
+function [ratemap, ang_hd, mr, sig,headdir] = plot_polar_rate_map(Spks, Traj, msT, varargin)
     % root.plot_polar_rate_map(cel);
     % root.plot_polar_rate_map(cel, params, MaxRho);
     %
@@ -52,11 +52,11 @@ function [ratemap, ang_hd, mr, sig] = plot_polar_rate_map(Spks, Traj, msT, varar
 
     end
 
-    [ratemap, theta, wu2, ang_hd, mr, mvl, occumap, numSpks, sig] = DirectionalTuningFnc(Spks, Traj, msT, 'fstart', fstart, 'animal', animal, 'kHz', kHz, 'spon', spON, 'speed', ThS, 'shuffle', shuffle,'shufflen',shuffleN,'shuffleType',shuffleType, 'posture', posture, 'maxdist', maxdist,'dirtype',dirType);
+    [ratemap, theta, wu2, ang_hd, mr, mvl, occumap, numSpks, sig,~,headdir] = DirectionalTuningFnc(Spks, Traj, msT, 'fstart', fstart, 'animal', animal, 'kHz', kHz, 'spon', spON, 'speed', ThS, 'shuffle', shuffle,'shufflen',shuffleN,'shuffleType',shuffleType, 'posture', posture, 'maxdist', maxdist,'dirtype',dirType);
 
     theta = theta * unitsratio('rad', 'deg');
     theta = cat(1, theta(:), theta(1));
-    theta = theta([length(theta) - floor(length(theta) / 4) + 1:length(theta) 1:length(theta) - floor(length(theta) / 4)]);
+   % theta = theta([length(theta) - floor(length(theta) / 4) + 1:length(theta) 1:length(theta) - floor(length(theta) / 4)]);
 
     if verbose == 1
         subplot(1, 3, 1);

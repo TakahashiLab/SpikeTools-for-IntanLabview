@@ -124,8 +124,10 @@ diffX = pX - sx;
 diffY = pY - sy;
 hovering = find(speed < 5)'; %5cm/s
 
-if hovering(1) == 1
-    hovering(1) = [];
+if ~isempty(hovering)
+    if hovering(1) == 1
+        hovering(1) = [];
+    end
 end
 
 movedir = atan2d(diffY, diffX)';
@@ -286,8 +288,8 @@ if isempty(spk_headdir)
 
 else
     num_spikes = hist(spk_headdir,theta);
-
-    window=29;
+    
+    window=floor(size(num_spikes,2)/2)-1;
     num_spikes=[fliplr(num_spikes(end-window+1:end)) num_spikes fliplr(num_spikes(1:window))];
 
     angle_occupancy=[fliplr(angle_occupancy(end-window+1:end)) angle_occupancy fliplr(angle_occupancy(1:window))];
