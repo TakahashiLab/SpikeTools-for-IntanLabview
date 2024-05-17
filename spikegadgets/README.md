@@ -76,7 +76,7 @@ conda env si_env
 jupyter notebookをVS code上で実行した方が便利かもしれません。その場合、si_env kernelを指定して実行する。
 VS Codeで`np1_r1.ipynb`を実行し、`stFolder`と`???.raw`ファイルが生成されます。
 
-# Ecephys_spike_sorting Process
+# Kilosort4
 
 Kilosort4を???.rawファイルを指定して実行し、Kilosort4フォルダで`phy template-gui params.py`を実行する。そのまま何もせずに保存します。その後、VS Codeで`exportPhy.ipynb`をopenし、`base_folder`に処理したいフォルダをセットします。`mPhy`フォルダが作成され、結果が入ります。
 
