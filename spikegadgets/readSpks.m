@@ -153,7 +153,7 @@ switch(animal)
 end
 
 States=[];
-if strmatch(lower(animal),'bird') || strmatch(lower(animal),'turtle')
+if ismember(animal, {'bird', 'turtle'})
     s=1;
     slen=8;
     if size(st,2)>16
