@@ -93,10 +93,40 @@ Kilosort4を???.rawファイルを指定して実行し、Kilosort4フォルダ�
 - Similarity >0.85以上はmergeの可能性あり。Mono-synaptic or burstを考慮すべきです。
 
 ### MATLAB Commands
+readSpks.mでデータを読み取る。
 
-```matlab
-cd 20220930_145002.DIO
-fn='20230819_164611.dio_Controller_Din1.dat';
-a=readTrodesExtractedDataFile(fn);
-[b,c]=a.fields.data;
-```
+このスクリプト `readSpks.m` は、以下のディレクトリ構造を期待しています。
+
+# ディレクトリ構造
+## ルートディレクトリ
+- `root_directory/`
+  - `*.kilosort/`
+    - `stFolder/`
+      - `kilosort4/`
+        - `mPhy*`
+    - `timestamps.dat`
+    - その他の.kilosortファイル
+  - `*.DIO/`
+    - `*dio?.dat`
+  - `video/`
+    - .matファイル（このフォルダには.matファイルが存在してはいけません）
+
+## 詳細
+
+1. **ルートディレクトリ**:
+   - スクリプトの `directoryPath` 引数で指定されます。
+
+2. **Kilosortディレクトリ**:
+   - ルートディレクトリ内に1つ以上の`.kilosort`ディレクトリが存在する必要があります。
+   - 各.kilosortディレクトリには `timestamps.dat` ファイルが含まれている必要があります。
+   - `stFolder`ディレクトリが含まれ、その中に`kilosort4`ディレクトリと`mPhy*`ファイルが含まれている必要があります。
+
+3. **DIOディレクトリ**:
+   - ルートディレクトリ内に1つ以上の`.DIO`ディレクトリが存在する必要があります。
+   - 各.DIOディレクトリには`*dio?.dat`ファイルが含まれている必要があります。
+
+4. **videoディレクトリ**:
+   - ルートディレクトリ内に`video`ディレクトリが存在し、.matファイルには,xydimsという変数名でxy座標が格納されている必要があります。
+
+
+
