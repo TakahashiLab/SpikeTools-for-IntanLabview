@@ -189,15 +189,20 @@ if shuffle
         Spks = SpksShuffle(i, :);
         Spks = Spks(find(Spks > StartTraj & Spks < EndTraj));
         spk_headdir = [];
-
+        spk_headdir_t = [];
         for j = 1:(size(headdir, 1) - 1)
             if msT(j+1)-msT(j) < msFPS*2
                 spk_headdir = [spk_headdir ones(1, sum(Spks >= msT(j) & Spks < msT(j + 1))) .* headdir(j)];
+                spk_headdir_t=[spk_headdir_t ones(1,sum(Spks >= msT(j) & Spks < msT(j+1))).*msT(j)];
             end
         end
-
-        [~, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
-
+        
+        switch lower(animal)
+            case 'seaturtle',
+                [~, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,spk_headdir_t);
+            otherwise,
+                [~, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
+        end
         MRs = [MRs mr];
         WU2s = [WU2s wu2];
         MVLs = [MVLs mvl];
