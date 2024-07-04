@@ -156,8 +156,11 @@ States=[];
 if ismember(animal, {'bird', 'turtle'})
     s=1;
     slen=8;
-    if size(st,2)>16
+  
+    if size(st,2) > 16
         slen=16;
+    elseif size(st,2)==4
+        slen=3;
     end
 
     switch(animal)
@@ -190,17 +193,21 @@ if ismember(animal, {'bird', 'turtle'})
 
         case 'bird',
             %correction
+           
             msT=vt;
             msTC=[];
             msTC=[msTC msT(1:1+PosLen(1)-1)];
-            id=find(vt>st(5));
-            msTC=[msTC; msT(id(1):id(1)+PosLen(2)-1)];
-            id=find(vt>st(9));
-            msTC=[msTC; msT(id(1):id(1)+PosLen(3)-1)];
-            id=find(vt>st(13));
-            msTC=[msTC; msT(id(1):id(1)+PosLen(4)-1)];
-            vt=msTC;
 
+            if length(PosLen)>1
+                id=find(vt>st(5));
+                msTC=[msTC; msT(id(1):id(1)+PosLen(2)-1)];
+                id=find(vt>st(9));
+                msTC=[msTC; msT(id(1):id(1)+PosLen(3)-1)];
+                id=find(vt>st(13));
+                msTC=[msTC; msT(id(1):id(1)+PosLen(4)-1)];
+            end
+            vt=msTC;
+            size(st)
             States=cell(1,2);
             StatesAll=cell(1,slen);
             for i=1:slen
@@ -214,9 +221,7 @@ if ismember(animal, {'bird', 'turtle'})
                     States{2}=[States{2}; id];%counterbalance / indonesia
                 end
             end
-
-      
-         
+        
 
             %debug
             if debug
