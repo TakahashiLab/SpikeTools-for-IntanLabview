@@ -22,7 +22,7 @@
 %%for display
 %%imagePmap(ratemap,ocmap);
 
-function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, xdim, ydim] = pmap2(Spks, Traj, msT, varargin)
+function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, xdim, ydim, instValues] = pmap2(Spks, Traj, msT, varargin)
     corrFlag = 0;
     year = 2018;
     shuffleN = 100;
@@ -61,6 +61,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
     p.addParamValue('shuffle', 0, @isnumeric);
     p.addParamValue('shufflen', 100, @isnumeric);
     p.addParamValue('shuffletype', 'shift', @ischar);
+
     p.addParamValue('verbose', 0, @isnumeric);
     p.addParamValue('posture', [3 4 5 6], @isvector);
     p.addParamValue('binwidth', 2.5, @isnumeric);
@@ -165,51 +166,45 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
         dTraj(ind) = dTraj(ind) - sign(dTraj(ind)) * max(Traj);
         movement = sqrt(sum(dTraj .^ 2, 2)) * cmPerPixel; %
     else
-        movement = sqrt(sum(diff(Traj(:, posture(3:4))) .^ 2, 2)) * cmPerPixel; % 1:2 -> 5:6
+        % movement = sqrt(sum(diff(Traj(:, posture(1:2))) .^ 2, 2)) * cmPerPixel; % 1:2 -> 5:6
+
+        % First, smoothed position was obtained by Matlab’s smooth function using a width of 0.5 s.
+        movX = diff(movmean(Traj(:, posture(1)), 500 / msFPS)) * cmPerPixel;
+        movY = diff(movmean(Traj(:, posture(2)), 500 / msFPS)) * cmPerPixel;
     end
+    
+    headdir = atan2d(y - y2, x - x2)';
+    
+    % Second, speed was calculated independently in the x and y directions, smoothed by Matlab’s smoothing function with a width of 0.8 s.
+    speedX = movmean(movX .* 1000 / msFPS, 800 / msFPS)'; % cm/sec
+    speedY = movmean(movY .* 1000 / msFPS, 800 / msFPS)'; % cm/sec
+    % Lastly, the animal’s running speed was calculated as the combination of speed in the x and y directions.
+    speed = sqrt(speedX .^ 2 + speedY .^ 2);
 
-    speed = movement ./ diff(msT);
+    speedX2=[speedX(msFPS:end) speedX(1:msFPS-1)];
+    speedY2=[speedY(msFPS:end) speedY(1:msFPS-1)];
 
-    speed = smooth(speed, FPS, 'moving') * 1000;
-
-    sx = smooth(x, 30)';
-    sy = smooth(y, 30)';
-    sx2 = smooth(x2, 30)';
-    sy2 = smooth(y2, 30)';
-    headdir = atan2d(sx - sx2, sy - sy2)';
-
-    pX = [sx(5:end) sx(1:4)];
-    pY = [sy(5:end) sy(1:4)];
-    movedir = atan2d(pX - x, pY - y)';
+    movedir = atan2d(speedY2 - speedY, speedX2 - speedX)';
     hovering = find(speed < 5)'; %5cm/s
-    movedir = movedir +180;
-    movedir(movedir > 180) = movedir(movedir > 180) - 360;
 
     if hovering(1) == 1
         hovering(1) = [];
     end
 
-    for k = hovering
-        movedir(k) = movedir(k - 1);
-    end
+    %hovering
+    movedir(hovering) = headdir(hovering);
+
+    deltadir = movedir - headdir(1:end-1);
+    deltadir(deltadir > 180) = deltadir(deltadir > 180) - 360;
+    deltadir(deltadir < -180) = deltadir(deltadir <- 180) + 360;
 
     switch (dirType)
         case 'move',
             headdir = movedir;
 
         case 'diff',
-            headdir = movedir - headdir;
-            
-            headdir(headdir > 180) = headdir(headdir > 180) - 360;
-            headdir(headdir < -180) = headdir(headdir <- 180) + 360;
-
+            headdir = deltadir;
     end
-
-    %for polar plot or quiver
-    hddir = headdir +180;
-    hddir(hddir > 180) = hddir(hddir > 180) - 360;
-
-    hddirQ = hddir;
 
     %analyzed if the speed is more than 5cm/s
     if spON
@@ -217,6 +212,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
         Traj = Traj(Good, :);
         msT = msT(Good);
         speed = speed(Good);
+        headdir=headdir(Good);
     end
 
     if Linear
@@ -230,7 +226,8 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
     StartTraj = msT(1);
     EndTraj = msT(end);
     Spks = Spks(find(Spks > StartTraj & Spks < EndTraj));
-
+   
+    
     if isempty(Spks)
         binside = 2.5;
 
@@ -308,11 +305,10 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
     end
 
     %Firing rate contrast Index
-    windowSize = 2000; %2s
+    windowSize = 1000; %1s
     Th = nanmedian(speed);
 
-    FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
-
+    FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed, deltadir);
     spk_x = [];
     spk_y = [];
 
@@ -409,7 +405,7 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
                 end
 
                 %Firing rate index
-                FrIndex(i, :) = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
+                FrIndex(i, :) = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed, deltadir);
             end
 
             oc_map = [];
@@ -498,11 +494,12 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
             U = zeros(size(spk_x));
             V = zeros(size(spk_y));
 
-            headdir = hddirQ;
-
             % 各スパイクの進行方向ベクトルを計算
+            IDX = [];
+
             for i = 1:length(spk_x)
                 idx = find(msT <= Spks(i), 1, 'last');
+                IDX = [IDX idx];
 
                 if ~isempty(idx)
                     U(i) = cosd(headdir(idx));
@@ -511,8 +508,11 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
 
             end
 
+            %outl=find(headdir(IDX)>45 | headdir(IDX)<-45 );
+
             % すべての矢印を一度に描画
             quiver(spk_x, spk_y, U, V, 'AutoScale', 'on', 'Color', 'b');
+            %quiver(spk_x(outl), spk_y(outl), U(outl), V(outl), 'AutoScale', 'on', 'Color', 'b');
 
             axis equal off;
             set(gca, 'xdir', 'normal');
@@ -551,11 +551,10 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
                 spkcnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
                 SpkTimes = [SpkTimes spkcnt];
             end
-
-            hd = headdir;
-            hd(end) = [];
-
-            [rate_map, oc_map] = velocityVector(SpkTimes, hd, speed, 100, fs_video);
+            
+            hd = headdir';
+        
+            [rate_map, oc_map] = velocityVector(SpkTimes, hd, speed, 50, fs_video);
             xdim = [];
             ydim = [];
 
@@ -605,45 +604,79 @@ function [rate_map, spatial_scale, SpksShuffle, oc_map, pp, rate_mapB, FrIndex, 
         end
 
         %Firing rate index
-        FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed);
+        [FrIndex, instValues] = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed, deltadir);
 
         rate_mapB = [];
 
     end
 
     %%%%
-    function FrIndex = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed)
+    function [FrIndex, instValues] = frInd(Spks, StartTraj, windowSize, EndTraj, msT, Th, speed, direction)
         debug = 0;
 
         FrHigh = [];
         FrLow = [];
         instSpeeds = [];
+        instDegs = [];
         Frs = [];
 
-        for k = StartTraj:windowSize:(EndTraj - windowSize)
-            fr = sum(Spks > k & Spks < k + windowSize);
-            instSpeed = nanmedian(speed(msT > k & msT < k + windowSize));
-            instSpeeds = [instSpeeds instSpeed];
-            Frs = [Frs fr];
+        dir = circ_ang2rad(direction);
+        msFPS = ceil(1 ./ median(diff(msT)) * 1000);
 
-            if instSpeed > Th
-                FrHigh = [FrHigh fr];
-            else
-                FrLow = [FrLow fr];
-            end
+        % windowSize=FPS;
+        % for k = StartTraj:windowSize:(EndTraj - windowSize)
+        %     fr = sum(Spks > k & Spks < k + windowSize) ./ windowSize .* 1000;
+        %     instSpeed = nanmedian(speed(msT > k & msT < k + windowSize));
+        %     instSpeeds = [instSpeeds instSpeed];
+        %     Frs = [Frs fr];
 
+        %     instDeg = circ_mean(dir(msT > k & msT < k + windowSize));
+        %     instDegs = [instDegs instDeg];
+
+        %     if instSpeed > Th
+        %         FrHigh = [FrHigh fr];
+        %     else
+        %         FrLow = [FrLow fr];
+        %     end
+        % end
+
+        % Instantaneous firing rate was smoothed with a 400 ms-wide Gaussian filter.
+        for j = 1:(size(speed, 2))
+            spkcnt = sum(Spks >= msT(j) & Spks < msT(j) + msFPS);
+            Frs = [Frs spkcnt * 1000 / msFPS];
         end
 
-        FrHigh = sum(FrHigh) / (length(FrHigh) * (windowSize / 1000));
-        FrLow = sum(FrLow) / (length(FrLow) * (windowSize / 1000));
+        instSpeeds = speed;
+        Frs = movmean(Frs, 400);
 
-        FrIndex(1, 1) = (FrHigh - FrLow) / (FrHigh + FrLow);
-        FrIndex(1, 2) = FrHigh;
-        FrIndex(1, 3) = FrLow;
-        %c=corrcoef(instSpeeds,Frs);
+        % FrHigh = sum(FrHigh) / (length(FrHigh) * (windowSize / 1000));
+        % FrLow = sum(FrLow) / (length(FrLow) * (windowSize / 1000));
+
+        % FrIndex(1, 1) = (FrHigh - FrLow) / (FrHigh + FrLow);
+        % FrIndex(1, 2) = FrHigh;
+        % FrIndex(1, 3) = FrLow;
+
         instSpeeds = instSpeeds';
         Frs = Frs';
-        FrIndex(1, 4) = corr(instSpeeds, Frs);
+
+        ThSpeed = 5;
+
+        indx = find(instSpeeds < ThSpeed);
+        instValues = [instSpeeds Frs];
+        instValues(indx, :) = [];
+
+        runningSpeed = instValues(:, 1);
+        % Running speed の範囲に基づいてビンエッジを計算
+        minSpeed = floor(min(runningSpeed));
+        maxSpeed = ceil(max(runningSpeed)) + 1;
+        binEdges = minSpeed:2:maxSpeed; % 2 cm/s のビン幅
+        binIndices = discretize(runningSpeed, binEdges);
+        % inhomogenous coverage,> 1% bin is considered
+        c = histcounts(runningSpeed, binEdges);
+        idx = find(~ismember(binIndices, find(c ./ sum(c) * 100 > .5)));
+        instValues(idx, :) = [];
+
+        FrIndex(1, 4) = corr(instValues(:, 1), instValues(:, 2));
 
         if debug
             figure;

@@ -44,3 +44,32 @@ tet1=ensemble(find(tetrodeMap(an,en)==1),:);
 %%check cluster in the feature space
 %ex. check cluster of tetrode #1 in the feature space 
 checkClusterM(ensemble,an,en,1)
+
+
+%cell identification
+load tmp.mat;
+[rkkOuts,rensemble]=makeBroadBand(fn,'raw',x);
+rensemble=rawCellClass(rensemble);
+save rensemble.mat rensemble rkkOuts;
+[phaseHistPyr,phaseHistInt,PyrIntList,PyrIntListStim,fr,tp,sw,pi,phaseHistPyrCtrl, phaseHistIntCtrl,cq]=contPD('2018','TK18052901','method','cellclassify');
+
+
+%cell classification
+%
+%This program produces cellclass.mat with cell classification data.
+batchCondPD('deepMachine','cellclassify');
+[TPs,SWs,PIs]=Cellall(fn);
+
+%move cellclass.mat to mouse/Gain
+%then cd mouse/Gain
+%
+batchCondPD('deepMachine','gainmap');% deepMachine=ubuntu, windows=windows server
+
+%Gainmap
+[phaseHistPyr,phaseHistInt,PyrIntList,PyrIntListStim,fr,tp,sw,pi,phaseHistPyrCtrl, phaseHistIntCtrl]=contPD('2019','TK19050801','cellClass',0,'localcell',1);
+
+%led or correlation tagging, ascending wave, gamma-band, neuron by phase plot, histogram, top frequency 120Hz, cell type cc(cross-correlation / opto-tagging) 
+Gainall(fn,'stimulation','ledtagstim','display','ascend','plot','all','band','gamma','xyaxis','neuronphase','hist','on','topFreq',120,'celltype','cc');
+
+%Coherence
+Cohereall(fn,'stimulation','ledtagstim','display','both','plot','all','band','all','xyaxis','freqphase','hist','on','topFreq',40,'celltype','all');

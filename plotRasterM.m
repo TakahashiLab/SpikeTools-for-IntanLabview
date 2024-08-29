@@ -2,7 +2,7 @@
 %load event.mat
 %plotRaster(kkOut{4,3},event,[1 2],'binWidth',100);
 %%%
-function raster=plotRaster(spks,event,nums,varargin)
+function raster=plotRasterM(spks,event,nums,varargin)
 p = inputParser;
 p.addParamValue('binwidth', 100, @isnumeric);
 p.addParamValue('samplingrate', 25, @isnumeric);

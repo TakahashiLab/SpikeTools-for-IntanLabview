@@ -17,12 +17,10 @@ function [firingRateMap, occupancyMap] = velocityVector(spikeCounts, directions,
     ySpeeds = speeds .* sin(directionsRad);
 
     % Initialize the bins for x and y direction speeds
-    %xSpeedBins = linspace(min(xSpeeds), max(xSpeeds), numXBins + 1);
-    %ySpeedBins = linspace(min(ySpeeds), max(ySpeeds), numYBins + 1);
-  
-    xSpeedBins = linspace(-100, 100, numXBins + 1);
-    ySpeedBins = linspace(-100, 100, numYBins + 1);
-
+    % xSpeedBins = linspace(-100, 100, numXBins + 1);
+    % ySpeedBins = linspace(-100, 100, numYBins + 1);
+    xSpeedBins = linspace(min(xSpeeds), max(xSpeeds), numXBins + 1);
+    ySpeedBins = linspace(min(ySpeeds), max(ySpeeds), numYBins + 1);
     % Calculate occupancy map
     occupancyMap = histcounts2(xSpeeds, ySpeeds, xSpeedBins, ySpeedBins) / fs;
 

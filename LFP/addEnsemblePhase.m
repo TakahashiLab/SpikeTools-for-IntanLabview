@@ -1,4 +1,4 @@
-function ensemble=addEnsemblePhase(ensemble,dlfp)
+function [ensemble,sig_theta,theta_phase]=addEnsemblePhase(ensemble,dlfp)
 kHz=25;
 binWidth=1;
 sig_theta=BandpassFilter(dlfp,1000,[4 11]);

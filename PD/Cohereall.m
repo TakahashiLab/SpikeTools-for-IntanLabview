@@ -11,6 +11,7 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin
     p.addParamValue('topfreq', 120, @isnumeric);
     p.addParamValue('alpha', 0.05, @isnumeric);
     p.addParamValue('xyaxis', 'off', @ischar);
+    p.addParamValue('cq',[25 .05], @isvector);
 
     p.parse(varargin{:});
 
@@ -23,12 +24,16 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin
     histon = p.Results.hist;
     topFreq = p.Results.topfreq;
     xyaxis = p.Results.xyaxis;
+    CQs = p.Results.cq;
 
     global alpha;
     alpha = p.Results.alpha;
 
     Suffix = '.mat';
     SuffixLen = size(Suffix, 2) - 1;
+
+    IDTh=CQs(1);
+    LratioTh=CQs(2);
 
     [path, name, ext] = fileparts(basename);
     dataFolder = fullfile(path, name);
@@ -76,23 +81,23 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin
     end
 
     c = 1;
-    div=0;
+    div = 0;
+
     switch (disp)
-    case 'ascend',
-        div=1;
-    case 'descend',
-        div=2;
-    case 'both',
-        div=3;
+        case 'ascend',
+            div = 1;
+        case 'descend',
+            div = 2;
+        case 'both',
+            div = 3;
     end
-    
 
     for i = possibleId
 
         if strncmp(d(i).name( end - SuffixLen:end), Suffix, SuffixLen)
         filename = fullfile(dataFolder, d(i).name);
         fprintf('loading %s\n', filename);
-        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl', 'pyr', 'interneuron');
+        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl', 'pyr', 'interneuron', 'cq');
         [~, fn] = fileparts(filename);
 
         if 0
@@ -236,28 +241,50 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin
 
         switch (lower(celltype))
             case 'cc',
-                normalPyr = intersect(normalPyr, PyrIntList{9});
-                normalInt = intersect(normalInt, PyrIntList{10});
-                pdPyr = intersect(pdPyr, PyrIntList{9});
-                pdInt = intersect(pdInt, PyrIntList{10});
+                normalPyr2 = intersect(normalPyr, PyrIntList{9});
+                normalInt2 = intersect(normalInt, PyrIntList{10});
+                pdPyr2 = intersect(pdPyr, PyrIntList{9});
+                pdInt2 = intersect(pdInt, PyrIntList{10});
             case 'pv',
-                normalInt = intersect(normalInt, PyrIntList{11});
-                pdInt = intersect(pdInt, PyrIntList{11});
+                normalPyr2 = [];
+                normalInt2 = intersect(normalInt, PyrIntList{11});
+                pdPyr2 = [];
+                pdInt2 = intersect(pdInt, PyrIntList{11});
             case 'ccpv',
-                normalPyr = intersect(normalPyr, PyrIntList{9});
-                normalInt = intersect(normalInt, union(PyrIntList{10}, PyrIntList{11}));
-                pdPyr = intersect(pdPyr, PyrIntList{9});
-                pdInt = intersect(pdInt, union(PyrIntList{10}, PyrIntList{11}));
+                normalPyr2 = intersect(normalPyr, PyrIntList{9});
+                normalInt2 = intersect(normalInt, union(PyrIntList{10}, PyrIntList{11}));
+                pdPyr2 = intersect(pdPyr, PyrIntList{9});
+                pdInt2 = intersect(pdInt, union(PyrIntList{10}, PyrIntList{11}));
             case 'all',
-
+                normalPyr2 = [];
+                normalInt2 = [];
+                pdPyr2 = [];
+                pdInt2 = [];
         end
 
-        normal = [pyr(normalPyr)' interneuron(normalInt)'];
-        
-        normalPyrs = [normalPyrs (1:length(normalPyr)) + offSet(1)];
+     
+        %cell classification
+        cq(isnan(cq(:, 1)), 1) = 0;
+        PYR = find(cq(pyr, 1) >= IDTh & cq(pyr, 2) < LratioTh);
        
+        normalPyr = intersect(PYR, normalPyr);
+        pdPyr = intersect(PYR, pdPyr);
+    
+        INTERNEURON = find(cq(interneuron, 1) >= IDTh & cq(interneuron, 2) < LratioTh);
+        normalInt = intersect(INTERNEURON, normalInt);
+        pdInt = intersect(INTERNEURON, pdInt);
+
+        normalPyr = union(normalPyr, normalPyr2);
+        normalInt = union(normalInt, normalInt2);
+        pdPyr = union(pdPyr, pdPyr2);
+        pdInt = union(pdInt, pdInt2);
+
+        normal = [pyr(normalPyr)' interneuron(normalInt)'];
+
+        normalPyrs = [normalPyrs (1:length(normalPyr)) + offSet(1)];
+
         normalInts = [normalInts (length(normalPyr) + 1:length(normal)) + offSet(1)];
-        
+
         if ~isempty(normal)
             normalPyrS = cat(1, normalPyrS, phaseHistPyr(normal));
             normalIntS = cat(1, normalIntS, phaseHistInt(normal));
@@ -281,7 +308,6 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Cohereall(basename, varargin
     end
 
 end
-
 
 if strcmp(plt, 'all')
     %pd or normal
@@ -350,8 +376,9 @@ if strcmp(plt, 'all')
         end
 
     elseif strcmp(stim, 'ledstim') | strcmp(stim, 'tagstim') | strcmp(stim, 'ledtagstim') | strcmp(stim, 'farstim') | strcmp(stim, 'contrastim')
+
         if 0
-        %if strcmp(disp, 'both')
+            %if strcmp(disp, 'both')
             figure;
 
             Ctrl{1} = normalPyrSCtrl;
@@ -378,15 +405,15 @@ if strcmp(plt, 'all')
             p = mult_comp_perm_corr(mphnormalPyrS, mphpdPyrS);
 
         else
-            
+
             Cs = normalPyrS;
             phis = normalIntS;
             fs = normalPyrSCtrl;
             confCs = normalIntSCtrl;
-         
+
             fslabel = [2:2:topFreq];
-         
-            [thetaIdxNormal,peakCohNormal,peakFreqNormal] = plotMTS(Cs, phis, fs, normalPyrs, normalInts, confCs, fslabel, topFreq,div);
+
+            [thetaIdxNormal, peakCohNormal, peakFreqNormal] = plotMTS(Cs, phis, fs, normalPyrs, normalInts, confCs, fslabel, topFreq, div);
 
             Cs = pdPyrS;
             phis = pdIntS;
@@ -394,11 +421,11 @@ if strcmp(plt, 'all')
             confCs = pdIntSCtrl;
 
             figure;
-            [thetaIdxPD,peakCohPD,peakFreqPD] = plotMTS(Cs, phis, fs, pdPyrs, pdInts, confCs, fslabel, topFreq,div);
+            [thetaIdxPD, peakCohPD, peakFreqPD] = plotMTS(Cs, phis, fs, pdPyrs, pdInts, confCs, fslabel, topFreq, div);
 
-            compThetaIdx(thetaIdxNormal, thetaIdxPD,'theta index');
-            compThetaIdx(peakCohNormal,peakCohPD,'peak coherence');
-            compThetaIdx(peakFreqNormal,peakFreqPD,'peak frequency (Hz)');
+            compThetaIdx(thetaIdxNormal, thetaIdxPD, 'theta index');
+            compThetaIdx(peakCohNormal, peakCohPD, 'peak coherence');
+            compThetaIdx(peakFreqNormal, peakFreqPD, 'peak frequency (Hz)');
 
         end
 
@@ -472,21 +499,22 @@ if strcmp(plt, 'all')
     end
 
 end
+
 end
 %%%%%%%%%%%55
-function compThetaIdx(thetaIdxNormal, thetaIdxPD,yLABEL)
+function compThetaIdx(thetaIdxNormal, thetaIdxPD, yLABEL)
     x = [cell2mat(thetaIdxNormal) cell2mat(thetaIdxPD)];
     grp = [ones(size(thetaIdxNormal{1})) ones(size(thetaIdxNormal{2})) * 2 ones(size(thetaIdxPD{1})) * 3 ones(size(thetaIdxPD{2})) * 4];
-    [p, tbl, stat] = kruskalwallis(x, grp,'off');
-   
-    [c,m]=multcompare(stat,'CriticalValueType','bonferroni','Display','off');
-   c
-    [avg,se]=grpstats(x,grp,["mean","sem"]);
+    [p, tbl, stat] = kruskalwallis(x, grp, 'off');
+
+    [c, m] = multcompare(stat, 'CriticalValueType', 'bonferroni', 'Display', 'off');
+    c
+    [avg, se] = grpstats(x, grp, ["mean", "sem"]);
     figure;
     bar(avg);
     hold on;
-    errorbar([1:4],avg,se,'.');
+    errorbar([1:4], avg, se, '.');
     ylabel(yLABEL);
-    set(gca,'xtick',1:4,'xticklabel',{'n-Pyr','n-PV','pd-Pyr','pd-PV'})
-    
+    set(gca, 'xtick', 1:4, 'xticklabel', {'n-Pyr', 'n-PV', 'pd-Pyr', 'pd-PV'})
+
 end

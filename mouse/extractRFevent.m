@@ -14,7 +14,6 @@ for i=1:loop
   seg=find(PosT>segments(i,1) & PosT<segments(i,2));
   pos=Pos(seg,1:2);  
   post=PosT(seg);  
-
   [segPara{i,1},segPara{i,2}]=runSpeedMaxDist(pos,post,kHz);%running speed /sec
 end
 

@@ -1,10 +1,11 @@
-function imagePmap(rate_map, oc_map, max_rate)
+function imagePmap(rate_map, oc_map, max_rate, pp)
     axis equal off;
     %ratemap
 
     if nargin < 3
         clims = [0 max(rate_map(:))];
         peak = max(rate_map(:));
+        pp = [];
     else
         clims = [0 max_rate];
         peak = max_rate;
@@ -16,6 +17,12 @@ function imagePmap(rate_map, oc_map, max_rate)
 
     imagesc(rate_map, clims);
     colormap(cbar);
+
+    if ~isempty(pp)
+        hold on;
+        plot(pp(:, 1), pp(:, 2), 'k*');
+    end
+
     axis equal off
 
     gTitle = sprintf('Peak:%1.2f', peak);

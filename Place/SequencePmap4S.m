@@ -1,17 +1,16 @@
-function [seq,order,oc_map]=SequencePmap4S(ensemble,LTraj,PosT,ThS,varargin)
+function [seq,order,oc_map]=SequencePmap4S(ensemble,LTraj,PosT,varargin)
 
 p = inputParser;
 p.addParamValue('outputmode', 'normalized', @ischar);
 p.addParamValue('shuffle', 0, @isnumeric);
 p.addParamValue('shufflen', 100, @isnumeric);
+p.addParamValue('threshold', 2.5, @isnumeric);
 p.parse(varargin{:});
 outputMode = p.Results.outputmode;
 shuffle=p.Results.shuffle;
 shuffleN=p.Results.shufflen;
+ThS=p.Results.shuffle;
 
-if nargin<=3
-    ThS=2.5;
-end
 
 
 loop=size(ensemble,1);

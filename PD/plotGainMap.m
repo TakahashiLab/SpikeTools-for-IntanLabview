@@ -151,13 +151,10 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
     frange = unique(round(frange / 2));
    
     xr = xr(frange);
-    
+    if 0
     %normalization
-  
     nC=nanmean(squeeze(nanmean(phaseHistCtrl,1)),1);
-   
-    nC(nC==0)=NaN;
-  
+    
     nCs=zeros(size(phaseHistCtrl));
     nC=repmat(nC,size(nCs,2),1);
    
@@ -167,13 +164,18 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
   
     phaseHistN=phaseHist./nCs;
     phaseHistCtrlN=phaseHistCtrl./nCs;
-   
+end
 
      if strcmp(xyaxis, 'neuronphase') %neuron x phase
-        xr=xr(1:end-1);
-        mph = squeeze(nanmean(phaseHist(:, xr, :), 2))';
-        mphC = squeeze(nanmean(phaseHistCtrlN(:, xr, :), 2))';
-        mphN = squeeze(nanmean(phaseHistN(:, xr, :), 2))';
+        %xr=xr(1:end-1);
+        mph = squeeze(mean(phaseHist(:, xr, :), 2))';
+        mphC = squeeze(mean(phaseHistCtrl(:, xr, :), 2))';
+       
+        mphC=mean(mphC,2);
+       
+        mphC(mphC==0)=1;
+        mphN=mph./mphC;
+
         mphStat = mphN;%statistical test
      
         mphV=mphN;%for bar  
@@ -182,7 +184,7 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
         [~, id] = sort(maxMph, 'descend');
         %mph = mphV(id, :);
         
-        mph = repeatMph(mph,0);
+        mph = repeatMph(mphN,0);
         mph = log10(mph);
         imagesc(mph);
         set(gca, 'ytick', [1 size(mph, 1)], 'yticklabel', [1 size(mph, 1)]);
@@ -195,16 +197,19 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
 
     elseif strcmp(xyaxis, 'freqphase') %freq x phase
     
-        mph = nanmean(phaseHist(:, xr, :), 3)';
-        mphC = nanmean(phaseHistCtrlN(:, xr, :), 3)';
-        mphN = nanmean(phaseHistN(:, xr, :), 3)';
-  
+        mph = mean(phaseHist(:, xr, :), 3)';
+        mphC = mean(phaseHistCtrl(:, xr, :), 3)';
+        %mphN = nanmean(phaseHistN(:, xr, :), 3)';
+        mphC=mean(mphC,1);
+        mphC(mphC==0)=1;
+        mphN=mph./mphC;
+       
 
         mphStat = mphN;%statistical test
         
         mphV=mphN;%for bar   
         
-        mph = repeatMph(mph, 1, [3 3], 1);
+        mph = repeatMph(mphV, 1, [3 3], 1);
        %mph=repeatMph(mph,0);
         
         imagesc(mph);
@@ -215,15 +220,25 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
         else
             ytick = 1:lenMph;
         end
-       
+
+        
+        if isMATLABReleaseOlderThan("R2021b")
+            caxis([.5 max(mph(:))]);
+        else
+            clim([.5 max(mph(:))]);
+        end
         yticklabel = xr(ytick) * 2;
         set(gca, 'ytick', ytick, 'yticklabel', yticklabel);
         ylabel('Frequency [Hz]');
     elseif strcmp(xyaxis, 'gainphase')
-        xr=xr(1:end-1);
+       
         mph = squeeze(nanmean(phaseHist(:, xr, :), 2))';
-        mphC = squeeze(nanmean(phaseHistCtrlN(:, xr, :), 2))';
-        mphN = squeeze(nanmean(phaseHistN(:, xr, :), 2))';
+        mphC = squeeze(nanmean(phaseHistCtrl(:, xr, :), 2))';
+        mphC=mean(mphC,2);
+       
+        mphC(mphC==0)=1;
+        mphN=mph./mphC;
+
         mphStat = mphN;%statistical test
        
         mphV=mphN;%for bar  
@@ -251,13 +266,18 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
         ylabel('Gain');
 
     elseif strcmp(xyaxis, 'gainfreq')
-        xr=xr(1:end-1);
+       
         mph = squeeze(mean(phaseHist(:, xr, :), 1));
-        mphC = squeeze(mean(phaseHistCtrlN(:, xr, :), 1));
-        mphN = squeeze(mean(phaseHistN(:, xr, :), 1));
+        mphC = squeeze(mean(phaseHistCtrl(:, xr, :), 1));
+        
+        mphC=mean(mphC,1);
+     
+        mphC(mphC==0)=1;
+        mphN=mph./mphC;
+
+
         mphStat = mphN;%statistical test
-        %nC = nanmean(mphC, 1);%1:neuron,2:freq
-        %mph = mph ./ nC;
+     
         mphV=mphN;%for bar  
         outMph = mph;
         mph=mph(2:end-1,:);
@@ -300,16 +320,13 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
  else
        
             alpha=0.05;
-                [x,y]=find(isnan(mphStat));
-            mphStat(x,:)=[];
+           
             %[clusters,p]=permutest(mphStat',mphC',false,alpha,1000,false);
-            [clusters,p]=permutest(mphStat',ones(size(mphStat))',false,alpha,1000,false);
-            clusters
-            p
-
+           [clusters,p]=permutest(mphStat',ones(size(mphStat))',false,alpha,1000,false);
+            
 
             sp=cell2mat(clusters(p<alpha));
-
+        if 0
             data=mean(mphStat);
             pd=makedist('uniform','lower',0,'upper',max(data));
                        
@@ -317,7 +334,7 @@ function mphV = plotfnc(phaseHist, phaseHistCtrl, xr, xrange, kernel, frange, ba
             fprintf('ks test=%f\n',p);
             [h,p]=chi2gof(data,'Expected',ones(size(data)));
             fprintf('chi2gof=%f\n',p);
-       
+        end
         
         zShift = size(mphV, 2)/2;
     

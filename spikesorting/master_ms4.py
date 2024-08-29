@@ -52,5 +52,5 @@ for epoch in epoch_names:
     print(dsdir)
     print(epoch)
     print(params_dir)
-    ms4_sort_dataset(dataset_dir=dsdir,dataset=epoch,params_dir=params_dir,output_dir=output_dir,adjacency_radius=-1,detect_threshold=4)
+    ms4_sort_dataset(dataset_dir=dsdir,dataset=epoch,params_dir=params_dir,output_dir=output_dir,adjacency_radius=-1,detect_threshold=5)
 

@@ -17,8 +17,8 @@ global alpha;
 alpha=p.Results.alpha;
 
 
-Suffix='.mat';
-SuffixLen=size(Suffix,2)-1;
+Sufchg='.mat';
+SufchgLen=size(Sufchg,2)-1;
 
 [path,name,ext]=fileparts(basename);
 dataFolder=fullfile(path,name);
@@ -29,14 +29,14 @@ LD=[];LL=[];LR=[];P=[];D=[];S=[];
 
 possibleId=[];
 for i=1:loop
-    if length(d(i).name)>SuffixLen
+    if length(d(i).name)>SufchgLen
         possibleId=[possibleId i];
     end
 end
     
 c=1;
 for i=possibleId
-    if strncmp(d(i).name(end-SuffixLen:end),Suffix,SuffixLen)
+    if strncmp(d(i).name(end-SufchgLen:end),Sufchg,SufchgLen)
         filename=fullfile(dataFolder,d(i).name);
         fprintf('loading %s\n',filename);
         load(filename,'LEDout','LFPoutL','LFPoutR','params','details');

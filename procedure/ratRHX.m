@@ -23,7 +23,7 @@ wfCheck(kkOuts,16);
 
 ensemble=makeEnsemble64(kkOuts,an,en);
 %Please save ensemble information for later analyses
-save ensemble.mat ensemble an en kkOuts;
+save ensemble.mat ensemble an en kkOuts -v7.3;
 
 %
 %find neurons from ensemble

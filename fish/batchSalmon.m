@@ -1,6 +1,6 @@
 % MATLABスクリプト
 % 引数 dirName に指定されたディレクトリ以下のすべてのサブディレクトリを検索
-function batchSalmon(dirName, varargin)
+function [Tbp,Cp]=batchSalmon(dirName, varargin)
     posture4d = [1:4]; %tracking points to calculate head directions
     orgP4d = posture4d;
 
@@ -31,6 +31,7 @@ function batchSalmon(dirName, varargin)
             spVsdir = 5;
         case 'spatialview',
             spVsdir = 6;
+
         otherwise
             spVsdir = 1;
     end
@@ -42,7 +43,7 @@ function batchSalmon(dirName, varargin)
     shuffleON = p.Results.shuffleon;
     shuffleType = p.Results.shuffletype;
     SFtype = p.Results.sftype;
-    
+
     spon = 0;
 
     gTh1 = 0.4;
@@ -53,13 +54,20 @@ function batchSalmon(dirName, varargin)
     fTh1 = 0.5;
     fTh2 = -0.5;
 
+    Tbp = []; %temporal bias
+    Tbn=[];
+    Cp=[];
+    Cn=[];
+    cp=1;
+    cn=1;
+   
     if speed > 0
         spon = 1;
     end
 
     % ディレクトリ内のすべてのファイルとサブディレクトリを取得
     files = dir(fullfile(dirName, '**', 'subject*.mat'));
-
+    mD = 150; %maxDist=150 rectangular tank, 80: circular pool
     cnt = 1;
     cntSp = 0; %spatial cell type
     % 各.matファイルをループ処理
@@ -69,24 +77,29 @@ function batchSalmon(dirName, varargin)
         fileName = fullfile(files(file).folder, files(file).name);
 
         % ファイルから変数を読み込み
-        data = load(fileName, 'ensemble', 'msT', 'fstart', 'Traj');
+        data = load(fileName, 'ensemble', 'msT', 'fstart', 'Traj', 'maxDist');
 
         % 変数が存在するかをチェック
         if isfield(data, 'ensemble') && isfield(data, 'msT') && ...
                 isfield(data, 'fstart') && isfield(data, 'Traj')
 
+            if isfield(data, 'maxDist')
+                mD = data.maxDist;
+            end
+
             % ここでカスタム関数を実行
             for i = 1:size(data.ensemble, 1)
 
-                if size(data.Traj, 2) <= 4 && posture4d(1)~=1
+                if size(data.Traj, 2) <= 4 && posture4d(1) ~= 1
                     posture4d = orgP4d - 2;
                 else
                     posture4d = orgP4d;
                 end
 
                 if spVsdir == 2 %both
+
                     [ratemap, ~, ~, ocmap] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType);
                     gs = gridSCore(moserac(imresize(ratemap, [58, 58])), 'allen', 0);
                     [~, ~, mr] = plot_polar_rate_map(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, 'khz', 31.25, 'posture', [1:4], 'animal', 'fish');
@@ -108,8 +121,8 @@ function batchSalmon(dirName, varargin)
 
                 elseif spVsdir == 1 %spatial
                     figure;
-                    [ratemap, spatial_scale, ~, ocmap, pp, ~, FrIndex] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                    [ratemap, spatial_scale, ~, ocmap, pp, ~, FrIndex, ~, ~, instValues] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType);
 
                     subplot(2, 2, 1);
@@ -117,16 +130,58 @@ function batchSalmon(dirName, varargin)
                     subplot(2, 2, 2);
                     gs1 = gridSCore(moserac(imresize(ratemap, [58, 58])), 'allen', 1);
                     subplot(2, 2, 3);
-                    gs2 = gridSCore(moserac(ratemap), 'allen', 1);
+                    gs2 = gridSCore(moserac(ratemap), 'allen', 0);
 
                     [~, IPS, IS] = calcInfoNew(ratemap, ocmap);
                     bn = Borderness(ratemap, spatial_scale, ocmap, 0);
 
+                    subplot(2, 2, 3);
+                    % Running speed (1列目) と Firing rate (3列目) を取得
+                    runningSpeed = instValues(:, 1);
+                    firingRate = instValues(:, 2);
+
+                    % Running speed の範囲に基づいてビンエッジを計算
+                    minSpeed = floor(min(runningSpeed));
+                    maxSpeed = ceil(max(runningSpeed)) + 1;
+                    binEdges = minSpeed:2:maxSpeed; % 2 cm/s のビン幅
+
+                    % 各ビンに対応する firingRate の値を集計
+                    % ここでは、discretize 関数を使用して、runningSpeed の値をビンに分類します
+                    binIndices = discretize(runningSpeed, binEdges);
+
+                    % % inhomogenous coverage,> 1% bin is considered
+                    % c = histcounts(runningSpeed, binEdges);
+                    % idx = find(~ismember(binIndices, find(c ./ sum(c) * 100 > 1)));
+                    % firingRate(idx) = 0;
+
+                    % accumarray を使用して、各ビンの firingRate の合計を計算
+                    % binIndices が空でないことを確認
+                    histogram('BinEdges', binEdges, 'BinCounts', accumarray(binIndices, firingRate, [], @sum));
+
+                    % タイトルと軸ラベルを設定
+                    xlabel('Running Speed (cm/s)');
+                    ylabel('Total Firing Rate');
+                    title('Total Firing Rate Distribution by Running Speed');
+
+                    subplot(2, 2, 4);
+
+                    [C, lag] = xcorr(runningSpeed, firingRate);%prospective +, retrospective -
+                    [~, I] = max(C);
+                    t = lag(I);                
+                    plot(lag,C);
+
+                    % instValues = zscore(instValues);
+                    %  plot(instValues(:, 1), 'r');
+                    %  hold on;
+                    %  plot(instValues(:, 2), 'g');
+
+
                     if shuffleON
                         %shuffle
+
                         [ratemap, ~, ~, ~, ~, ~, Frs] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                            'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
-                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN);
+                            'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN, 'shuffletype', shuffleType);
 
                         for k = 1:size(ratemap, 1)
                             [~, IPSs(k), ISs(k)] = calcInfoNew(ratemap(k, :, :), ocmap);
@@ -155,7 +210,7 @@ function batchSalmon(dirName, varargin)
 
                     fprintf('%d::%d::%s::gs1=%1.2f,gs2=%1.2f. IPS=%1.2f, IS=%1.2f, FrIndex=%1.2f,Border=%1.2f\n', cntSp, cnt, fileName, gs1, gs2, IPS, IS, FrIndex(SFtype), bn);
 
-                    if gs1 > gTh1 || gs2 > gTh2 || IPS > pTh || IS < sTh || FrIndex(1) > fTh1 || FrIndex(SFtype) < fTh2
+                    if gs1 > gTh1 || gs2 > gTh2 || IPS > pTh || IS < sTh || FrIndex(SFtype) > fTh1 || FrIndex(SFtype) < fTh2
                         cntSp = cntSp + 1;
 
                         if gs1 > gTh1 || gs2 > gTh2
@@ -168,8 +223,14 @@ function batchSalmon(dirName, varargin)
 
                         if FrIndex(SFtype) > fTh1
                             fprintf('*Speed-pos*');
+                            Tbp = [Tbp t];
+                            Cp{cp}=C;
+                            cp=cp+1;
                         elseif FrIndex(SFtype) < fTh2
                             fprintf('*Speed-neg*');
+                            Tbn = [Tbn t];
+                            Cn{cn}=C;
+                            cn=cn+1;
                         end
 
                     end
@@ -182,7 +243,7 @@ function batchSalmon(dirName, varargin)
                     figure;
                     subplot(2, 2, 1);
                     [ratemap, ~, ~, ocmap, pp] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 1, 'posture', [1:4], 'dirtype', dirType);
 
                     subplot(2, 2, 2);
@@ -202,7 +263,7 @@ function batchSalmon(dirName, varargin)
                 elseif spVsdir == 4 %hdseg
                     figure;
                     [ratemap, ~, ~, ocmap, pp] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'hdseg', 1, 'dirtype', dirType);
 
                     k = [9 6 3 2 1 4 7 8];
@@ -234,14 +295,14 @@ function batchSalmon(dirName, varargin)
 
                     subplot(3, 3, 5);
                     [ratemap, ~, ~, ocmap] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4]);
                     imagePmap(ratemap, ocmap);
 
                 elseif spVsdir == 5 %velocity-vector
                     figure;
                     [ratemap, ~, ~, ocmap] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'mode', 'velocity-vector');
 
                     imagePmap(ratemap, ocmap);
@@ -251,8 +312,8 @@ function batchSalmon(dirName, varargin)
                     if shuffleON
                         %shuffle
                         [ratemap, ~, ~, ~, ~, ~, Frs] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                            'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
-                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN, 'mode', 'velocity-vector');
+                            'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN, 'shuffletype', shuffleType, 'mode', 'velocity-vector');
 
                         for k = 1:size(ratemap, 1)
                             [~, IPSs(k), ISs(k)] = calcInfoNew(ratemap(k, :, :), ocmap);
@@ -280,11 +341,11 @@ function batchSalmon(dirName, varargin)
                 elseif spVsdir == 6 %spatial view
                     figure;
                     [ratemap, spatial_scale, ~, ocmap, pp, ~, FrIndex] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                        'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                        'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
                         'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'mode', 'spatialview');
 
                     subplot(2, 2, 1);
-                   
+
                     imagePmap(ratemap, ocmap);
 
                     [~, IPS, IS] = calcInfoNew(ratemap, ocmap);
@@ -292,9 +353,9 @@ function batchSalmon(dirName, varargin)
                     if shuffleON
                         %shuffle
                         [ratemap, ~, ~, ~, ~, ~, Frs] = pmap2(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, ...
-                            'maxDist', 150, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
-                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN, 'mode', 'spatialview');
-                       
+                            'maxDist', mD, 'khz', 31.25, 'spon', spon, 'speed', speed, ...
+                            'binwidth', 2.5, 'grid', [10 10], 'verbose', 0, 'posture', [1:4], 'dirtype', dirType, 'shuffle', 1, 'shuffleN', shuffleN, 'shuffletype', shuffleType, 'mode', 'spatialview');
+
                         for k = 1:size(ratemap, 1)
                             [~, IPSs(k), ISs(k)] = calcInfoNew(ratemap(k, :, :), ocmap);
                         end
@@ -331,7 +392,7 @@ function batchSalmon(dirName, varargin)
 
                 else %direction
                     figure;
-                    
+
                     [~, ~, mr] = plot_polar_rate_map(data.ensemble{i, 3}, data.Traj, data.msT, 'fstart', data.fstart, 'khz', 31.25, 'posture', posture4d, 'animal', 'fish', 'verbose', 1, 'dirtype', dirType);
 
                     if shuffleON
@@ -361,4 +422,5 @@ function batchSalmon(dirName, varargin)
     end
 
     fprintf('spatial cell types=%d / %d\n', cntSp, cnt - 1);
+    Tbp
 end

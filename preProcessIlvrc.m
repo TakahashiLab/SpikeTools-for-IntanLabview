@@ -120,21 +120,17 @@ if sleep==0 | sleep==1 | sleep==3 | sleep==4%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         e=e-gmr;
                         
                     else% split median referencing
+                        
                         loop1=size(ref,1);
                         for k=1:loop1
                             channels=ref{k,2};
                             refNum=ref{k,1};
-                            %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing
                             pe=e(channels,:);
-                            branchPoint=floor(size(pe,2)/2);
-                            %1st half
-                            gmr=median(pe(:,1:branchPoint),1);
-                            e(channels,1:branchPoint)=pe(:,1:branchPoint)-repmat(gmr,size(channels,2),1); 
-                            %2nd half
-                            gmr=median(pe(:,branchPoint+1:end),1);
-                            e(channels,branchPoint+1:end)=pe(:,branchPoint+1:end)-repmat(gmr,size(channels,2),1); 
-
+                            gmr=median(pe,1);
+                            e(channels,:)=pe-repmat(gmr,size(channels,2),1); ...
+                            %referencing
                         end
+
                     end
                 else
                     e=e-repmat(e(ref,:),size(e,1),1);%referencing
@@ -194,11 +190,4 @@ if 0
 end
 
 
-return;
-%%%%%%%%%
-function saveKilosort(fn,x)
-fid=fopen(fn,'w');
-x=int16(x);
-fwrite(fid,x,'int16');
-fclose(fid);
 return;

@@ -9,12 +9,14 @@ p.addParamValue('hz', 25000, @isnumeric);
 p.addParamValue('fps', 50, @isnumeric);
 p.addParamValue('sth', 2, @isnumeric);
 p.addParamValue('pixel2cm', 0.185, @isnumeric);
+p.addParamValue('xy', [1 2], @isvector);
 
 p.parse(varargin{:});
 Hz = p.Results.hz;
 fps=p.Results.fps;
 sth=p.Results.sth;
-pixel2cm = p.Results.pixel2cm
+pixel2cm = p.Results.pixel2cm;
+xydim=p.Results.xy;
 
 %Hz=25000;
 %pixel2cm=0.185;%cm^2 = 1 pixel
@@ -34,11 +36,9 @@ if size(Pos,1)~=size(PosT,1)
   PosT=PosT';
 end
 
-
-traj=Pos(:,1:2).*pixel2cm;
+traj=Pos(:,xydim).*pixel2cm;
 
 trajD=diff(traj);
-
 deltaTime=diff(PosT)./Hz;%sec
 
 dist=sqrt(trajD(:,1).^2+trajD(:,2).^2);

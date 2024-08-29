@@ -13,6 +13,7 @@ function [ensemble, IS, LR] = makeEnsemble64(kkOuts, an, en, varargin)
     tetNum = size(kkOuts, 2);
 
     for i = 1:tetNum
+    
         tmp = kkOuts{i}(an{i}, :);
 
         if ~isempty(tmp)
@@ -49,7 +50,7 @@ function [ensemble, IS, LR] = makeEnsemble64(kkOuts, an, en, varargin)
 
         ensemble = [ensemble; tmp];
         fprintf('tetNum=%d\n', i);
-
+    
         if size(tmp, 1) == 1
             is = NaN;
             lr = NaN;
@@ -59,6 +60,7 @@ function [ensemble, IS, LR] = makeEnsemble64(kkOuts, an, en, varargin)
 
         IS = [IS; is(:, 1)];
         LR = [LR; lr(:, 1)];
+        
     end
 
     return;

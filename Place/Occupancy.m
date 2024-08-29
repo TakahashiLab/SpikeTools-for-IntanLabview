@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [occupancy, xdim, ydim] = Occupancy(x,y,spatial_scale,dim,fs_video)
+function [occupancy, xdim, ydim] = Occupancy(x,y,spatial_scale,dim,fs_video,xdim,ydim)
 % Returns occupancy matrix of time spent in 2D spatial bins 
 %
 % Returns occupancy matrix of time spent in bins of dimension 3x3cm^2 be
@@ -15,8 +15,11 @@ function [occupancy, xdim, ydim] = Occupancy(x,y,spatial_scale,dim,fs_video)
 %
 % andrew bogaard 17 may 2010
 % from https://github.com/hasselmonians/CMBHOME
-xdim = min(x):spatial_scale^-1*dim:max(x); %edges of x and y dimensions
-ydim = min(y):spatial_scale^-1*dim:max(y);
+
+if nargin==5
+    xdim = min(x):spatial_scale^-1*dim:max(x); %edges of x and y dimensions
+    ydim = min(y):spatial_scale^-1*dim:max(y);
+end
 
 occupancy = hist3([x, y], 'Edges', {xdim, ydim}) /fs_video;
 return;

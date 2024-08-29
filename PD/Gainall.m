@@ -11,6 +11,7 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
     p.addParamValue('topfreq', 120, @isnumeric);
     p.addParamValue('alpha', 0.05, @isnumeric);
     p.addParamValue('xyaxis', 'off', @ischar);
+    p.addParamValue('cq',[25 .05], @isvector);
 
     p.parse(varargin{:});
 
@@ -23,12 +24,16 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
     histon = p.Results.hist;
     topFreq = p.Results.topfreq;
     xyaxis = p.Results.xyaxis;
+    CQs = p.Results.cq;
 
     global alpha;
     alpha = p.Results.alpha;
 
     Suffix = '.mat';
     SuffixLen = size(Suffix, 2) - 1;
+
+    IDTh=CQs(1);
+    LratioTh=CQs(2);
 
     [path, name, ext] = fileparts(basename);
     dataFolder = fullfile(path, name);
@@ -75,7 +80,7 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
         if strncmp(d(i).name( end - SuffixLen:end), Suffix, SuffixLen)
         filename = fullfile(dataFolder, d(i).name);
         fprintf('loading %s\n', filename);
-        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl');
+        load(filename, 'phaseHistPyr', 'phaseHistInt', 'PyrIntList', 'PyrIntListStim', 'phaseHistPyrCtrl', 'phaseHistIntCtrl','pyr','interneuron','cq');
             %phaseHistPyr=phaseHistPyrCtrl;
             %phaseHistInt=phaseHistIntCtrl;
         switch lower(stim)
@@ -206,32 +211,56 @@ function [normalPyrS, normalIntS, pdPyrS, pdIntS] = Gainall(basename, varargin)
 
         end
 
+       
+
+       
         switch (lower(celltype))
             case 'cc',
-                normalPyr=intersect(normalPyr,PyrIntList{9});
-                normalInt=intersect(normalInt,PyrIntList{10});
-                pdPyr=intersect(pdPyr,PyrIntList{9});
-                pdInt=intersect(pdInt,PyrIntList{10});
+                normalPyr2=intersect(normalPyr,PyrIntList{9});
+                normalInt2=intersect(normalInt,PyrIntList{10});
+                pdPyr2=intersect(pdPyr,PyrIntList{9});
+                pdInt2=intersect(pdInt,PyrIntList{10});
             case 'pv',
-                normalInt=intersect(normalInt,PyrIntList{11});
-                pdInt=intersect(pdInt,PyrIntList{11});
+                normalPyr2=[];
+                normalInt2=intersect(normalInt,PyrIntList{11});
+                pdPyr2=[];
+                pdInt2=intersect(pdInt,PyrIntList{11});
             case 'ccpv',
-                normalPyr=intersect(normalPyr,PyrIntList{9});
-                normalInt=intersect(normalInt,union(PyrIntList{10},PyrIntList{11}));
-                pdPyr=intersect(pdPyr,PyrIntList{9});
-                pdInt=intersect(pdInt,union(PyrIntList{10},PyrIntList{11}));
+                normalPyr2=intersect(normalPyr,PyrIntList{9});
+                normalInt2=intersect(normalInt,union(PyrIntList{10},PyrIntList{11}));
+                pdPyr2=intersect(pdPyr,PyrIntList{9});
+                pdInt2=intersect(pdInt,union(PyrIntList{10},PyrIntList{11}));
             case 'all',
-                %nothing
-              
+                normalPyr2=[];
+                normalInt2=[];
+                pdPyr2=[];
+                pdInt2=[];
         end
+    
+         %cell classification
+         cq(isnan(cq(:,1)),1)=0;
+         PYR=find(cq(pyr,1)>=IDTh & cq(pyr,2)<LratioTh);
+    
+        normalPyr=intersect(PYR,normalPyr);
+         pdPyr=intersect(PYR,pdPyr);
+   
+         INTERNEURON=find(cq(interneuron,1)>=IDTh & cq(interneuron,2)<LratioTh);
+         normalInt=intersect(INTERNEURON,normalInt);
+         pdInt=intersect(INTERNEURON,pdInt);
 
-        PyrIntList{1}
-        normalPyr
+        normalPyr=union(normalPyr,normalPyr2);
+        normalInt=union(normalInt,normalInt2);
+        pdPyr=union(pdPyr,pdPyr2);
+        pdInt=union(pdInt,pdInt2);
+
+     
+
+        %
         normalPyrS = cat(3, normalPyrS, phaseHistPyr(:, :, normalPyr));
         normalIntS = cat(3, normalIntS, phaseHistInt(:, :, normalInt));
         normalPyrSCtrl = cat(3, normalPyrSCtrl, phaseHistPyrCtrl(:, :, normalPyr));
         normalIntSCtrl = cat(3, normalIntSCtrl, phaseHistIntCtrl(:, :, normalInt));
-
+        
         pdPyrS = cat(3, pdPyrS, phaseHistPyr(:, :, pdPyr));
         pdIntS = cat(3, pdIntS, phaseHistInt(:, :, pdInt));
         pdPyrSCtrl = cat(3, pdPyrSCtrl, phaseHistPyrCtrl(:, :, pdPyr));

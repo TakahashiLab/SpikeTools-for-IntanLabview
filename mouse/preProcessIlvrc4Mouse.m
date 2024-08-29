@@ -131,37 +131,27 @@ for i=possibleId
                 end
                 x=double(x)./Factor16bit.*uV1;%convert to 1 uV
 
-                save('tmp.mat','-v7.3','x');
-                fprintf('dividing data\n');
-                if unixMem() < 50 %if below 50GB
-                    xx=x(1:size(x,1)/2,:);
-                    clear x;
-                    lfp0=filterAmp(xx,2,sampl,gpuFlag);
-                    fprintf('first half\n');
-		    save('tmp.mat','-append','lfp0');
-                    clear lfp0;
+                if ~exist(savenames{numOfElectrodes+1})
+                    save('tmp.mat','-v7.3','x');
+                    if unixMem() < 50 %if below 50GB
+                        fprintf('memory below 50GB\n');
+                        x=single(x);
+                        lfp=filterAmp(x,2,sampl,2);%singleMode
+                        clear x;
+                    else
+                        fprintf('process entire data at once\n');
+                        lfp=filterAmp(x,2,sampl,gpuFlag);
+                        clear x;
+                    end
+                    lfp=int16(lfp);
+                    fprintf('convert LFPs\n');
+                    dlfp=downlfp(lfp,25);%25kHz -> 1kHz
+                    fprintf('Saving LFPs...\n');
+                    parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
+                            'dlfp',dlfp);
+                    clear lfp dlfp;
                     load tmp.mat x;
-                    xx=x(size(x,1)/2+1:end,:);
-                    clear x;
-                    fprintf('second half\n');
-                    lfp1=filterAmp(xx,2,sampl,gpuFlag);	
-                    load tmp.mat lfp0;
-                    fprintf('Concatenate halves\n');
-                    lfp=[lfp0;lfp1];
-                    clear lfp0 lfp1;
-                else
-                    fprintf('process entire data at once\n');
-                    lfp=filterAmp(x,2,sampl,gpuFlag);
-                    clear x;
                 end
-                lfp=int16(lfp);
-                fprintf('convert LFPs\n');
-                dlfp=downlfp(lfp,25);%25kHz -> 1kHz
-                fprintf('Saving LFPs...\n');
-                parsave(savenames{numOfElectrodes+1},'lfp',lfp, ...
-                        'dlfp',dlfp);
-                clear lfp dlfp;
-                load tmp.mat x;
             else
                 [~,ref,sampl]=loadilvrcN(fullfile(dataFolder,d(i).name),-1);
                 if ~isempty(forceRef)
@@ -169,8 +159,17 @@ for i=possibleId
                 end
                 load tmp.mat x;
             end
-            e=filterAmp(x,0,sampl,gpuFlag);
+
+
+            if unixMem() < 50 %if below 50GB
+                fprintf('memory below 50GB\n');
+                x=single(x);
+                e=filterAmp(x,0,sampl,2);%single mode
+            else
+                e=filterAmp(x,0,sampl,gpuFlag);
+            end
             clear x;
+
             e=double(e)./Factor16bit.*uV01;%convert to 0.1 uV
             
             if iscell(ref);
@@ -184,9 +183,8 @@ for i=possibleId
                         channels=ref{k,2};
                         refNum=ref{k,1};
                         %	    e(channels,:)=e(channels,:)-repmat(e(refNum,:),size(channels,2),1);%referencing 
-                        pe=e(channels,:);
-                        gmr=median(pe,1);
-                        e(channels,:)=pe-repmat(gmr,size(channels,2),1);%referencing 
+                        gmr=median(e(channels,:),1);
+                        e(channels,:)=e(channels,:)-repmat(gmr,size(channels,2),1);%referencing 
                     end
                 end
             else

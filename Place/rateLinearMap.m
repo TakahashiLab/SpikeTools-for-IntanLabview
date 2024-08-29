@@ -1,12 +1,16 @@
-function [rate_map, xdim, occupancy, no_occupancy] = rateLinearMap(spk_x,x,spatial_scale,fs_video,fieldShuffleON)
+function [rate_map, xdim, occupancy, no_occupancy] = rateLinearMap(spk_x,x,spatial_scale,fs_video,binside)
 
-binside=2.5;
+if nargin==4
+    binside=2.5;
+end
+
 GRID=[9 9];
+
 
 std_smooth_kernel=5;
 %[occupancy, xdim, ydim] = Occupancy(x,y,
 %spatial_scale,binside,fs_video);
-dim=binside;;
+dim=binside;
 
 xdim = min(x):spatial_scale^-1*dim:max(x); %edges of x and y
                                            %dimensions

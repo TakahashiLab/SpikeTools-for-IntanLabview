@@ -11,11 +11,11 @@ for i=1:loop
   mm=[mm nanmedian(segPara{i,num})];
 end
 
-plot(mm);
-
-xticklabels={'pre','peak','s','trough','s','rising','s','falling','post'};
-set(gca,'xticklabel',xticklabels);
-
+if verbose
+    plot(mm);
+    xticklabels={'pre','peak','s','trough','s','rising','s','falling','post'};
+    set(gca,'xticklabel',xticklabels);
+end
 
 for i=1:loop
   segPara{i,num}(isnan(segPara{i,num}))=[];

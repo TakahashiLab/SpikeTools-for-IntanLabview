@@ -23,6 +23,8 @@ verbose = p.Results.verbose;
 splitNum = p.Results.splitNum;
 calcPhase = p.Results.phase;
 
+maxFr=1;%1Hz
+
 phaseT=spks{1,4};
 spks=double(spks{1,3});
 
@@ -34,6 +36,8 @@ loop=length(nums);
 SpkInIndex=[];
 
 for m=nums
+    
+    cl=[];
     if verbose
           if loop~=1
             subplot(1,loop,m);
@@ -99,6 +103,7 @@ for m=nums
         
         if calcPhase
             phaseSeq=phaseT(SpkInIndexT);
+            cl=[cl;phaseSeq' SpkSeq'];
             raster=raster+full(sparse(phaseSeq,SpkSeq,1,360,eventLength));
         else
             raster(i,:)=full(sparse(1,SpkSeq,1,1,eventLength));
@@ -115,6 +120,7 @@ for m=nums
     if calcPhase & verbose
         raster=[raster;raster];
         [x,y]=find(raster);
+
         plot(y,x,'k.');
     end
     
@@ -188,7 +194,46 @@ end
         end
         smhistR{m}=smhistRaster;
     end
+    
 
+    maxHistRaster=max(smhistRaster);
+    if maxHistRaster > maxFr
+        [out,b]=countPlaceFields(smhistRaster,1,50);
+        maxP=1;
+        maxV=-1;
+        for j=1:length(out)
+            if max(smhistRaster(b{j}(:,2))) > maxV
+                maxV=max(smhistRaster(b{j}(:,2)));
+                maxP=j;
+            end
+        end
+        
+        
+        if calcPhase & ~isempty(b)
+            range=b{maxP}(1,2):b{maxP}(end,2);
+            clT=cl((cl(:,2)>=b{maxP}(1,2) & cl(:,2)<=b{maxP}(end, ...
+                                                             2)),:);
+
+        if ~isempty(cl) & ~isempty(clT)
+
+            [r,clp]=circ_corrcl(deg2rad(clT(:,1)),clT(:,2));
+            [beta,r2,p] = CircularRegression(clT(:,2),deg2rad(clT(:, ...
+                                                              1)));
+            
+            hold on;
+            y=rad2deg((range)*beta(1)+beta(2));
+            y(y<0)=y(y<0)+360;
+            if verbose
+            plot(range,y,'k-');
+            end
+
+            if clp<0.05
+            fprintf('p=%f\n',clp);
+        end
+        end
+    end    
+
+    end
 return;
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % function [Up,Do,l]=splitUpDo(Up,Do,splitNum,ThS,kHz)

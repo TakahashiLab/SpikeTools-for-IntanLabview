@@ -13,12 +13,8 @@ end
 [PosT]=extractEventNoisy(event(5,:),'pulsewidth',10);
 delP=find(diff(t(PosT))*25>0.6);
 
+
 Pos(delP+1,:)=[];
 
 
-if size(Pos,1)>size(PosT,1)
-    Pos=Pos(1:size(PosT,1),:);
-elseif size(Pos,1)<size(PosT,1)
-    PosT=PosT(1:size(Pos,1));    
-end
 return;

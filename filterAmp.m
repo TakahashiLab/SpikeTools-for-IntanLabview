@@ -56,6 +56,8 @@ end
 for i=1:size(x,1)
     if gpuOn==1
         x(i,:)=gpuFiltFilt(b,a,x(i,:));
+    elseif gpuOn==2
+        x(i,:)=singleFiltFilt(b,a,x(i,:));
     else
         x(i,:)=filtfilt(bpFilt,double(x(i,:)));
     end

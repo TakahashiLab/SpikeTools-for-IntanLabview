@@ -28,6 +28,8 @@ else
     if yLen < xLen
         Len=xLen;
     end
+    yLen
+    xLen
 %     Len=min([xLen yLen])
 end
 
@@ -136,7 +138,9 @@ else
     movement=sqrt(sum(diff(Traj(:,5:6)).^2,2))*cmPerPixel;% 1:2 -> 5:6
 end
 
+
 speed=movement./diff(msT);
+
 speed=smooth(speed,FPS,'moving')*1000;
 
 %analyzed if the speed is more than 5cm/s 
@@ -179,6 +183,7 @@ if isempty(Spks)
     FrIndex=[];
     return;
 end
+
 
 %Firing rate contrast Index
 windowSize=2000;%2s
