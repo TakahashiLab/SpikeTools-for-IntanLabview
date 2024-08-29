@@ -124,8 +124,10 @@ diffX = pX - sx;
 diffY = pY - sy;
 hovering = find(speed < 5)'; %5cm/s
 
-if hovering(1) == 1
-    hovering(1) = [];
+if ~isempty(hovering)
+    if hovering(1) == 1
+        hovering(1) = [];
+    end
 end
 
 movedir = atan2d(diffY, diffX)';
@@ -187,15 +189,20 @@ if shuffle
         Spks = SpksShuffle(i, :);
         Spks = Spks(find(Spks > StartTraj & Spks < EndTraj));
         spk_headdir = [];
-
+        spk_headdir_t = [];
         for j = 1:(size(headdir, 1) - 1)
             if msT(j+1)-msT(j) < msFPS*2
                 spk_headdir = [spk_headdir ones(1, sum(Spks >= msT(j) & Spks < msT(j + 1))) .* headdir(j)];
+                spk_headdir_t=[spk_headdir_t ones(1,sum(Spks >= msT(j) & Spks < msT(j+1))).*msT(j)];
             end
         end
-
-        [~, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
-
+        
+        switch lower(animal)
+            case 'seaturtle',
+                [~, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,spk_headdir_t);
+            otherwise,
+                [~, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
+        end
         MRs = [MRs mr];
         WU2s = [WU2s wu2];
         MVLs = [MVLs mvl];
@@ -286,8 +293,8 @@ if isempty(spk_headdir)
 
 else
     num_spikes = hist(spk_headdir,theta);
-
-    window=29;
+    
+    window=floor(size(num_spikes,2)/2)-1;
     num_spikes=[fliplr(num_spikes(end-window+1:end)) num_spikes fliplr(num_spikes(1:window))];
 
     angle_occupancy=[fliplr(angle_occupancy(end-window+1:end)) angle_occupancy fliplr(angle_occupancy(1:window))];
