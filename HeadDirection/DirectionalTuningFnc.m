@@ -237,7 +237,7 @@ if shuffle
         end
         
         switch lower(animal)
-            case 'seaturtle',
+            case 'turtle',
                 [tc, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,conv);
             case 'bird',
                 [tc, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,conv);
@@ -274,7 +274,7 @@ else
    spk=[spk_headdir;spk_headdir_t];
 
     switch lower(animal)
-        case 'seaturtle',
+        case 'turtle',
             [tuning_curve,ang_hd,mr,wu2,mvl,occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,conv);
         case 'bird',
             [tuning_curve,ang_hd,mr,wu2,mvl,occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,conv);
@@ -290,6 +290,7 @@ function [tuning_curve, ang_hd, mr, wu2, mvl, angle_occupancy, num_spikes] = Dir
 spk_headdir = spk_headdir';
 %%%%%%%%%%%%%%%%%%%%%%%%head direction
 angle_occupancy = DirectionalOccupancy(binsize, headdir, fs_video);
+
 num_spikes = hist(spk_headdir, theta);
 window = 29;
 
