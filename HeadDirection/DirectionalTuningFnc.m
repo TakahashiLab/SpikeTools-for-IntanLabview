@@ -21,6 +21,7 @@ p.addParamValue('shuffletype', 'shift', @ischar);
 p.addParamValue('verbose', 0, @isnumeric);
 p.addParamValue('posture', [3 4 5 6], @isvector);
 p.addParamValue('dirtype', 'head', @ischar);
+p.addParamValue('conv', 0, @isnumeric);
 
 p.parse(varargin{:});
 fstart = p.Results.fstart;
@@ -35,6 +36,7 @@ shuffleType = p.Results.shuffletype;
 verbose = p.Results.verbose;
 posture = p.Results.posture;
 dirType = p.Results.dirtype;
+conv = p.Results.conv;
 
 binsize = .5; %.5
 theta = -180 + binsize / 2:binsize:180 - binsize / 2;
@@ -58,11 +60,20 @@ if nargin == 4
     shuffle = 0;
 end
 
+if startsWith(lower(animal),'sea')
+    animal=animal(4:end);
+end
+
 switch lower(animal)
     case 'bird'
         cmPerPixel = maxdist / Len; %120cm circle;
         Bin = BinWidthCm / cmPerPixel;
         spON = 0;
+        kHz=30;
+        binsize = 6;%0.5
+        theta=-180+binsize/2:binsize:180-binsize/2;
+        theta = theta(:);
+        posture=[5 6 1 2];
     case 'rat'
         cmPerPixel = maxdist / Len; %
         Bin = BinWidthCm / cmPerPixel;
@@ -74,7 +85,7 @@ switch lower(animal)
         cmPerPixel = maxdist / Len; %120cm circle;
         Bin = BinWidthCm / cmPerPixel;
         %spON=0;
-    case 'seaturtle',
+    case 'turtle',
         cmPerPixel=20/Len;%120cm circle;
         Bin=BinWidthCm/cmPerPixel;
         kHz=30;
@@ -84,6 +95,7 @@ switch lower(animal)
         theta=-180+binsize/2:binsize:180-binsize/2;
         theta = theta(:);
         posture=[1:4];
+        
 end
 
 FPS = floor(1 / (median(diff(msT)) / 1000));
@@ -151,6 +163,7 @@ EndTraj = msT(end);
 MRs = [];
 WU2s = [];
 MVLs = [];
+TC=[];
 
 if shuffle
 
@@ -167,7 +180,33 @@ if shuffle
 
     switch (shuffleType)
         case 'shift',
+            shuffleLag = 20000; %20sec
+            for i = 1:shuffleN
+                spkss = Spks + rp(i);
+                topSpks = find(spkss >= endSpks);
+                spkss(topSpks) = spkss(topSpks) - endSpks + beginSpks;
+                SpksShuffle(i, :) = sort(spkss);
+            end
 
+        case 'shift10m',%seaturtle
+            shuffleLag = 60000*10; %10min
+            %10min-20min
+           
+            entireLength2=shuffleLag*2;
+            rp = randperm(entireLength2 - shuffleLag + 1);
+            for i = 1:shuffleN
+                spkss = Spks + rp(i);
+                topSpks = find(spkss >= endSpks);
+                spkss(topSpks) = spkss(topSpks) - endSpks + beginSpks;
+                SpksShuffle(i, :) = sort(spkss);
+            end
+
+        case 'shift40m',%seaturtle
+            shuffleLag = 60000*40; %10min
+            %10min-20min
+
+            entireLength2=shuffleLag*2;
+            rp = randperm(entireLength2 - shuffleLag + 1);
             for i = 1:shuffleN
                 spkss = Spks + rp(i);
                 topSpks = find(spkss >= endSpks);
@@ -193,23 +232,26 @@ if shuffle
         for j = 1:(size(headdir, 1) - 1)
             if msT(j+1)-msT(j) < msFPS*2
                 spk_headdir = [spk_headdir ones(1, sum(Spks >= msT(j) & Spks < msT(j + 1))) .* headdir(j)];
-                spk_headdir_t=[spk_headdir_t ones(1,sum(Spks >= msT(j) & Spks < msT(j+1))).*msT(j)];
+               
             end
         end
         
         switch lower(animal)
             case 'seaturtle',
-                [~, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,spk_headdir_t);
+                [tc, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,conv);
+            case 'bird',
+                [tc, ~, mr, wu2, mvl] = DirectionTuningCore2(headdir, spk_headdir, binsize, fs_video, theta,conv);
             otherwise,
-                [~, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
+                [tc, ~, mr, wu2, mvl] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
         end
         MRs = [MRs mr];
         WU2s = [WU2s wu2];
         MVLs = [MVLs mvl];
+        TC=[TC; tc];
 
     end
 
-    tuning_curve = [];
+    tuning_curve = TC;
     ang_hd = [];
     mr = MRs;
     wu2 = WU2s;
@@ -226,17 +268,16 @@ else
     for i = 1:(size(headdir, 1) - 1)
         if msT(i+1)-msT(i) < msFPS*2
             spk_headdir=[spk_headdir ones(1,sum(Spks >= msT(i) & Spks < msT(i+1))).*headdir(i)];
-            spk_headdir_t=[spk_headdir_t ones(1,sum(Spks >= msT(i) & Spks < msT(i+1))).*msT(i)];
-
-
         end
     end
 
-    spk=[spk_headdir; spk_headdir_t];
+   spk=[spk_headdir;spk_headdir_t];
 
     switch lower(animal)
         case 'seaturtle',
-            [tuning_curve,ang_hd,mr,wu2,mvl,occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,spk_headdir_t);
+            [tuning_curve,ang_hd,mr,wu2,mvl,occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,conv);
+        case 'bird',
+            [tuning_curve,ang_hd,mr,wu2,mvl,occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,conv);
         otherwise,
             [tuning_curve, ang_hd, mr, wu2, mvl, occupancy, num_spikes] = DirectionTuningCore(headdir, spk_headdir, binsize, fs_video, theta);
     end
@@ -250,7 +291,6 @@ spk_headdir = spk_headdir';
 %%%%%%%%%%%%%%%%%%%%%%%%head direction
 angle_occupancy = DirectionalOccupancy(binsize, headdir, fs_video);
 num_spikes = hist(spk_headdir, theta);
-
 window = 29;
 
 num_spikes = [fliplr(num_spikes(end - window + 1:end)) num_spikes fliplr(num_spikes(1:window))];
@@ -265,13 +305,13 @@ tuning_curve = tuning_curve(window + 1:end - window);
 angle_occupancy = angle_occupancy(window + 1:end - window);
 num_spikes = num_spikes(window + 1:end - window);
 
-[ang_hd, mr, mvl] = GetOtherStats(tuning_curve, theta);
+[ang_hd, mr, mvl] = GetOtherStats2(tuning_curve, theta);
 wu2 = WatsonsU2(spk_headdir, headdir);
 
 return;
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
-function [tuning_curve,ang_hd,mr,wu2,mvl,angle_occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,spk_headdir_t)
+function [tuning_curve,ang_hd,mr,wu2,mvl,angle_occupancy,num_spikes,sig]=DirectionTuningCore2(headdir,spk_headdir,binsize,fs_video,theta,conv)
 sig=0;ang_hd=NaN;
 gaussianSD = 3; % Standard deviation for Gaussian smoothing
 significantPValue = 0.0001; % Threshold for Rayleigh test
@@ -281,6 +321,7 @@ minZScore = 50; % Minimum Z-score
 tuning_curve=NaN*ones(1,60);
 spk_headdir=spk_headdir';
 %%%%%%%%%%%%%%%%%%%%%%%%head direction
+
 angle_occupancy = DirectionalOccupancy(binsize, headdir,fs_video);
 
 if isempty(spk_headdir)
@@ -290,14 +331,17 @@ if isempty(spk_headdir)
     wu2=0;
     mvl=0;
     num_spikes=0;
-
 else
-    num_spikes = hist(spk_headdir,theta);
+    edges = [-180; theta; 180];
+    %num_spikes = hist(spk_headdir,theta);
+    num_spikes = histcounts(spk_headdir,edges);
     
-    window=floor(size(num_spikes,2)/2)-1;
-    num_spikes=[fliplr(num_spikes(end-window+1:end)) num_spikes fliplr(num_spikes(1:window))];
-
-    angle_occupancy=[fliplr(angle_occupancy(end-window+1:end)) angle_occupancy fliplr(angle_occupancy(1:window))];
+    %%window=floor(size(num_spikes,2)/2)-1
+    %%num_spikes=[fliplr(num_spikes(end-window+1:end)) num_spikes fliplr(num_spikes(1:window))];
+    %%angle_occupancy=[fliplr(angle_occupancy(end-window+1:end)) angle_occupancy fliplr(angle_occupancy(1:window))];
+    
+    num_spikes=[sum(num_spikes([1 end])) num_spikes(2:end-1)];
+    angle_occupancy=[sum(angle_occupancy([1 end])) angle_occupancy(2:end-1)];
     %num_spikes = smooth(num_spikes,window,'moving')';
     %angle_occupancy = smooth(angle_occupancy,window,'moving')';
 
@@ -310,22 +354,22 @@ else
 
     tuning_curve(isnan(tuning_curve))=0;
 
-    % Apply Gaussian smoothing
-    kernelSize = ceil(gaussianSD * 6); % 3 standard deviations on either side
-    gaussianKernel = fspecial('gaussian', [1, kernelSize], gaussianSD);
-    tuning_curve = conv2(tuning_curve, gaussianKernel, 'same');
-
+    if conv
+        % Apply Gaussian smoothing
+        kernelSize = ceil(gaussianSD * 6); % 3 standard deviations on either side
+        gaussianKernel = fspecial('gaussian', [1, kernelSize], gaussianSD);
+        tuning_curve = conv2(tuning_curve, gaussianKernel, 'same');
+    end
 
     % Rayleigh test for uniformity
-    [pValue, z] = circ_rtest(deg2rad(spk_headdir), spk_headdir_t);
-
+    [pValue, z] = circ_rtest(deg2rad(spk_headdir));
 
 
     %tuning_curve=smooth(tuning_curve,window,'moving')';
 
-    tuning_curve = tuning_curve(window+1:end-window);
-    angle_occupancy = angle_occupancy(window+1:end-window);
-    num_spikes = num_spikes(window+1:end-window);
+    %tuning_curve = tuning_curve(window+1:end-window);
+    %angle_occupancy = angle_occupancy(window+1:end-window);
+    %num_spikes = num_spikes(window+1:end-window);
 
     % Find peak firing rate
     peakRate = max(tuning_curve);
@@ -335,7 +379,7 @@ else
         sig=1;
     end
 
-    [ang_hd, mr,mvl] = GetOtherStats(tuning_curve, theta);
+    [ang_hd, mr,mvl] = GetOtherStats2(tuning_curve, theta);
     wu2 = WatsonsU2(spk_headdir, headdir);
 end
 return;
@@ -359,5 +403,39 @@ ang_hd = atan2(mean(ys), mean(xs)); % mean direction
 mr = (cos(ang_hd) * sum(xs) + sin(ang_hd) * sum(ys)) / sum(tuning_curve); % mean resultant length
 
 mvl = sqrt(mean(ys) ^ 2 + mean(xs) ^ 2); %mean vector length
+
+return;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [ang_hd, mr, mvl] = GetOtherStats2(tuning_curve, theta)
+    % Remove NaN values
+    tf = ~isnan(tuning_curve); % where we aren't NaN
+    theta = theta * unitsratio('rad', 'deg'); % convert degrees to radians
+    theta = theta(tf); % remove NaNs
+    tuning_curve = tuning_curve(tf)'; % transpose to column vector
+
+    % Calculate vector components
+    xs = tuning_curve .* cos(theta); % x component
+    ys = tuning_curve .* sin(theta); % y component
+
+    % Calculate mean direction (angle)
+    ang_hd = atan2(mean(ys), mean(xs)); % mean direction
+
+    % Calculate mean resultant length
+    sum_xs = sum(xs);
+    sum_ys = sum(ys);
+    resultant_vector_length = sqrt(sum_xs^2 + sum_ys^2); % resultant vector length
+    mr = resultant_vector_length / sum(tuning_curve); % mean resultant length
+
+    % Calculate mean vector length
+    mean_x = mean(xs);
+    mean_y = mean(ys);
+    mvl = sqrt(mean_x^2 + mean_y^2); % mean vector length
+
+    if 0
+    % Display results
+    fprintf('Mean Direction (rad): %.4f\n', ang_hd);
+    fprintf('Mean Resultant Length: %.4f\n', mr);
+    fprintf('Mean Vector Length: %.4f\n', mvl);
+    end
 
 return;
