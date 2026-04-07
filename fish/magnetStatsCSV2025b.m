@@ -111,7 +111,7 @@ mat_files_trout = {
 '2025-03-13 15-45-02DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'controlT1',   9,'5mo';
 '2025-03-13 16-10-09DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'microT100',   9,'5mo';
 '2025-03-13 16-35-23DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'microT10',   9,'5mo';
-'2025-03-13 16-55-02DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'rotation0',   9,'5mo';
+%'2025-03-13 16-55-02DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'rotation0',   9,'5mo';
 '2025-03-13 17-00-15DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'rotation180',  9,'5mo';
 '2025-03-14 08-49-36DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'controlT1',   10,'5mo';
 '2025-03-14 09-15-21DLC_mobnet_100_trout_2025Oct17shuffle1_500000_vmc_checked_c.mat', 'microT100',   10,'5mo';
