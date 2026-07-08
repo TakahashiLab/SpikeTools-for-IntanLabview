@@ -17,6 +17,33 @@ setup_spiketools_path
 This adds the repository and all subfolders to the MATLAB path, so older calls
 such as `preProcessIlvrc`, `batchSpikesIntan`, and `extractPos` continue to work.
 
+## Repository layout
+
+Top-level folders are organized by analysis domain or acquisition system:
+
+| Folder | Contents |
+|---|---|
+| `analysis/` | Shared analysis helpers, including LFP and statistics utilities. |
+| `configFiles/` | Configuration files and electrode/tetrode layout files. |
+| `event/` | Event extraction utilities for noisy event channels and RHX data. |
+| `extractSpk/` | Spike extraction MEX files and related source code. |
+| `fish/` | Fish behavior and magnetic-field experiment analysis pipeline. |
+| `HeadDirection/` | Head-direction tuning, polar map, occupancy, and circular statistics code. |
+| `LFP/` | LFP filtering, wavelet, phase, and raster-related functions. |
+| `mouse/` | Mouse-specific preprocessing, RF/event extraction, and LFP analysis code. |
+| `neuropixels/` | Neuropixels probe bank configuration and IMRO helpers. |
+| `PD/` | Photodiode/visual-stimulus response analysis routines. |
+| `Place/` | Place-cell, place-map, occupancy, lap, and spatial information analysis. |
+| `procedure/` | Procedure-level scripts for specific animal or experiment workflows. |
+| `SGLX/` | SpikeGLX-related spike matrix and conversion helpers. |
+| `spikegadgets/` | SpikeGadgets/Trodes export notes, notebooks, and Phy conversion helpers. |
+| `spikesorting/` | KiloSort, MountainSort, cluster quality, waveform, and sorting conversion tools. |
+| `Time/` | Time-cell and sequence-map analysis functions. |
+| `turtle/` | Sea turtle batch scripts and result summary scripts. |
+
+`legacy/` contains older MATLAB entry points that used to live in the repository
+root. They are still usable after running `setup_spiketools_path`.
+
 - Please clone the following tools from cortexlab at UCL to your home directory (c:/users/[your user account here]/Documents/Matlab) using git. 
   * [KiloSort](https://github.com/cortex-lab/KiloSort)
   * [spikes](https://github.com/cortex-lab/spikes)
