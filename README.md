@@ -4,6 +4,19 @@
 ***Tools for analyzing neural activity recorded using our custom-made software.***
 ***The software was developed using intan-tech libraries for LabVIEW programming language.***
 
+## MATLAB path setup
+
+Most legacy top-level MATLAB functions have been moved into `legacy/` to keep
+the repository root clean. Before using the toolbox, run this once per MATLAB
+session from the repository root:
+
+```matlab
+setup_spiketools_path
+```
+
+This adds the repository and all subfolders to the MATLAB path, so older calls
+such as `preProcessIlvrc`, `batchSpikesIntan`, and `extractPos` continue to work.
+
 - Please clone the following tools from cortexlab at UCL to your home directory (c:/users/[your user account here]/Documents/Matlab) using git. 
   * [KiloSort](https://github.com/cortex-lab/KiloSort)
   * [spikes](https://github.com/cortex-lab/spikes)
