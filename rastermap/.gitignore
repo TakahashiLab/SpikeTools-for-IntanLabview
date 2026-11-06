@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+rastermap_good_clusters/
+spks_good*.npy
+time_seconds.npy
+rastermap_result.npz
+rastermap_isort.npy
+good_clusters_*.png
+cluster_metadata*.json
+summary.json
